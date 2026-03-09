@@ -1,0 +1,52 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="عن الرحّال — رحّال الخبر">
+  <section class="max-w-3xl mx-auto px-4 py-16">
+    <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-8">
+      عن <span class="text-[#e94560]">الرحّال</span>
+    </h1>
+
+    <div class="bg-white dark:bg-[#1e293b] rounded-2xl p-8 shadow-sm border border-gray-100 dark:border-gray-700">
+      <div class="flex items-center gap-6 mb-8">
+        <div class="w-24 h-24 bg-gradient-to-br from-[#0f3460] to-[#e94560] rounded-full flex items-center justify-center text-5xl">
+          🧭
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+            د. وائل بن عبدالعزيز الدغفق
+          </h2>
+          <p class="text-[#e94560] font-medium">رحّال الخبر</p>
+        </div>
+      </div>
+
+      <div class="space-y-4 text-gray-700 dark:text-gray-300 leading-relaxed text-lg">
+        <p>
+          رحّال سعودي متمرّس، قضى أكثر من 40 عاماً في استكشاف العالم وتوثيق الحضارات والثقافات المختلفة. زار أكثر من 175 دولة حول العالم.
+        </p>
+        <p>
+          تتميز رحلاته بالعمق الثقافي والتوثيق الحضاري، حيث يجمع بين المتعة والمعرفة في كل رحلة، مع اهتمام خاص بالمجتمعات الإسلامية والمواقع التاريخية.
+        </p>
+        <p>
+          هذه المدوّنة هي سجل لرحلاته وخواطره ومشاهداته من مختلف بقاع الأرض.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-3 gap-4 mt-8">
+        <div class="text-center p-4 bg-gray-50 dark:bg-[#0f172a] rounded-xl">
+          <p class="text-2xl font-bold text-[#e94560] font-num">175+</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">دولة</p>
+        </div>
+        <div class="text-center p-4 bg-gray-50 dark:bg-[#0f172a] rounded-xl">
+          <p class="text-2xl font-bold text-[#0f3460] dark:text-blue-400 font-num">40+</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">سنة ترحال</p>
+        </div>
+        <div class="text-center p-4 bg-gray-50 dark:bg-[#0f172a] rounded-xl">
+          <p class="text-2xl font-bold text-[#533483] dark:text-purple-400 font-num">6</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">قارات</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

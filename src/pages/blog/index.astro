@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { getAllPosts, getExcerpt, getPostCoverImage, getPostSlug } from '../../utils/posts';
+
+const allPosts = await getAllPosts();
+---
+
+<BaseLayout title="المدوّنة — رحّال الخبر">
+  <section class="max-w-6xl mx-auto px-4 py-12">
+    <div class="mb-10">
+      <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-3">
+        جميع <span class="text-[#e94560]">الرحلات</span>
+      </h1>
+      <p class="text-gray-500 dark:text-gray-400">
+        {allPosts.length} تدوينة من رحلات حول العالم
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {allPosts.map(post => (
+        <PostCard
+          title={post.title}
+          date={post.date}
+          slug={getPostSlug(post)}
+          excerpt={getExcerpt(post.content_text)}
+          image={getPostCoverImage(post)}
+          labels={post.labels}
+        />
+      ))}
+    </div>
+  </section>
+</BaseLayout>

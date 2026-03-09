@@ -1,0 +1,62 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ContinentCard from '../../components/ContinentCard.astro';
+import PostCard from '../../components/PostCard.astro';
+import { getContinents, getOtherPosts, getExcerpt, getPostCoverImage, getPostSlug } from '../../utils/posts';
+
+const continents = getContinents();
+const otherCategories = await getOtherPosts();
+const totalOtherPosts = otherCategories.reduce((sum, cat) => sum + cat.posts.length, 0);
+---
+
+<BaseLayout title="الوجهات — رحّال الخبر">
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-[#0f3460] via-[#1a1a2e] to-[#16213e] text-white py-16">
+    <div class="max-w-6xl mx-auto px-4 text-center">
+      <h1 class="text-4xl md:text-5xl font-bold mb-4">🌍 الوجهات</h1>
+      <p class="text-xl text-gray-300">اكتشف رحلات حول العالم مصنفة حسب القارات والدول</p>
+    </div>
+  </section>
+
+  <!-- Continents Grid -->
+  <section class="max-w-6xl mx-auto px-4 py-12">
+    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-8">
+      القارات
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {continents.map(continent => (
+        <ContinentCard
+          name={continent.name}
+          emoji={continent.emoji}
+          slug={continent.slug}
+          postCount={continent.postCount}
+          countryCount={continent.countryCount}
+        />
+      ))}
+    </div>
+  </section>
+
+  <!-- Other Posts Section -->
+  {totalOtherPosts > 0 && (
+    <section class="max-w-6xl mx-auto px-4 py-12">
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+          📚 مقالات أخرى
+        </h2>
+        <a href="/destinations/other" class="text-[#e94560] hover:underline font-medium">
+          عرض الكل (<span class="font-num">{totalOtherPosts}</span>) ←
+        </a>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {otherCategories.map(cat => (
+          <a href="/destinations/other" class="block p-5 rounded-xl bg-white dark:bg-[#1e293b] border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow">
+            <h3 class="font-bold text-gray-900 dark:text-white mb-1">{cat.category}</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              <span class="font-num">{cat.posts.length}</span> مقال
+            </p>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+</BaseLayout>

@@ -1,0 +1,36 @@
+---
+interface Props {
+  name: string;
+  slug: string;
+  continentSlug: string;
+  postCount: number;
+  image?: string;
+}
+
+const { name, slug, continentSlug, postCount, image } = Astro.props;
+---
+
+<a href={`/destinations/${continentSlug}/${slug}`} class="group block">
+  <div class="relative overflow-hidden rounded-2xl bg-white dark:bg-[#1e293b] shadow-md border border-gray-100 dark:border-gray-700 transition-all duration-300 group-hover:shadow-xl group-hover:scale-[1.02]">
+    {image ? (
+      <div class="h-40 overflow-hidden">
+        <img
+          src={image}
+          alt={name}
+          class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          loading="lazy"
+        />
+      </div>
+    ) : (
+      <div class="h-40 bg-gradient-to-br from-[#0f3460] to-[#e94560] flex items-center justify-center">
+        <span class="text-5xl">🌍</span>
+      </div>
+    )}
+    <div class="p-4">
+      <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">{name}</h3>
+      <p class="text-sm text-gray-500 dark:text-gray-400">
+        <span class="font-num">{postCount}</span> تدوينة
+      </p>
+    </div>
+  </div>
+</a>

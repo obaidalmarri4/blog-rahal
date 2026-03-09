@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Custom Font */
+@font-face {
+  font-family: 'NTPanoramaNaskh';
+  src: url('/fonts/NTPanoramaNaskh-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Custom base styles */
+@layer base {
+  body {
+    font-family: 'NTPanoramaNaskh', system-ui, sans-serif;
+    direction: rtl;
+    text-align: right;
+    @apply bg-white text-gray-900 dark:bg-[#0f172a] dark:text-gray-100 transition-colors duration-300;
+  }
+}
+
+/* Post content */
+.post-content {
+  line-height: 1.6;
+  font-size: 1.125rem;
+  text-align: right;
+}
+.post-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  margin: 1.5rem auto;
+  display: block;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+.post-content p, .post-content div {
+  margin-bottom: 0.5rem;
+  text-align: right;
+}
+.post-content a {
+  color: #e94560;
+  text-decoration: underline;
+}
+.post-content b, .post-content strong {
+  @apply text-gray-900 dark:text-white font-bold;
+}
+
+/* Force RTL alignment everywhere */
+.post-content * {
+  text-align: right !important;
+}
+.post-content img {
+  text-align: center !important;
+}
+
+/* Use system font for numbers */
+.font-num {
+  font-family: system-ui, -apple-system, sans-serif;
+}

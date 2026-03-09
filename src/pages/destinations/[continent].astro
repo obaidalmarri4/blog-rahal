@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CountryCard from '../../components/CountryCard.astro';
+import { getAllContinentSlugs, getContinentBySlug, getCountriesByContinent, getPostsByCountry, getPostCoverImage } from '../../utils/posts';
+
+export async function getStaticPaths() {
+  const slugs = getAllContinentSlugs();
+  return slugs.map(slug => ({ params: { continent: slug } }));
+}
+
+const { continent: continentSlug } = Astro.params;
+const continent = getContinentBySlug(continentSlug!);
+
+if (!continent) {
+  return Astro.redirect('/destinations');
+}
+
+const countries = getCountriesByContinent(continent.name);
+
+// Get cover image for each country (first image from first post)
+const countryImages: Record<string, string | undefined> = {};
+for (const country of countries) {
+  const posts = await getPostsByCountry(country.name);
+  if (posts.length > 0) {
+    countryImages[country.name] = getPostCoverImage(posts[0]);
+  }
+}
+---
+
+<BaseLayout title={`${continent.emoji} ${continent.name} — رحّال الخبر`}>
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-[#0f3460] via-[#1a1a2e] to-[#16213e] text-white py-16">
+    <div class="max-w-6xl mx-auto px-4">
+      <nav class="text-sm text-gray-400 mb-4">
+        <a href="/destinations" class="hover:text-white transition-colors">الوجهات</a>
+        <span class="mx-2">›</span>
+        <span class="text-white">{continent.name}</span>
+      </nav>
+      <div class="text-center">
+        <div class="text-6xl mb-4">{continent.emoji}</div>
+        <h1 class="text-4xl md:text-5xl font-bold mb-2">{continent.name}</h1>
+        <p class="text-xl text-gray-300">
+          <span class="font-num">{countries.length}</span> دولة · <span class="font-num">{countries.reduce((sum, c) => sum + c.postCount, 0)}</span> تدوينة
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Countries Grid -->
+  <section class="max-w-6xl mx-auto px-4 py-12">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      {countries.map(country => (
+        <CountryCard
+          name={country.name}
+          slug={country.slug}
+          continentSlug={continentSlug!}
+          postCount={country.postCount}
+          image={countryImages[country.name]}
+        />
+      ))}
+    </div>
+  </section>
+</BaseLayout>

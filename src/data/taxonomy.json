@@ -1,0 +1,2133 @@
+{
+  "posts": {
+    "2025-12-blog-post": {
+      "continent": "أفريقيا",
+      "country": "مالي",
+      "type": "travel"
+    },
+    "2025-11-1447": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2025-10-1447_23": {
+      "continent": "آسيا",
+      "country": "الصين",
+      "type": "travel"
+    },
+    "2025-10-1447": {
+      "continent": "آسيا",
+      "country": "الصين",
+      "type": "travel"
+    },
+    "2025-10-blog-post": {
+      "continent": "أوروبا",
+      "country": "النمسا",
+      "type": "travel"
+    },
+    "2025-10-1980-40-my-first-journey-to-india-1980": {
+      "continent": "آسيا",
+      "country": "الهند",
+      "type": "travel"
+    },
+    "2025-09-blog-post": {
+      "continent": "آسيا",
+      "country": "منغوليا",
+      "type": "travel"
+    },
+    "2025-08-blog-post_20": {
+      "continent": "أوروبا",
+      "country": "إسبانيا",
+      "type": "travel"
+    },
+    "2025-08-1447": {
+      "continent": "الشرق الأوسط",
+      "country": "البحرين",
+      "type": "travel"
+    },
+    "2025-08-6-2015-1436": {
+      "continent": "أوروبا",
+      "country": "مالطا",
+      "type": "travel"
+    },
+    "2025-06-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تاريخ وثقافة"
+    },
+    "2025-05-blog-post": {
+      "continent": "آسيا",
+      "country": "أوزبكستان",
+      "type": "travel"
+    },
+    "2025-03-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2025-03-1446": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تاريخ وثقافة"
+    },
+    "2024-01-9": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "طعام ومشروبات"
+    },
+    "2024-12-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2024-11-1446-2024": {
+      "continent": "آسيا",
+      "country": "اليابان",
+      "type": "travel"
+    },
+    "2024-09-blog-post": {
+      "continent": "أفريقيا",
+      "country": "كينيا",
+      "type": "travel"
+    },
+    "2024-08-15": {
+      "continent": "آسيا",
+      "country": "قيرغيزستان",
+      "type": "travel"
+    },
+    "2024-08-1442": {
+      "continent": "أفريقيا",
+      "country": "الجزائر",
+      "type": "travel"
+    },
+    "2024-08-2011": {
+      "continent": "أمريكا الشمالية",
+      "country": "بنما",
+      "type": "travel"
+    },
+    "2024-08-safety-first": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تاريخ وثقافة"
+    },
+    "2024-06-1808": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تاريخ وثقافة"
+    },
+    "2024-01-16-1445": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2023-06-blog-post": {
+      "continent": "آسيا",
+      "country": "الصين",
+      "type": "travel"
+    },
+    "2023-05-blog-post": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2023-04-1444": {
+      "continent": "أفريقيا",
+      "country": "المغرب",
+      "type": "travel"
+    },
+    "2023-04-2020-1442": {
+      "continent": "أفريقيا",
+      "country": "المغرب",
+      "type": "travel"
+    },
+    "2023-01-14-1444-2023": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2022-10-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تاريخ وثقافة"
+    },
+    "2022-08-1444": {
+      "continent": "آسيا",
+      "country": "باكستان",
+      "type": "travel"
+    },
+    "2022-07-1443": {
+      "continent": "أوروبا",
+      "country": "البرتغال",
+      "type": "travel"
+    },
+    "2022-06-meu-1443": {
+      "continent": "آسيا",
+      "country": "الصين",
+      "type": "travel"
+    },
+    "2022-06-blog-post_13": {
+      "continent": "آسيا",
+      "country": "الصين",
+      "type": "travel"
+    },
+    "2022-06-blog-post_10": {
+      "continent": "أفريقيا",
+      "country": "المغرب",
+      "type": "travel"
+    },
+    "2022-06-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2022-05-blog-post_29": {
+      "continent": "أوروبا",
+      "country": "اليونان",
+      "type": "travel"
+    },
+    "2022-05-blog-post_28": {
+      "continent": "أفريقيا",
+      "country": "المغرب",
+      "type": "travel"
+    },
+    "2022-05-2010": {
+      "continent": "أفريقيا",
+      "country": "تونس",
+      "type": "travel"
+    },
+    "2022-05-blog-post_24": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تاريخ وثقافة"
+    },
+    "2022-05-1443_21": {
+      "continent": "أفريقيا",
+      "country": "الجزائر",
+      "type": "travel"
+    },
+    "2022-05-blog-post": {
+      "continent": "أوروبا",
+      "country": "أوكرانيا",
+      "type": "travel"
+    },
+    "2022-05-1443_20": {
+      "continent": "أفريقيا",
+      "country": "الجزائر",
+      "type": "travel"
+    },
+    "2022-05-1300-1443": {
+      "continent": "أفريقيا",
+      "country": "الجزائر",
+      "type": "travel"
+    },
+    "2022-05-1443_9": {
+      "continent": "أفريقيا",
+      "country": "الجزائر",
+      "type": "travel"
+    },
+    "2022-05-1443": {
+      "continent": "أمريكا الجنوبية",
+      "country": "الأرجنتين",
+      "type": "travel"
+    },
+    "2022-04-1443": {
+      "continent": "أمريكا الجنوبية",
+      "country": "البيرو",
+      "type": "travel"
+    },
+    "2022-04-blog-post": {
+      "continent": "آسيا",
+      "country": "تركيا",
+      "type": "travel"
+    },
+    "2022-03-1443_27": {
+      "continent": "أوروبا",
+      "country": "إيطاليا",
+      "type": "travel"
+    },
+    "2022-03-1443_22": {
+      "continent": "أمريكا الجنوبية",
+      "country": "بوليفيا",
+      "type": "travel"
+    },
+    "2022-03-1443": {
+      "continent": "أوروبا",
+      "country": "إيطاليا",
+      "type": "travel"
+    },
+    "2022-02-blog-post": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2022-01-blog-post_22": {
+      "continent": "آسيا",
+      "country": "الصين",
+      "type": "travel"
+    },
+    "2022-01-blog-post": {
+      "continent": "آسيا",
+      "country": "الهند",
+      "type": "travel"
+    },
+    "2020-04-blog-post_81": {
+      "continent": "آسيا",
+      "country": "تركيا",
+      "type": "travel"
+    },
+    "2021-12-global-information-for-tea-wail-aldaqfaq": {
+      "continent": "آسيا",
+      "country": "الصين",
+      "type": "travel"
+    },
+    "2021-12-1848": {
+      "continent": "آسيا",
+      "country": "الصين",
+      "type": "travel"
+    },
+    "2021-12-1773": {
+      "continent": "أمريكا الشمالية",
+      "country": "أمريكا",
+      "type": "travel"
+    },
+    "2021-12-bostonteaparty": {
+      "continent": "أمريكا الشمالية",
+      "country": "أمريكا",
+      "type": "travel"
+    },
+    "2021-11-1440": {
+      "continent": "أوروبا",
+      "country": "بولندا",
+      "type": "travel"
+    },
+    "2021-10-1-1443": {
+      "continent": "أفريقيا",
+      "country": "كينيا",
+      "type": "travel"
+    },
+    "2021-09-blog-post_15": {
+      "continent": "أفريقيا",
+      "country": "المغرب",
+      "type": "travel"
+    },
+    "2021-09-blog-post_13": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "نصائح سفر"
+    },
+    "2021-09-1995": {
+      "continent": "آسيا",
+      "country": "الفلبين",
+      "type": "travel"
+    },
+    "2021-09-blog-post": {
+      "continent": "آسيا",
+      "country": "الفلبين",
+      "type": "travel"
+    },
+    "2021-07-blog-post_25": {
+      "continent": "آسيا",
+      "country": "تركيا",
+      "type": "travel"
+    },
+    "2021-07-blog-post": {
+      "continent": "الشرق الأوسط",
+      "country": "اليمن",
+      "type": "travel"
+    },
+    "2018-04-blog-post": {
+      "continent": "آسيا",
+      "country": "تركيا",
+      "type": "travel"
+    },
+    "2021-06-1969": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2021-06-1440": {
+      "continent": "أفريقيا",
+      "country": "المغرب",
+      "type": "travel"
+    },
+    "2021-06-blog-post_26": {
+      "continent": "أفريقيا",
+      "country": "مصر",
+      "type": "travel"
+    },
+    "2020-04-40": {
+      "continent": "أوروبا",
+      "country": "المجر",
+      "type": "travel"
+    },
+    "2021-06-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "نصائح سفر"
+    },
+    "2021-06-1442": {
+      "continent": "أوروبا",
+      "country": "إيطاليا",
+      "type": "travel"
+    },
+    "2021-06-1157-1442": {
+      "continent": "أفريقيا",
+      "country": "المغرب",
+      "type": "travel"
+    },
+    "2021-05-blog-post_19": {
+      "continent": "أفريقيا",
+      "country": "المغرب",
+      "type": "travel"
+    },
+    "2021-05-2017": {
+      "continent": "أوروبا",
+      "country": "روسيا",
+      "type": "travel"
+    },
+    "2021-05-1371-1442": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تاريخ وثقافة"
+    },
+    "2021-05-constance": {
+      "continent": "أوروبا",
+      "country": "ألمانيا",
+      "type": "travel"
+    },
+    "2021-04-blog-post_1": {
+      "continent": "الشرق الأوسط",
+      "country": "قطر",
+      "type": "travel"
+    },
+    "2021-04-blog-post": {
+      "continent": "آسيا",
+      "country": "الهند",
+      "type": "travel"
+    },
+    "2021-01-blog-post": {
+      "continent": "الشرق الأوسط",
+      "country": "العراق",
+      "type": "travel"
+    },
+    "2020-12-blog-post": {
+      "continent": "الشرق الأوسط",
+      "country": "اليمن",
+      "type": "travel"
+    },
+    "2020-10-blog-post": {
+      "continent": "الشرق الأوسط",
+      "country": "الكويت",
+      "type": "travel"
+    },
+    "2020-10-1442_17": {
+      "continent": "الشرق الأوسط",
+      "country": "العراق",
+      "type": "travel"
+    },
+    "2020-10-1442": {
+      "continent": "أمريكا الجنوبية",
+      "country": "البيرو",
+      "type": "travel"
+    },
+    "2020-09-blog-post": {
+      "continent": "أوروبا",
+      "country": "ألبانيا",
+      "type": "travel"
+    },
+    "2020-09-1437": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2017-01-1438-2017": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تاريخ وثقافة"
+    },
+    "2020-06-1441_26": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2020-06-1441": {
+      "continent": "آسيا",
+      "country": "الهند",
+      "type": "travel"
+    },
+    "2020-05-1441_27": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "نصائح سفر"
+    },
+    "2020-05-1441": {
+      "continent": "أفريقيا",
+      "country": "المغرب",
+      "type": "travel"
+    },
+    "2020-05-blog-post_15": {
+      "continent": "آسيا",
+      "country": "الهند",
+      "type": "travel"
+    },
+    "2020-05-7320-1441": {
+      "continent": "الشرق الأوسط",
+      "country": "العراق",
+      "type": "travel"
+    },
+    "2020-05-2020-1441": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "نصائح سفر"
+    },
+    "2020-05-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تاريخ وثقافة"
+    },
+    "2020-04-blog-post_20": {
+      "continent": "أفريقيا",
+      "country": "المغرب",
+      "type": "travel"
+    },
+    "2020-04-blog-post_78": {
+      "continent": "أفريقيا",
+      "country": "زيمبابوي",
+      "type": "travel"
+    },
+    "2020-04-blog-post_59": {
+      "continent": "أمريكا الجنوبية",
+      "country": "الأرجنتين",
+      "type": "travel"
+    },
+    "2020-04-blog-post_30": {
+      "continent": "آسيا",
+      "country": "إندونيسيا",
+      "type": "travel"
+    },
+    "2020-04-blog-post_82": {
+      "continent": "أوروبا",
+      "country": "أوكرانيا",
+      "type": "travel"
+    },
+    "2020-04-blog-post_28": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "طعام ومشروبات"
+    },
+    "2020-04-blog-post_21": {
+      "continent": "آسيا",
+      "country": "تركيا",
+      "type": "travel"
+    },
+    "2020-04-blog-post_94": {
+      "continent": "آسيا",
+      "country": "كوريا",
+      "type": "travel"
+    },
+    "2020-04-blog-post_11": {
+      "continent": "أوروبا",
+      "country": "النرويج",
+      "type": "travel"
+    },
+    "2020-04-blog-post_15": {
+      "continent": "الشرق الأوسط",
+      "country": "قطر",
+      "type": "travel"
+    },
+    "2020-04-blog-post": {
+      "continent": "آسيا",
+      "country": "تركيا",
+      "type": "travel"
+    },
+    "2020-04-1999": {
+      "continent": "أمريكا الشمالية",
+      "country": "أمريكا",
+      "type": "travel"
+    },
+    "2020-04-1441": {
+      "continent": "آسيا",
+      "country": "الصين",
+      "type": "travel"
+    },
+    "2020-03-2019": {
+      "continent": "آسيا",
+      "country": "الهند",
+      "type": "travel"
+    },
+    "2020-03-1441": {
+      "continent": "آسيا",
+      "country": "الصين",
+      "type": "travel"
+    },
+    "2020-02-1441_29": {
+      "continent": "أفريقيا",
+      "country": "المغرب",
+      "type": "travel"
+    },
+    "2020-02-1441": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2020-02-blog-post": {
+      "continent": "الشرق الأوسط",
+      "country": "العراق",
+      "type": "travel"
+    },
+    "2020-01-1441_68": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تاريخ وثقافة"
+    },
+    "2020-01-1440_22": {
+      "continent": "أفريقيا",
+      "country": "المغرب",
+      "type": "travel"
+    },
+    "2020-01-1441_22": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "طعام ومشروبات"
+    },
+    "2020-01-1440": {
+      "continent": "أفريقيا",
+      "country": "المغرب",
+      "type": "travel"
+    },
+    "2020-01-1420": {
+      "continent": "آسيا",
+      "country": "الصين",
+      "type": "travel"
+    },
+    "2020-01-1441_24": {
+      "continent": "الشرق الأوسط",
+      "country": "الأردن",
+      "type": "travel"
+    },
+    "2020-01-1441_1": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2020-01-1441": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2019-12-2018": {
+      "continent": "آسيا",
+      "country": "أوزبكستان",
+      "type": "travel"
+    },
+    "2019-12-2009": {
+      "continent": "آسيا",
+      "country": "الصين",
+      "type": "travel"
+    },
+    "2019-12-blog-post": {
+      "continent": "الشرق الأوسط",
+      "country": "البحرين",
+      "type": "travel"
+    },
+    "2019-11-lucca-1440": {
+      "continent": "أوروبا",
+      "country": "إيطاليا",
+      "type": "travel"
+    },
+    "2019-11-urdini-seven-rila-lakes": {
+      "continent": "أوروبا",
+      "country": "بلغاريا",
+      "type": "travel"
+    },
+    "2019-10-1440": {
+      "continent": "أوروبا",
+      "country": "سلوفينيا",
+      "type": "travel"
+    },
+    "2019-09-1441": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2019-08-1440": {
+      "continent": "أوروبا",
+      "country": "بولندا",
+      "type": "travel"
+    },
+    "2019-06-1440_29": {
+      "continent": "آسيا",
+      "country": "تايلند",
+      "type": "travel"
+    },
+    "2019-06-1436": {
+      "continent": "آسيا",
+      "country": "كوريا",
+      "type": "travel"
+    },
+    "2019-06-1440": {
+      "continent": "الشرق الأوسط",
+      "country": "عمان",
+      "type": "travel"
+    },
+    "2019-06-2019-1440": {
+      "continent": "آسيا",
+      "country": "تركيا",
+      "type": "travel"
+    },
+    "2019-06-blog-post_9": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "نصائح سفر"
+    },
+    "2019-05-blog-post_22": {
+      "continent": "آسيا",
+      "country": "الهند",
+      "type": "travel"
+    },
+    "2019-05-blog-post": {
+      "continent": "أمريكا الجنوبية",
+      "country": "كولومبيا",
+      "type": "travel"
+    },
+    "2019-04-1440_25": {
+      "continent": "أوروبا",
+      "country": "اليونان",
+      "type": "travel"
+    },
+    "2019-04-blog-post": {
+      "continent": "الشرق الأوسط",
+      "country": "العراق",
+      "type": "travel"
+    },
+    "2019-04-1439": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2019-04-14402019": {
+      "continent": "آسيا",
+      "country": "الهند",
+      "type": "travel"
+    },
+    "2019-03-1440_13": {
+      "continent": "الشرق الأوسط",
+      "country": "العراق",
+      "type": "travel"
+    },
+    "2019-03-1440": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تاريخ وثقافة"
+    },
+    "2019-03-rjukan": {
+      "continent": "أوروبا",
+      "country": "النرويج",
+      "type": "travel"
+    },
+    "2019-02-1440_14": {
+      "continent": "أفريقيا",
+      "country": "بوروندي",
+      "type": "travel"
+    },
+    "2019-02-1440_2": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تاريخ وثقافة"
+    },
+    "2019-02-1440": {
+      "continent": "أفريقيا",
+      "country": "بوروندي",
+      "type": "travel"
+    },
+    "2019-01-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تاريخ وثقافة"
+    },
+    "2018-12-1439": {
+      "continent": "آسيا",
+      "country": "باكستان",
+      "type": "travel"
+    },
+    "2018-12-blog-post_5": {
+      "continent": "أوروبا",
+      "country": "أوكرانيا",
+      "type": "travel"
+    },
+    "2018-12-blog-post_4": {
+      "continent": "أوروبا",
+      "country": "التشيك",
+      "type": "travel"
+    },
+    "2018-12-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "نصائح سفر"
+    },
+    "2018-11-12_17": {
+      "continent": "آسيا",
+      "country": "إندونيسيا",
+      "type": "travel"
+    },
+    "2018-11-blog-post_12": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "نصائح سفر"
+    },
+    "2018-11-blog-post_23": {
+      "continent": "أفريقيا",
+      "country": "تونس",
+      "type": "travel"
+    },
+    "2018-11-12": {
+      "continent": "أفريقيا",
+      "country": "المغرب",
+      "type": "travel"
+    },
+    "2018-11-blog-post_8": {
+      "continent": "الشرق الأوسط",
+      "country": "فلسطين",
+      "type": "travel"
+    },
+    "2018-11-blog-post": {
+      "continent": "أفريقيا",
+      "country": "المغرب",
+      "type": "travel"
+    },
+    "2018-10-blog-post_10": {
+      "continent": "أوروبا",
+      "country": "التشيك",
+      "type": "travel"
+    },
+    "2018-10-blog-post": {
+      "continent": "آسيا",
+      "country": "المالديف",
+      "type": "travel"
+    },
+    "2018-09-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "طعام ومشروبات"
+    },
+    "2018-08-1800": {
+      "continent": "أفريقيا",
+      "country": "مصر",
+      "type": "travel"
+    },
+    "2018-08-2018": {
+      "continent": "الشرق الأوسط",
+      "country": "الأردن",
+      "type": "travel"
+    },
+    "2018-08-1820": {
+      "continent": "الشرق الأوسط",
+      "country": "البحرين",
+      "type": "travel"
+    },
+    "2018-08-blog-post_24": {
+      "continent": "آسيا",
+      "country": "كوريا",
+      "type": "travel"
+    },
+    "2018-08-blog-post_22": {
+      "continent": "أفريقيا",
+      "country": "مصر",
+      "type": "travel"
+    },
+    "2018-08-blog-post": {
+      "continent": "الشرق الأوسط",
+      "country": "العراق",
+      "type": "travel"
+    },
+    "2018-08-blog-post_1": {
+      "continent": "الشرق الأوسط",
+      "country": "الكويت",
+      "type": "travel"
+    },
+    "2018-07-15-2018": {
+      "continent": "آسيا",
+      "country": "تركيا",
+      "type": "travel"
+    },
+    "2018-07-2018": {
+      "continent": "أوروبا",
+      "country": "اليونان",
+      "type": "travel"
+    },
+    "2018-07-blog-post": {
+      "continent": "آسيا",
+      "country": "اليابان",
+      "type": "travel"
+    },
+    "2018-07-blog-post_16": {
+      "continent": "أوروبا",
+      "country": "سلوفينيا",
+      "type": "travel"
+    },
+    "2018-06-blog-post_28": {
+      "continent": "آسيا",
+      "country": "تركيا",
+      "type": "travel"
+    },
+    "2018-06-2018": {
+      "continent": "آسيا",
+      "country": "جورجيا",
+      "type": "travel"
+    },
+    "2018-06-blog-post": {
+      "continent": "آسيا",
+      "country": "أوزبكستان",
+      "type": "travel"
+    },
+    "2018-02-blog-post": {
+      "continent": "آسيا",
+      "country": "كوريا",
+      "type": "travel"
+    },
+    "2017-11-myrrha": {
+      "continent": "آسيا",
+      "country": "الهند",
+      "type": "travel"
+    },
+    "2017-11-blog-post_11": {
+      "continent": "الشرق الأوسط",
+      "country": "العراق",
+      "type": "travel"
+    },
+    "2017-11-1439": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2017-03-1438-2017": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تاريخ وثقافة"
+    },
+    "2017-02-1438": {
+      "continent": "الشرق الأوسط",
+      "country": "اليمن",
+      "type": "travel"
+    },
+    "2017-02-1435": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2017-01-blog-post_16": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2017-01-blog-post_9": {
+      "continent": "الشرق الأوسط",
+      "country": "عمان",
+      "type": "travel"
+    },
+    "2017-01-2017": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2016-12-blog-post_20": {
+      "continent": "آسيا",
+      "country": "تركيا",
+      "type": "travel"
+    },
+    "2016-12-2016-1438": {
+      "continent": "الشرق الأوسط",
+      "country": "عمان",
+      "type": "travel"
+    },
+    "2016-12-blog-post": {
+      "continent": "الشرق الأوسط",
+      "country": "عمان",
+      "type": "travel"
+    },
+    "2016-11-2016_59": {
+      "continent": "آسيا",
+      "country": "تركيا",
+      "type": "travel"
+    },
+    "2016-11-2016_3": {
+      "continent": "الشرق الأوسط",
+      "country": "قطر",
+      "type": "travel"
+    },
+    "2016-11-2016": {
+      "continent": "آسيا",
+      "country": "كوريا",
+      "type": "travel"
+    },
+    "2016-11-1438": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "نصائح سفر"
+    },
+    "2016-10-blog-post_31": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2016-10-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2016-09-1437": {
+      "continent": "الشرق الأوسط",
+      "country": "قطر",
+      "type": "travel"
+    },
+    "2016-07-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "طعام ومشروبات"
+    },
+    "2016-06-blog-post_30": {
+      "continent": "آسيا",
+      "country": "الصين",
+      "type": "travel"
+    },
+    "2016-06-blog-post_14": {
+      "continent": "آسيا",
+      "country": "ماليزيا",
+      "type": "travel"
+    },
+    "2016-06-blog-post_9": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "نصائح سفر"
+    },
+    "2016-06-travel-smart-steps-for-pleasant-trip-to": {
+      "continent": "آسيا",
+      "country": "تركيا",
+      "type": "travel"
+    },
+    "2016-06-blog-post": {
+      "continent": "آسيا",
+      "country": "تركيا",
+      "type": "travel"
+    },
+    "2016-05-blog-post": {
+      "continent": "آسيا",
+      "country": "الصين",
+      "type": "travel"
+    },
+    "2016-03-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2016-01-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تاريخ وثقافة"
+    },
+    "2015-09-blog-post": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2015-08-blog-post_17": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2015-04-madeira": {
+      "continent": "أوروبا",
+      "country": "البرتغال",
+      "type": "travel"
+    },
+    "2015-04-blog-post": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2015-04-2015": {
+      "continent": "أوروبا",
+      "country": "سلوفينيا",
+      "type": "travel"
+    },
+    "2015-04-waterfall-mountain-hotel-chile": {
+      "continent": "أمريكا الجنوبية",
+      "country": "تشيلي",
+      "type": "travel"
+    },
+    "2015-03-blog-post": {
+      "continent": "أفريقيا",
+      "country": "مصر",
+      "type": "travel"
+    },
+    "2014-12-blog-post": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2014-11-blog-post_18": {
+      "continent": "أوروبا",
+      "country": "إيطاليا",
+      "type": "travel"
+    },
+    "2014-11-blog-post": {
+      "continent": "آسيا",
+      "country": "الهند",
+      "type": "travel"
+    },
+    "2014-08-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2014-07-1435_29": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2014-07-1435": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2014-07-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2014-05-meteor-crater-photo-by-harry-taylor": {
+      "continent": "أمريكا الشمالية",
+      "country": "أمريكا",
+      "type": "travel"
+    },
+    "2014-05-overtaken-photo-by-harry-taylor": {
+      "continent": "أمريكا الشمالية",
+      "country": "أمريكا",
+      "type": "travel"
+    },
+    "2014-05-lunar-eclipse-april-2014-photo-by-harry": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2014-05-dust-storm-photo-by-harry-taylor": {
+      "continent": "أمريكا الشمالية",
+      "country": "أمريكا",
+      "type": "travel"
+    },
+    "2014-04-bagla-largest-wooden-ships-of": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2014-04-1430-adventure-valley": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2014-04-erosion-stone-photo-by-wail-aldaqfaq": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2014-02-tour-of-cav": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2014-01-rahal-between-mounta_27": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2014-01-rahal-between-mounta": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2014-01-photos-from-ista": {
+      "continent": "آسيا",
+      "country": "تركيا",
+      "type": "travel"
+    },
+    "2014-01-blog-post": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2014-01-journey-to-discover-m": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2014-01-repaired-wheel-in-seconds-rahal-alk": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "نصائح سفر"
+    },
+    "2012-08-blog-post_8174": {
+      "continent": "أمريكا الجنوبية",
+      "country": "البرازيل",
+      "type": "travel"
+    },
+    "2013-12-blog-post_23": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "نصائح سفر"
+    },
+    "2013-12-method-of-operation-of": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "نصائح سفر"
+    },
+    "2011-09-blog-post_545": {
+      "continent": "أمريكا الشمالية",
+      "country": "المكسيك",
+      "type": "travel"
+    },
+    "2013-12-blog-post_17": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تاريخ وثقافة"
+    },
+    "2013-12-blog-post": {
+      "continent": "آسيا",
+      "country": "بوتان",
+      "type": "travel"
+    },
+    "2012-12-blog-post": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2011-10-1419": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2011-10-14191998": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2013-07-plateaus-takhfah-brilliant": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "طعام ومشروبات"
+    },
+    "2012-08-4_8098": {
+      "continent": "أمريكا الجنوبية",
+      "country": "البرازيل",
+      "type": "travel"
+    },
+    "2011-10-1998-dam-themed-khyber": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تاريخ وثقافة"
+    },
+    "2011-10-1417_16": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2011-09-blog-post_24": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2013-11-29-12-14342013": {
+      "continent": "الشرق الأوسط",
+      "country": "الكويت",
+      "type": "travel"
+    },
+    "2011-10-1430": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2011-03-blog-post_25": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2008-09-2008": {
+      "continent": "الشرق الأوسط",
+      "country": "عمان",
+      "type": "travel"
+    },
+    "2011-09-blog-post_4506": {
+      "continent": "أمريكا الشمالية",
+      "country": "المكسيك",
+      "type": "travel"
+    },
+    "2011-09-parque-ibirapuera": {
+      "continent": "أمريكا الجنوبية",
+      "country": "البرازيل",
+      "type": "travel"
+    },
+    "2013-07-walkthrough-elsafrrat-villages-rahal-al": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2013-09-massage-fish-madhu-river-in-c": {
+      "continent": "آسيا",
+      "country": "سريلانكا",
+      "type": "travel"
+    },
+    "2012-02-pools-of-rain-in-kairouan-tunisia": {
+      "continent": "أفريقيا",
+      "country": "تونس",
+      "type": "travel"
+    },
+    "2011-11-ecuador": {
+      "continent": "أمريكا الجنوبية",
+      "country": "الإكوادور",
+      "type": "travel"
+    },
+    "2011-01-blog-post_4790": {
+      "continent": "آسيا",
+      "country": "نيبال",
+      "type": "travel"
+    },
+    "2010-09-blog-post": {
+      "continent": "آسيا",
+      "country": "اليابان",
+      "type": "travel"
+    },
+    "2011-10-14081988": {
+      "continent": "أوروبا",
+      "country": "النمسا",
+      "type": "travel"
+    },
+    "2011-10-1402": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2011-10-1988": {
+      "continent": "أوروبا",
+      "country": "النمسا",
+      "type": "travel"
+    },
+    "2013-02-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "نصائح سفر"
+    },
+    "2011-11-blog-post_21": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2010-09-blog-post_02": {
+      "continent": "آسيا",
+      "country": "الفلبين",
+      "type": "travel"
+    },
+    "2011-10-1420": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2010-12-blog-post_21": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2013-09-blog-post_28": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "نصائح سفر"
+    },
+    "2011-10-blog-post_6380": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2012-05-tijuca-forest-largest-urban-rainforest": {
+      "continent": "أمريكا الجنوبية",
+      "country": "البرازيل",
+      "type": "travel"
+    },
+    "2011-10-2010_14": {
+      "continent": "آسيا",
+      "country": "اليابان",
+      "type": "travel"
+    },
+    "2011-06-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2013-07-walkthrough-elsafrrat-villages-2": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2011-10-1429": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2012-05-blog-post_26": {
+      "continent": "أمريكا الجنوبية",
+      "country": "البرازيل",
+      "type": "travel"
+    },
+    "2013-10-rescue-team": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "طعام ومشروبات"
+    },
+    "2012-08-5": {
+      "continent": "أمريكا الجنوبية",
+      "country": "البرازيل",
+      "type": "travel"
+    },
+    "2011-10-2001_02": {
+      "continent": "الشرق الأوسط",
+      "country": "عمان",
+      "type": "travel"
+    },
+    "2011-11-ecuador_20": {
+      "continent": "أمريكا الجنوبية",
+      "country": "الإكوادور",
+      "type": "travel"
+    },
+    "2013-09-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2011-10-2010": {
+      "continent": "آسيا",
+      "country": "اليابان",
+      "type": "travel"
+    },
+    "2013-10-rescue-team-aoun": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "طعام ومشروبات"
+    },
+    "2011-09-blog-post_1819": {
+      "continent": "أمريكا الشمالية",
+      "country": "أمريكا",
+      "type": "travel"
+    },
+    "2011-10-1988_902": {
+      "continent": "أوروبا",
+      "country": "النمسا",
+      "type": "travel"
+    },
+    "2011-10-1405": {
+      "continent": "آسيا",
+      "country": "تركيا",
+      "type": "travel"
+    },
+    "2011-09-amazonas": {
+      "continent": "أمريكا الجنوبية",
+      "country": "البرازيل",
+      "type": "travel"
+    },
+    "2011-09-blog-post_696": {
+      "continent": "أمريكا الجنوبية",
+      "country": "البرازيل",
+      "type": "travel"
+    },
+    "2010-08-26-1405": {
+      "continent": "آسيا",
+      "country": "الهند",
+      "type": "travel"
+    },
+    "2012-04-blog-post": {
+      "continent": "أفريقيا",
+      "country": "تونس",
+      "type": "travel"
+    },
+    "2011-10-2001": {
+      "continent": "الشرق الأوسط",
+      "country": "عمان",
+      "type": "travel"
+    },
+    "2013-12-blog-post_7": {
+      "continent": "أوروبا",
+      "country": "البوسنة",
+      "type": "travel"
+    },
+    "2011-03-2005_18": {
+      "continent": "أفريقيا",
+      "country": "كينيا",
+      "type": "travel"
+    },
+    "2012-02-beginning-of-flood-rains": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2011-10-blog-post_02": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2013-11-112": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2011-09-blog-post_22": {
+      "continent": "أفريقيا",
+      "country": "تونس",
+      "type": "travel"
+    },
+    "2011-10-1431-adventure": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2012-05-blog-post": {
+      "continent": "أمريكا الجنوبية",
+      "country": "البرازيل",
+      "type": "travel"
+    },
+    "2013-07-hd-depths-amazon-trip-rahal-alkhobar_29": {
+      "continent": "أمريكا الجنوبية",
+      "country": "البرازيل",
+      "type": "travel"
+    },
+    "2013-11-zaita-amazing-desert": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2012-08-blog-post_2244": {
+      "continent": "أمريكا الجنوبية",
+      "country": "البرازيل",
+      "type": "travel"
+    },
+    "2011-09-blog-post_20": {
+      "continent": "آسيا",
+      "country": "بوتان",
+      "type": "travel"
+    },
+    "2011-09-blog-post_8587": {
+      "continent": "أمريكا الجنوبية",
+      "country": "الإكوادور",
+      "type": "travel"
+    },
+    "2013-09-1434-2013-ceylonp2-for-ra": {
+      "continent": "آسيا",
+      "country": "سريلانكا",
+      "type": "travel"
+    },
+    "2011-08-ecuador": {
+      "continent": "أمريكا الجنوبية",
+      "country": "الإكوادور",
+      "type": "travel"
+    },
+    "2010-08-2009_31": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2011-10-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2010-08-blog-post": {
+      "continent": "آسيا",
+      "country": "الهند",
+      "type": "travel"
+    },
+    "2012-08-blog-post_276": {
+      "continent": "أمريكا الجنوبية",
+      "country": "البرازيل",
+      "type": "travel"
+    },
+    "2010-09-blog-post_01": {
+      "continent": "آسيا",
+      "country": "نيبال",
+      "type": "travel"
+    },
+    "2011-03-1427": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2011-01-blog-post_23": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "نصائح سفر"
+    },
+    "2011-10-1999-1419": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2011-09-1432": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2011-10-19971418": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2013-10-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2011-09-blog-post_7504": {
+      "continent": "أمريكا الجنوبية",
+      "country": "الإكوادور",
+      "type": "travel"
+    },
+    "2011-09-blog-post_3659": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2011-09-1432_21": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2012-08-4_12": {
+      "continent": "أمريكا الجنوبية",
+      "country": "البرازيل",
+      "type": "travel"
+    },
+    "2010-08-1": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2011-10-1976": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2011-01-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2011-10-1417": {
+      "continent": "أفريقيا",
+      "country": "مصر",
+      "type": "travel"
+    },
+    "2011-09-2-1432": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2017-01-blog-post": {
+      "continent": "آسيا",
+      "country": "تركيا",
+      "type": "travel"
+    },
+    "2011-10-1998": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2011-11-1433": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2012-07-3": {
+      "continent": "أمريكا الجنوبية",
+      "country": "البرازيل",
+      "type": "travel"
+    },
+    "2011-06-blog-post_24": {
+      "continent": "آسيا",
+      "country": "كوريا",
+      "type": "travel"
+    },
+    "2011-09-blog-post_9683": {
+      "continent": "أمريكا الشمالية",
+      "country": "بنما",
+      "type": "travel"
+    },
+    "2011-10-1418_11": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2011-10-blog-post_16": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2011-09-blog-post_4801": {
+      "continent": "أمريكا الشمالية",
+      "country": "بنما",
+      "type": "travel"
+    },
+    "2011-09-blog-post_9434": {
+      "continent": "أمريكا الجنوبية",
+      "country": "البرازيل",
+      "type": "travel"
+    },
+    "2011-09-blog-post_13": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2011-07-4": {
+      "continent": "أمريكا الجنوبية",
+      "country": "البرازيل",
+      "type": "travel"
+    },
+    "2010-08-2010_31": {
+      "continent": "أفريقيا",
+      "country": "تونس",
+      "type": "travel"
+    },
+    "2011-09-blog-post_12": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2011-09-1432_13": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2011-10-1418_4324": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "تاريخ وثقافة"
+    },
+    "2013-11-blog-post_14": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2011-09-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2012-02-stitches-wheel-in-sand": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2011-11-blog-post": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2011-09-1432_2448": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2011-09-blog-post_5130": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2011-09-1427": {
+      "continent": null,
+      "country": null,
+      "type": "other",
+      "category": "عام"
+    },
+    "2011-09-blog-post_6590": {
+      "continent": "أمريكا الجنوبية",
+      "country": "الإكوادور",
+      "type": "travel"
+    },
+    "2011-10-1998-aelchenana-historic-tower": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    },
+    "2011-03-blog-post": {
+      "continent": "آسيا",
+      "country": "تركيا",
+      "type": "travel"
+    },
+    "2011-10-1431-northern-cities-and-oasis": {
+      "continent": "الشرق الأوسط",
+      "country": "السعودية",
+      "type": "travel"
+    }
+  },
+  "continents": {
+    "آسيا": {
+      "emoji": "🌏",
+      "slug": "asia"
+    },
+    "أوروبا": {
+      "emoji": "🌍",
+      "slug": "europe"
+    },
+    "أفريقيا": {
+      "emoji": "🌍",
+      "slug": "africa"
+    },
+    "أمريكا الجنوبية": {
+      "emoji": "🌎",
+      "slug": "south-america"
+    },
+    "أمريكا الشمالية": {
+      "emoji": "🌎",
+      "slug": "north-america"
+    },
+    "الشرق الأوسط": {
+      "emoji": "🕌",
+      "slug": "middle-east"
+    },
+    "أوقيانوسيا": {
+      "emoji": "🌊",
+      "slug": "oceania"
+    }
+  },
+  "countries": {
+    "مالي": {
+      "slug": "mali",
+      "continent": "أفريقيا"
+    },
+    "الصين": {
+      "slug": "china",
+      "continent": "آسيا"
+    },
+    "النمسا": {
+      "slug": "austria",
+      "continent": "أوروبا"
+    },
+    "الهند": {
+      "slug": "india",
+      "continent": "آسيا"
+    },
+    "منغوليا": {
+      "slug": "mongolia",
+      "continent": "آسيا"
+    },
+    "إسبانيا": {
+      "slug": "spain",
+      "continent": "أوروبا"
+    },
+    "البحرين": {
+      "slug": "bahrain",
+      "continent": "الشرق الأوسط"
+    },
+    "مالطا": {
+      "slug": "malta",
+      "continent": "أوروبا"
+    },
+    "أوزبكستان": {
+      "slug": "uzbekistan",
+      "continent": "آسيا"
+    },
+    "اليابان": {
+      "slug": "japan",
+      "continent": "آسيا"
+    },
+    "كينيا": {
+      "slug": "kenya",
+      "continent": "أفريقيا"
+    },
+    "قيرغيزستان": {
+      "slug": "kyrgyzstan",
+      "continent": "آسيا"
+    },
+    "الجزائر": {
+      "slug": "algeria",
+      "continent": "أفريقيا"
+    },
+    "بنما": {
+      "slug": "panama",
+      "continent": "أمريكا الشمالية"
+    },
+    "السعودية": {
+      "slug": "saudi-arabia",
+      "continent": "الشرق الأوسط"
+    },
+    "المغرب": {
+      "slug": "morocco",
+      "continent": "أفريقيا"
+    },
+    "باكستان": {
+      "slug": "pakistan",
+      "continent": "آسيا"
+    },
+    "البرتغال": {
+      "slug": "portugal",
+      "continent": "أوروبا"
+    },
+    "اليونان": {
+      "slug": "greece",
+      "continent": "أوروبا"
+    },
+    "تونس": {
+      "slug": "tunisia",
+      "continent": "أفريقيا"
+    },
+    "أوكرانيا": {
+      "slug": "ukraine",
+      "continent": "أوروبا"
+    },
+    "الأرجنتين": {
+      "slug": "argentina",
+      "continent": "أمريكا الجنوبية"
+    },
+    "البيرو": {
+      "slug": "peru",
+      "continent": "أمريكا الجنوبية"
+    },
+    "تركيا": {
+      "slug": "turkey",
+      "continent": "آسيا"
+    },
+    "إيطاليا": {
+      "slug": "italy",
+      "continent": "أوروبا"
+    },
+    "بوليفيا": {
+      "slug": "bolivia",
+      "continent": "أمريكا الجنوبية"
+    },
+    "أمريكا": {
+      "slug": "usa",
+      "continent": "أمريكا الشمالية"
+    },
+    "بولندا": {
+      "slug": "poland",
+      "continent": "أوروبا"
+    },
+    "الفلبين": {
+      "slug": "philippines",
+      "continent": "آسيا"
+    },
+    "اليمن": {
+      "slug": "yemen",
+      "continent": "الشرق الأوسط"
+    },
+    "مصر": {
+      "slug": "egypt",
+      "continent": "أفريقيا"
+    },
+    "المجر": {
+      "slug": "hungary",
+      "continent": "أوروبا"
+    },
+    "روسيا": {
+      "slug": "russia",
+      "continent": "أوروبا"
+    },
+    "ألمانيا": {
+      "slug": "germany",
+      "continent": "أوروبا"
+    },
+    "قطر": {
+      "slug": "qatar",
+      "continent": "الشرق الأوسط"
+    },
+    "العراق": {
+      "slug": "iraq",
+      "continent": "الشرق الأوسط"
+    },
+    "الكويت": {
+      "slug": "kuwait",
+      "continent": "الشرق الأوسط"
+    },
+    "ألبانيا": {
+      "slug": "albania",
+      "continent": "أوروبا"
+    },
+    "زيمبابوي": {
+      "slug": "zimbabwe",
+      "continent": "أفريقيا"
+    },
+    "إندونيسيا": {
+      "slug": "indonesia",
+      "continent": "آسيا"
+    },
+    "كوريا": {
+      "slug": "korea",
+      "continent": "آسيا"
+    },
+    "النرويج": {
+      "slug": "norway",
+      "continent": "أوروبا"
+    },
+    "الأردن": {
+      "slug": "jordan",
+      "continent": "الشرق الأوسط"
+    },
+    "بلغاريا": {
+      "slug": "bulgaria",
+      "continent": "أوروبا"
+    },
+    "سلوفينيا": {
+      "slug": "slovenia",
+      "continent": "أوروبا"
+    },
+    "تايلند": {
+      "slug": "thailand",
+      "continent": "آسيا"
+    },
+    "عمان": {
+      "slug": "oman",
+      "continent": "الشرق الأوسط"
+    },
+    "كولومبيا": {
+      "slug": "colombia",
+      "continent": "أمريكا الجنوبية"
+    },
+    "بوروندي": {
+      "slug": "burundi",
+      "continent": "أفريقيا"
+    },
+    "التشيك": {
+      "slug": "czech",
+      "continent": "أوروبا"
+    },
+    "فلسطين": {
+      "slug": "palestine",
+      "continent": "الشرق الأوسط"
+    },
+    "المالديف": {
+      "slug": "maldives",
+      "continent": "آسيا"
+    },
+    "جورجيا": {
+      "slug": "georgia",
+      "continent": "آسيا"
+    },
+    "ماليزيا": {
+      "slug": "malaysia",
+      "continent": "آسيا"
+    },
+    "تشيلي": {
+      "slug": "chile",
+      "continent": "أمريكا الجنوبية"
+    },
+    "البرازيل": {
+      "slug": "brazil",
+      "continent": "أمريكا الجنوبية"
+    },
+    "المكسيك": {
+      "slug": "mexico",
+      "continent": "أمريكا الشمالية"
+    },
+    "بوتان": {
+      "slug": "bhutan",
+      "continent": "آسيا"
+    },
+    "سريلانكا": {
+      "slug": "sri-lanka",
+      "continent": "آسيا"
+    },
+    "الإكوادور": {
+      "slug": "ecuador",
+      "continent": "أمريكا الجنوبية"
+    },
+    "نيبال": {
+      "slug": "nepal",
+      "continent": "آسيا"
+    },
+    "البوسنة": {
+      "slug": "bosnia",
+      "continent": "أوروبا"
+    }
+  }
+}
