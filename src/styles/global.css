@@ -2,11 +2,32 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Custom Font */
+/* Custom Font — IBM Plex Sans Arabic */
 @font-face {
-  font-family: 'NTPanoramaNaskh';
-  src: url('/fonts/NTPanoramaNaskh-Regular.ttf') format('truetype');
-  font-weight: normal;
+  font-family: 'IBM Plex Sans Arabic';
+  src: url('/fonts/IBMPlexSansArabic-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  src: url('/fonts/IBMPlexSansArabic-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  src: url('/fonts/IBMPlexSansArabic-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  src: url('/fonts/IBMPlexSansArabic-Bold.ttf') format('truetype');
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
@@ -14,7 +35,7 @@
 /* Custom base styles */
 @layer base {
   body {
-    font-family: 'NTPanoramaNaskh', system-ui, sans-serif;
+    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
     direction: rtl;
     text-align: right;
     @apply bg-white text-gray-900 dark:bg-[#0f172a] dark:text-gray-100 transition-colors duration-300;
