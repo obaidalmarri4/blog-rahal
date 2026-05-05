@@ -22,7 +22,7 @@ const gradients: Record<string, string> = {
 const gradient = gradients[slug] || 'from-gray-500 to-gray-600';
 ---
 
-<a href={`/destinations/${slug}`} class="group block">
+<a href={`/destinations/${slug}/`} class="group block">
   <div class={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${gradient} p-6 md:p-8 shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:scale-[1.02]`}>
     <div class="absolute top-4 left-4 text-6xl opacity-20 group-hover:opacity-30 transition-opacity">
       {emoji}
