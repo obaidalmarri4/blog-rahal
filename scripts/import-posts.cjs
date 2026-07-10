@@ -7,8 +7,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const SOURCE_DATA = path.join(__dirname, '../../output/all_posts.json');
-const SOURCE_IMAGES = path.join(__dirname, '../../data/images');
+// مخرجات الـ scraper بقيت في الفولدر الأصلي بعد نقل المشروع لسطح المكتب
+const SOURCE_DATA = '/Users/obaidalmarri/blog rahal/output/all_posts.json';
+const SOURCE_IMAGES = '/Users/obaidalmarri/blog rahal/data/images';
 const DEST_POSTS = path.join(__dirname, '../src/content/posts');
 const DEST_IMAGES = path.join(__dirname, '../public/images');
 

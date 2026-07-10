@@ -1,52 +1,97 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { getAllPosts, getContinents } from '../utils/posts';
+
+const allPosts = await getAllPosts();
+const continents = getContinents();
+const totalCountries = continents.reduce((s, c) => s + c.countryCount, 0);
 ---
 
 <BaseLayout title="عن الرحّال — رحّال الخبر">
-  <section class="max-w-3xl mx-auto px-4 py-16">
-    <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-8">
-      عن <span class="text-[#e94560]">الرحّال</span>
-    </h1>
 
-    <div class="bg-white dark:bg-[#1e293b] rounded-2xl p-8 shadow-sm border border-gray-100 dark:border-gray-700">
-      <div class="flex items-center gap-6 mb-8">
-        <div class="w-24 h-24 bg-gradient-to-br from-[#0f3460] to-[#e94560] rounded-full flex items-center justify-center text-5xl">
-          🧭
+  <!-- Dark header band -->
+  <section style="background:#1f1a14; border-bottom:2px solid #c9a04a40; padding:3rem 0 2rem;">
+    <div class="max-w-4xl mx-auto px-4">
+      <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.25em; color:#6b7d5a; margin-bottom:0.75rem;">
+        FIELD AGENT · PROFILE
+      </div>
+      <h1 style="font-family:'Thmanyah Serif Display',serif; font-size:2.5rem; color:#f0e6d2; font-weight:700;">
+        عن <span style="color:#c8612e;">الرحّال</span>
+      </h1>
+    </div>
+  </section>
+
+  <!-- Paper content area -->
+  <section style="background:#f0e6d2; color:#2a2218; padding:3rem 0 4rem;">
+    <div class="max-w-4xl mx-auto px-4">
+
+      <!-- Author block -->
+      <div style="display:flex; align-items:flex-start; gap:2rem; margin-bottom:2.5rem; flex-wrap:wrap;">
+        <!-- Concentric circle avatar -->
+        <div style="flex-shrink:0;">
+          <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
+            <circle cx="50" cy="50" r="48" stroke="#c9a04a" stroke-width="1"/>
+            <circle cx="50" cy="50" r="38" stroke="#c9a04a" stroke-width="0.7" opacity="0.6"/>
+            <circle cx="50" cy="50" r="28" stroke="#c9a04a" stroke-width="0.5" opacity="0.5"/>
+            <circle cx="50" cy="50" r="5" fill="#c8612e" opacity="0.9"/>
+            <text x="50" y="54" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#c9a04a">26.3°N</text>
+          </svg>
         </div>
+
         <div>
-          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 style="font-family:'Thmanyah Serif Display',serif; font-size:1.75rem; font-weight:700; color:#1f1a14; margin-bottom:0.25rem;">
             د. وائل بن عبدالعزيز الدغفق
           </h2>
-          <p class="text-[#e94560] font-medium">رحّال الخبر</p>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.15em; color:#c8612e; margin-bottom:0.5rem;">
+            RAHHAL · EST 1980 · KHOBAR KSA
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#6b7d5a; letter-spacing:0.1em;">
+            26.279°N · 50.208°E
+          </div>
         </div>
       </div>
 
-      <div class="space-y-4 text-gray-700 dark:text-gray-300 leading-relaxed text-lg">
-        <p>
+      <!-- Ochre rule -->
+      <div style="height:1px; background:linear-gradient(to left, transparent, #c9a04a, transparent); margin-bottom:2rem;"></div>
+
+      <!-- Bio -->
+      <div style="font-family:'Thmanyah Serif Display',serif; font-size:1.2rem; line-height:2; color:#2a2218; margin-bottom:2.5rem;">
+        <p style="margin-bottom:1rem;">
           رحّال سعودي متمرّس، قضى أكثر من 40 عاماً في استكشاف العالم وتوثيق الحضارات والثقافات المختلفة. زار أكثر من 175 دولة حول العالم.
         </p>
-        <p>
+        <p style="margin-bottom:1rem;">
           تتميز رحلاته بالعمق الثقافي والتوثيق الحضاري، حيث يجمع بين المتعة والمعرفة في كل رحلة، مع اهتمام خاص بالمجتمعات الإسلامية والمواقع التاريخية.
         </p>
         <p>
-          هذه المدوّنة هي سجل لرحلاته وخواطره ومشاهداته من مختلف بقاع الأرض.
+          هذه المدوّنة هي سجل لرحلاته وخواطره ومشاهداته من مختلف بقاع الأرض، موثّقةً منذ عام 1980.
         </p>
       </div>
 
-      <div class="grid grid-cols-3 gap-4 mt-8">
-        <div class="text-center p-4 bg-gray-50 dark:bg-[#0f172a] rounded-xl">
-          <p class="text-2xl font-bold text-[#e94560] font-num">175+</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">دولة</p>
+      <!-- Stats grid -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div style="border:1px solid #c9a04a; padding:1.25rem; text-align:center; background:#e8dcc4;">
+          <div style="font-family:'Thmanyah Serif Display',serif; font-size:2.5rem; font-weight:700; color:#c8612e; line-height:1;">175+</div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.15em; color:#6b7d5a; margin-top:6px;">NATIONS</div>
+          <div style="font-family:'Thmanyah Serif Display',serif; font-size:0.75rem; color:#3a5566; margin-top:2px;">دولة</div>
         </div>
-        <div class="text-center p-4 bg-gray-50 dark:bg-[#0f172a] rounded-xl">
-          <p class="text-2xl font-bold text-[#0f3460] dark:text-blue-400 font-num">40+</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">سنة ترحال</p>
+        <div style="border:1px solid #c9a04a; padding:1.25rem; text-align:center; background:#e8dcc4;">
+          <div style="font-family:'Thmanyah Serif Display',serif; font-size:2.5rem; font-weight:700; color:#c8612e; line-height:1;">40+</div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.15em; color:#6b7d5a; margin-top:6px;">YEARS</div>
+          <div style="font-family:'Thmanyah Serif Display',serif; font-size:0.75rem; color:#3a5566; margin-top:2px;">سنة ترحال</div>
         </div>
-        <div class="text-center p-4 bg-gray-50 dark:bg-[#0f172a] rounded-xl">
-          <p class="text-2xl font-bold text-[#533483] dark:text-purple-400 font-num">6</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">قارات</p>
+        <div style="border:1px solid #c9a04a; padding:1.25rem; text-align:center; background:#e8dcc4;">
+          <div style="font-family:'Thmanyah Serif Display',serif; font-size:2.5rem; font-weight:700; color:#c8612e; line-height:1;">{allPosts.length}</div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.15em; color:#6b7d5a; margin-top:6px;">ENTRIES</div>
+          <div style="font-family:'Thmanyah Serif Display',serif; font-size:0.75rem; color:#3a5566; margin-top:2px;">تدوينة</div>
+        </div>
+        <div style="border:1px solid #c9a04a; padding:1.25rem; text-align:center; background:#e8dcc4;">
+          <div style="font-family:'Thmanyah Serif Display',serif; font-size:2.5rem; font-weight:700; color:#c8612e; line-height:1;">{continents.length}</div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.15em; color:#6b7d5a; margin-top:6px;">CONTINENTS</div>
+          <div style="font-family:'Thmanyah Serif Display',serif; font-size:0.75rem; color:#3a5566; margin-top:2px;">قارات</div>
         </div>
       </div>
+
     </div>
   </section>
+
 </BaseLayout>

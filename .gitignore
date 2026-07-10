@@ -25,3 +25,9 @@ pnpm-debug.log*
 
 # Images (hosted on Blogger/Google CDN)
 public/images/
+.vercel
+
+# Claude Code agent tooling and scratch state (worktrees, plans, skills)
+.claude/
+.agents/
+plans/

@@ -9,32 +9,55 @@ interface Props {
 
 const { name, emoji, slug, postCount, countryCount } = Astro.props;
 
-const gradients: Record<string, string> = {
-  'asia': 'from-amber-500 to-orange-600',
-  'europe': 'from-blue-500 to-indigo-600',
-  'africa': 'from-green-600 to-emerald-700',
-  'south-america': 'from-red-500 to-pink-600',
-  'north-america': 'from-purple-500 to-violet-600',
-  'middle-east': 'from-yellow-600 to-amber-700',
-  'oceania': 'from-cyan-500 to-teal-600',
+const accentColors: Record<string, string> = {
+  'asia': '#c8612e',
+  'europe': '#3a5566',
+  'africa': '#6b7d5a',
+  'south-america': '#c8612e',
+  'north-america': '#3a5566',
+  'middle-east': '#c9a04a',
+  'oceania': '#6b7d5a',
 };
 
-const gradient = gradients[slug] || 'from-gray-500 to-gray-600';
+const accent = accentColors[slug] || '#c9a04a';
 ---
 
-<a href={`/destinations/${slug}/`} class="group block">
-  <div class={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${gradient} p-6 md:p-8 shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:scale-[1.02]`}>
-    <div class="absolute top-4 left-4 text-6xl opacity-20 group-hover:opacity-30 transition-opacity">
+<a href={`/destinations/${slug}/`} style="display:block; text-decoration:none; group:true;">
+  <div style={`border:1px solid ${accent}50; padding:1.5rem; background:#1f1a14; transition:border-color 0.2s, background 0.2s; position:relative; overflow:hidden;`}
+       onmouseover={`this.style.borderColor='${accent}'; this.style.background='${accent}10';`}
+       onmouseout={`this.style.borderColor='${accent}50'; this.style.background='#1f1a14';`}>
+
+    <!-- Background emoji (faded) -->
+    <div style="position:absolute; bottom:-10px; left:-5px; font-size:80px; opacity:0.06; pointer-events:none; user-select:none;">
       {emoji}
     </div>
-    <div class="relative z-10 text-white">
-      <div class="text-4xl mb-3">{emoji}</div>
-      <h3 class="text-2xl font-bold mb-2">{name}</h3>
-      <div class="flex gap-4 text-white/80 text-sm">
-        <span class="font-num">{countryCount} <span class="text-white/60">دولة</span></span>
-        <span class="font-num">{postCount} <span class="text-white/60">تدوينة</span></span>
+
+    <!-- Content -->
+    <div style="position:relative; z-index:1;">
+      <!-- Emoji + label -->
+      <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem;">
+        <span style="font-size:1.5rem;">{emoji}</span>
+        <div style={`font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.2em; color:${accent};`}>
+          {slug.toUpperCase().replace(/-/g, ' ')}
+        </div>
+      </div>
+
+      <h3 style="font-family:'Thmanyah Serif Display',serif; font-size:1.4rem; color:#f0e6d2; font-weight:700; margin-bottom:0.75rem;">
+        {name}
+      </h3>
+
+      <!-- Stats -->
+      <div style={`display:flex; gap:1.5rem; border-top:1px solid ${accent}30; padding-top:0.75rem;`}>
+        <div>
+          <div style={`font-family:'JetBrains Mono',monospace; font-size:11px; color:${accent}; font-weight:500;`}>{countryCount}</div>
+          <div style="font-family:'Thmanyah Serif Display',serif; font-size:10px; color:#6b7d5a;">دولة</div>
+        </div>
+        <div>
+          <div style={`font-family:'JetBrains Mono',monospace; font-size:11px; color:${accent}; font-weight:500;`}>{postCount}</div>
+          <div style="font-family:'Thmanyah Serif Display',serif; font-size:10px; color:#6b7d5a;">تدوينة</div>
+        </div>
       </div>
     </div>
-    <div class="absolute bottom-0 left-0 w-full h-1 bg-white/20 group-hover:bg-white/40 transition-colors"></div>
+
   </div>
 </a>

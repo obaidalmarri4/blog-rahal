@@ -1,74 +1,128 @@
 @import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap");
 
-@custom-variant dark (&:where(.dark, .dark *));
-
-/* Custom Font — IBM Plex Sans Arabic */
+/* Thmanyah Serif Display */
 @font-face {
-  font-family: 'IBM Plex Sans Arabic';
-  src: url('/fonts/IBMPlexSansArabic-Light.ttf') format('truetype');
+  font-family: 'Thmanyah Serif Display';
+  src: url('/fonts/thmanyahserifdisplay-Light.otf') format('opentype');
   font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: 'IBM Plex Sans Arabic';
-  src: url('/fonts/IBMPlexSansArabic-Regular.ttf') format('truetype');
+  font-family: 'Thmanyah Serif Display';
+  src: url('/fonts/thmanyahserifdisplay-Regular.otf') format('opentype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: 'IBM Plex Sans Arabic';
-  src: url('/fonts/IBMPlexSansArabic-Medium.ttf') format('truetype');
+  font-family: 'Thmanyah Serif Display';
+  src: url('/fonts/thmanyahserifdisplay-Medium.otf') format('opentype');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: 'IBM Plex Sans Arabic';
-  src: url('/fonts/IBMPlexSansArabic-Bold.ttf') format('truetype');
+  font-family: 'Thmanyah Serif Display';
+  src: url('/fonts/thmanyahserifdisplay-Bold.otf') format('opentype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
+@font-face {
+  font-family: 'Thmanyah Serif Display';
+  src: url('/fonts/thmanyahserifdisplay-Black.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
 
-/* Custom base styles */
+/* Base */
 @layer base {
   body {
-    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    font-family: 'Thmanyah Serif Display', system-ui, serif;
     direction: rtl;
     text-align: right;
-    @apply bg-white text-gray-900 dark:bg-[#0f172a] dark:text-gray-100 transition-colors duration-300;
+    background-color: #1f1a14;
+    color: #f0e6d2;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Thmanyah Serif Display', serif;
+    font-weight: 700;
+  }
+  blockquote {
+    font-family: 'Thmanyah Serif Display', serif;
+    font-weight: 700;
   }
 }
 
-/* Post content */
+/* Atlas utility */
+.atlas-mono {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+/* Post content — paper reading area */
 .post-content {
-  line-height: 1.6;
-  font-size: 1.125rem;
+  font-family: 'Thmanyah Serif Display', serif;
+  font-size: 19px;
+  line-height: 1.95;
+  color: #2a2218;
   text-align: right;
 }
 .post-content img {
   max-width: 100%;
   height: auto;
-  border-radius: 0.75rem;
-  margin: 1.5rem auto;
+  border-radius: 0.5rem;
+  margin: 2rem auto;
   display: block;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 20px rgba(42, 34, 24, 0.15);
 }
-.post-content p, .post-content div {
-  margin-bottom: 0.5rem;
+.post-content p,
+.post-content div {
+  margin-bottom: 0.75rem;
   text-align: right;
 }
 .post-content a {
-  color: #e94560;
+  color: #c8612e;
   text-decoration: underline;
+  text-underline-offset: 3px;
 }
-.post-content b, .post-content strong {
-  @apply text-gray-900 dark:text-white font-bold;
+.post-content b,
+.post-content strong {
+  color: #1f1a14;
+  font-weight: 700;
+}
+.post-content blockquote {
+  border-inline-start: 4px solid #c8612e;
+  padding-inline-start: 1.5rem;
+  margin: 2rem 0;
+  font-family: 'Thmanyah Serif Display', serif;
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: #3a3028;
+}
+.post-content h2 {
+  font-family: 'Thmanyah Serif Display', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1f1a14;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
 }
 
-/* Force RTL alignment everywhere */
+/* Data callout inside articles */
+.data-callout {
+  border: 1px solid #c9a04a;
+  background: rgba(201, 160, 74, 0.08);
+  padding: 1.5rem;
+  margin: 2rem 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: #2a2218;
+}
+
+/* Force RTL in post content */
 .post-content * {
   text-align: right !important;
 }
@@ -76,7 +130,19 @@
   text-align: center !important;
 }
 
-/* Use system font for numbers */
+/* Number font */
 .font-num {
   font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #1f1a14;
+}
+::-webkit-scrollbar-thumb {
+  background: #c9a04a40;
+  border-radius: 3px;
 }

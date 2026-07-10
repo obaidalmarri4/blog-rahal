@@ -1,0 +1,284 @@
+---
+import { getExcerpt, getPostSlug, getPostTaxonomy, getPostCoverImage } from '../utils/posts';
+import type { Post } from '../utils/posts';
+
+interface Props {
+  posts: Post[];
+  filterable?: boolean;
+}
+
+const { posts, filterable = false } = Astro.props;
+
+const countryCoords: Record<string, string> = {
+  'مالي': '14.4°N · 3.6°W', 'الهند': '20.6°N · 78.9°E', 'الصين': '35.9°N · 104.2°E',
+  'اليابان': '36.2°N · 138.3°E', 'تركيا': '38.9°N · 35.2°E', 'إيران': '32.4°N · 53.7°E',
+  'العراق': '33.2°N · 43.7°E', 'الأردن': '30.6°N · 36.8°E', 'مصر': '26.8°N · 30.8°E',
+  'المغرب': '31.8°N · 7.1°W', 'الجزائر': '28.0°N · 1.7°E', 'تونس': '33.9°N · 9.6°E',
+  'ليبيا': '26.3°N · 17.2°E', 'السودان': '12.9°N · 30.2°E', 'إثيوبيا': '9.1°N · 40.5°E',
+  'كينيا': '0.0°N · 37.9°E', 'تنزانيا': '6.4°S · 34.9°E', 'جنوب أفريقيا': '30.6°S · 22.9°E',
+  'نيجيريا': '9.1°N · 8.7°E', 'السنغال': '14.5°N · 14.5°W', 'فرنسا': '46.2°N · 2.2°E',
+  'ألمانيا': '51.2°N · 10.5°E', 'إيطاليا': '41.9°N · 12.6°E', 'إسبانيا': '40.5°N · 3.7°W',
+  'البرتغال': '39.4°N · 8.2°W', 'المملكة المتحدة': '55.4°N · 3.4°W', 'هولندا': '52.1°N · 5.3°E',
+  'سويسرا': '46.8°N · 8.2°E', 'اليونان': '39.1°N · 21.8°E', 'روسيا': '61.5°N · 105.3°E',
+  'أمريكا': '37.1°N · 95.7°W', 'الولايات المتحدة': '37.1°N · 95.7°W', 'كندا': '56.1°N · 106.3°W',
+  'البرازيل': '14.2°S · 51.9°W', 'الأرجنتين': '38.4°S · 63.6°W', 'أستراليا': '25.3°S · 133.8°E',
+  'إندونيسيا': '0.8°S · 113.9°E', 'ماليزيا': '4.2°N · 101.9°E', 'تايلاند': '15.9°N · 100.9°E',
+  'باكستان': '30.4°N · 69.3°E', 'الكويت': '29.3°N · 47.5°E', 'الإمارات': '23.4°N · 53.8°E',
+  'قطر': '25.4°N · 51.2°E', 'البحرين': '26.0°N · 50.6°E', 'عُمان': '21.5°N · 55.9°E',
+  'اليمن': '15.6°N · 48.5°E', 'لبنان': '33.9°N · 35.5°E', 'سوريا': '34.8°N · 38.9°E',
+  'فلسطين': '31.9°N · 35.2°E', 'أذربيجان': '40.1°N · 47.6°E', 'جورجيا': '42.3°N · 43.4°E',
+  'كازاخستان': '48.0°N · 66.9°E', 'أوزبكستان': '41.4°N · 64.6°E', 'موريتانيا': '20.9°N · 10.9°W',
+  'النيجر': '17.6°N · 8.1°E', 'تشاد': '15.5°N · 18.7°E', 'الكاميرون': '3.9°N · 11.5°E',
+  'الصومال': '5.2°N · 46.2°E', 'أوغندا': '1.4°N · 32.3°E', 'ناميبيا': '22.3°S · 17.9°E',
+};
+
+const arabicMonths = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+
+function formatMonoDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function getReadTime(text: string): number {
+  return Math.max(1, Math.ceil((text?.split(/\s+/).length || 0) / 200));
+}
+
+type Item =
+  | { kind: 'year'; year: number }
+  | { kind: 'month'; year: number; month: number }
+  | { kind: 'post'; post: Post; year: number; month: number };
+
+const items: Item[] = [];
+let lastY = -1, lastM = -1;
+for (const post of posts) {
+  const d = new Date(post.date);
+  const y = d.getFullYear();
+  const m = d.getMonth();
+  if (y !== lastY) { items.push({ kind: 'year', year: y }); lastY = y; lastM = -1; }
+  if (m !== lastM) { items.push({ kind: 'month', year: y, month: m }); lastM = m; }
+  items.push({ kind: 'post', post, year: y, month: m });
+}
+---
+
+<div class="timeline" data-filterable={filterable ? 'true' : 'false'}>
+  {items.map((item) => {
+    if (item.kind === 'year') {
+      return (
+        <div class="timeline-year" data-year={item.year}>
+          <h2>{item.year}</h2>
+          <span class="rule"></span>
+        </div>
+      );
+    }
+    if (item.kind === 'month') {
+      return (
+        <div class="timeline-month" data-year={item.year} data-month={item.month}>
+          <span class="dot"></span>
+          <span class="month-label">{arabicMonths[item.month]}</span>
+        </div>
+      );
+    }
+    const post = item.post;
+    const slug = getPostSlug(post);
+    const cover = getPostCoverImage(post);
+    const tx = getPostTaxonomy(post);
+    const countriesArr = tx?.countries || [];
+    const primaryCountry = countriesArr[0] || null;
+    const coords = primaryCountry && countryCoords[primaryCountry] ? countryCoords[primaryCountry] : null;
+    const country = primaryCountry;
+    const region = tx?.continent || null;
+    return (
+      <article
+        class="timeline-entry"
+        data-year={item.year}
+        data-continent={region || ''}
+        data-country={country || ''}
+        data-countries={countriesArr.join('|')}
+        data-title={post.title.toLowerCase()}
+      >
+        <span class="entry-dot"></span>
+        <a href={`/blog/${slug}/`} class="entry-link">
+          <div class="entry-thumb">
+            {cover ? (
+              <img src={cover} alt={post.title} loading="lazy" />
+            ) : (
+              <span class="thumb-placeholder">◆</span>
+            )}
+          </div>
+          <div class="entry-body">
+            <h3 class="entry-title">{post.title}</h3>
+            <p class="entry-excerpt">{getExcerpt(post.content_text, 110)}</p>
+            <div class="entry-meta">
+              <span class="meta-date">{formatMonoDate(post.date)}</span>
+              {coords && <><span class="meta-sep">·</span><span class="meta-coords">{coords}</span></>}
+              {country && !coords && <><span class="meta-sep">·</span><span class="meta-country">{country}</span></>}
+              {region && <><span class="meta-sep">·</span><span class="meta-region">{region}</span></>}
+              <span class="meta-sep">·</span><span class="meta-read">{getReadTime(post.content_text)}m</span>
+            </div>
+          </div>
+        </a>
+      </article>
+    );
+  })}
+</div>
+
+<style>
+  .timeline {
+    position: relative;
+    padding-right: 2.25rem;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0.6rem;
+    width: 1px;
+    background: #c9a04a40;
+  }
+
+  .timeline-year {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 2.5rem 0 1.25rem;
+    position: relative;
+  }
+  .timeline-year:first-child { margin-top: 0; }
+  .timeline-year h2 {
+    font-family: 'Thmanyah Serif Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #c9a04a;
+    line-height: 1;
+    margin: 0;
+  }
+  .timeline-year .rule {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to left, transparent, #c9a04a40);
+  }
+
+  .timeline-month {
+    position: relative;
+    margin: 1.5rem 0 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .timeline-month .dot {
+    position: absolute;
+    right: -2.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #c9a04a;
+  }
+  .month-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #6b7d5a;
+  }
+
+  .timeline-entry {
+    position: relative;
+    margin: 0.75rem 0;
+  }
+  .entry-dot {
+    position: absolute;
+    right: -2.27rem;
+    top: 1.3rem;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #c8612e;
+    box-shadow: 0 0 0 3px #1f1a14;
+  }
+  .entry-link {
+    display: flex;
+    gap: 1rem;
+    padding: 0.85rem 0.25rem;
+    text-decoration: none;
+    color: inherit;
+    border-radius: 4px;
+    transition: background 0.15s ease;
+  }
+  .entry-link:hover { background: #ffffff05; }
+  .entry-link:hover .entry-title { color: #c9a04a; }
+
+  .entry-thumb {
+    flex-shrink: 0;
+    width: 72px;
+    height: 72px;
+    border-radius: 3px;
+    overflow: hidden;
+    background: #c9a04a15;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .entry-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .thumb-placeholder { font-size: 1.4rem; color: #c9a04a80; }
+
+  .entry-body { flex: 1; min-width: 0; }
+  .entry-title {
+    font-family: 'Thmanyah Serif Display', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #f0e6d2;
+    line-height: 1.35;
+    margin: 0 0 0.35rem;
+    transition: color 0.15s ease;
+  }
+  .entry-excerpt {
+    font-family: 'Thmanyah Serif Display', serif;
+    font-size: 0.82rem;
+    color: #c9a04a85;
+    line-height: 1.5;
+    margin: 0 0 0.45rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .entry-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: #6b7d5a;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    direction: ltr;
+    justify-content: flex-end;
+  }
+  .entry-meta .meta-coords { color: #c8612e; }
+  .entry-meta .meta-region,
+  .entry-meta .meta-country {
+    color: #c9a04a;
+    font-family: 'Thmanyah Serif Display', serif;
+    font-size: 11px;
+  }
+  .entry-meta .meta-sep { color: #c9a04a40; }
+
+  .timeline-entry.is-hidden,
+  .timeline-month.is-hidden,
+  .timeline-year.is-hidden { display: none; }
+
+  @media (max-width: 640px) {
+    .timeline { padding-right: 1.75rem; }
+    .timeline::before { right: 0.4rem; }
+    .entry-dot { right: -1.77rem; }
+    .timeline-month .dot { right: -1.75rem; }
+    .entry-thumb { width: 56px; height: 56px; }
+    .entry-title { font-size: 0.98rem; }
+    .entry-excerpt { font-size: 0.78rem; }
+  }
+</style>

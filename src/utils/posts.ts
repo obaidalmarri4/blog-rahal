@@ -19,7 +19,7 @@ export interface Post {
 
 interface TaxonomyEntry {
   continent: string | null;
-  country: string | null;
+  countries: string[];
   type: string;
   category?: string;
 }
@@ -86,8 +86,8 @@ export function getContinents(): { name: string; emoji: string; slug: string; po
         continentStats[entry.continent] = { posts: 0, countries: new Set() };
       }
       continentStats[entry.continent].posts++;
-      if (entry.country) {
-        continentStats[entry.continent].countries.add(entry.country);
+      for (const c of entry.countries || []) {
+        continentStats[entry.continent].countries.add(c);
       }
     }
   }
@@ -115,8 +115,13 @@ export function getCountriesByContinent(continentName: string): { name: string; 
   const countryStats: Record<string, number> = {};
 
   for (const [, entry] of Object.entries(taxonomy.posts)) {
-    if (entry.type === 'travel' && entry.continent === continentName && entry.country) {
-      countryStats[entry.country] = (countryStats[entry.country] || 0) + 1;
+    if (entry.type === 'travel' && entry.continent === continentName) {
+      for (const c of entry.countries || []) {
+        // Only count countries that belong to this continent (avoid foreign companions)
+        if (taxonomy.countries[c]?.continent === continentName) {
+          countryStats[c] = (countryStats[c] || 0) + 1;
+        }
+      }
     }
   }
 
@@ -148,7 +153,7 @@ export async function getPostsByCountry(countryName: string): Promise<Post[]> {
   const allPosts = await getAllPosts();
   return allPosts.filter(post => {
     const tx = getPostTaxonomy(post);
-    return tx?.type === 'travel' && tx.country === countryName;
+    return tx?.type === 'travel' && (tx.countries || []).includes(countryName);
   });
 }
 
@@ -187,9 +192,11 @@ export function getAllCountrySlugsForContinent(continentSlug: string): string[] 
 
   const slugs = new Set<string>();
   for (const [, entry] of Object.entries(taxonomy.posts)) {
-    if (entry.type === 'travel' && entry.continent === continent.name && entry.country) {
-      const meta = taxonomy.countries[entry.country];
-      if (meta) slugs.add(meta.slug);
+    if (entry.type === 'travel' && entry.continent === continent.name) {
+      for (const c of entry.countries || []) {
+        const meta = taxonomy.countries[c];
+        if (meta && meta.continent === continent.name) slugs.add(meta.slug);
+      }
     }
   }
   return [...slugs];

@@ -1,0 +1,406 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getAllPosts, getPostSlug, getPostTaxonomy } from '../utils/posts';
+
+const allPosts = await getAllPosts();
+
+interface PostMeta {
+  slug: string;
+  title: string;
+  year: number;
+  continent: string;
+}
+
+const postMeta: PostMeta[] = [];
+const postIndex = new Map<string, number>();
+const tiles: Array<[string, number]> = []; // [src, postIdx]
+const yearSet = new Set<number>();
+const continentCounts: Record<string, number> = {};
+
+for (const post of allPosts) {
+  if (!post.images || post.images.length === 0) continue;
+  const slug = getPostSlug(post);
+  const tx = getPostTaxonomy(post);
+  const year = new Date(post.date).getFullYear();
+  const continent = tx?.continent || '';
+  yearSet.add(year);
+
+  let idx = postIndex.get(slug);
+  if (idx === undefined) {
+    idx = postMeta.length;
+    postMeta.push({ slug, title: post.title, year, continent });
+    postIndex.set(slug, idx);
+  }
+
+  for (const img of post.images) {
+    const src = img.original_url || img.thumbnail_url;
+    if (!src) continue;
+    tiles.push([src, idx]);
+    if (continent) continentCounts[continent] = (continentCounts[continent] || 0) + 1;
+  }
+}
+
+const years = Array.from(yearSet).sort((a, b) => b - a);
+const continents = Object.entries(continentCounts)
+  .sort((a, b) => b[1] - a[1])
+  .map(([name, count]) => ({ name, count }));
+
+const albumData = { posts: postMeta, tiles };
+---
+
+<BaseLayout title="ألبوم الرحّال — رحّال الخبر">
+
+  <!-- Page Header -->
+  <section style="background:#1f1a14; padding:3rem 0 1.5rem; border-bottom:1px solid #c9a04a40;">
+    <div class="max-w-6xl mx-auto px-4">
+      <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.25em; color:#6b7d5a; margin-bottom:0.75rem;">
+        FIELD ALBUM · IMAGE ARCHIVE
+      </div>
+      <h1 style="font-family:'Thmanyah Serif Display',serif; font-size:2.5rem; color:#f0e6d2; font-weight:700; margin-bottom:0.5rem;">
+        ألبوم الرحّال
+      </h1>
+      <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#c9a04a;">
+        <span id="img-count">{tiles.length}</span> IMAGES <span id="img-filter-suffix" style="display:none; color:#c8612e;"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filter Bar -->
+  <section style="background:#1f1a14; padding:1.5rem 0; border-bottom:1px solid #c9a04a20;">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="filter-bar">
+        <div class="filter-row">
+          <span class="filter-label">السنة</span>
+          <div class="filter-chips" data-filter-group="year">
+            <button type="button" class="chip is-active" data-value="">الكل</button>
+            {years.map((y) => (
+              <button type="button" class="chip" data-value={String(y)}>{y}</button>
+            ))}
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <span class="filter-label">القارة</span>
+          <div class="filter-chips" data-filter-group="continent">
+            <button type="button" class="chip is-active" data-value="">الكل</button>
+            {continents.map((c) => (
+              <button type="button" class="chip" data-value={c.name}>{c.name} <span class="chip-count">{c.count}</span></button>
+            ))}
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <span class="filter-label">بحث</span>
+          <input id="search-input" type="search" placeholder="عنوان التدوينة..." class="filter-search" />
+          <button type="button" id="reset-btn" class="reset-btn">إعادة ضبط</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery -->
+  <section style="background:#1f1a14; padding:2rem 0 3rem;">
+    <div class="max-w-6xl mx-auto px-4">
+      <div id="gallery-grid" class="gallery-grid"></div>
+      <div id="loading-sentinel" style="height:1px;"></div>
+      <div id="empty-state" style="display:none; text-align:center; padding:3rem 0; font-family:'Thmanyah Serif Display',serif; color:#c9a04a80;">
+        لا توجد صور بهذه المرشّحات
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox -->
+  <dialog id="lightbox" class="lightbox" aria-label="عرض الصورة">
+    <button type="button" id="lb-close" class="lb-close" aria-label="إغلاق">✕</button>
+    <button type="button" id="lb-prev" class="lb-nav lb-prev" aria-label="السابق">‹</button>
+    <button type="button" id="lb-next" class="lb-nav lb-next" aria-label="التالي">›</button>
+    <div class="lb-content">
+      <img id="lb-image" src="" alt="" />
+      <div class="lb-info">
+        <div id="lb-title" class="lb-title"></div>
+        <a id="lb-link" href="#" class="lb-link">اذهب للمدوّنة ←</a>
+      </div>
+    </div>
+  </dialog>
+
+  <script type="application/json" id="album-data" set:html={JSON.stringify(albumData)}></script>
+
+</BaseLayout>
+
+<style>
+  .filter-bar { display: flex; flex-direction: column; gap: 0.85rem; }
+  .filter-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+  .filter-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: #6b7d5a; min-width: 3.5rem;
+  }
+  .filter-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; flex: 1; }
+  .chip {
+    font-family: 'Thmanyah Serif Display', serif;
+    font-size: 0.78rem; color: #c9a04a;
+    background: transparent; border: 1px solid #c9a04a40;
+    padding: 0.3rem 0.7rem; border-radius: 2px; cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex; align-items: center; gap: 0.35rem;
+  }
+  .chip:hover { border-color: #c9a04a; background: #c9a04a10; }
+  .chip.is-active { background: #c9a04a; color: #1f1a14; border-color: #c9a04a; }
+  .chip.is-active .chip-count { color: #1f1a14; opacity: 0.7; }
+  .chip-count { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #6b7d5a; }
+  .filter-search {
+    flex: 1; min-width: 12rem;
+    background: transparent; border: 1px solid #c9a04a40;
+    color: #f0e6d2; padding: 0.4rem 0.7rem;
+    font-family: 'Thmanyah Serif Display', serif; font-size: 0.85rem;
+    border-radius: 2px; direction: rtl;
+  }
+  .filter-search:focus { outline: none; border-color: #c9a04a; }
+  .filter-search::placeholder { color: #6b7d5a; }
+  .reset-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: #c8612e;
+    background: transparent; border: 1px solid #c8612e40;
+    padding: 0.4rem 0.7rem; cursor: pointer; border-radius: 2px;
+    letter-spacing: 0.05em;
+  }
+  .reset-btn:hover { background: #c8612e15; border-color: #c8612e; }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 6px;
+  }
+  .tile {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border: none;
+    padding: 0;
+    background: #c9a04a10;
+    cursor: zoom-in;
+    border-radius: 2px;
+  }
+  .tile img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform 0.3s ease, filter 0.3s ease;
+  }
+  .tile:hover img { transform: scale(1.04); filter: brightness(0.65); }
+  .tile-overlay {
+    position: absolute; inset: 0;
+    display: flex; align-items: flex-end;
+    padding: 8px;
+    background: linear-gradient(to top, #1f1a14ee, #1f1a1400 60%);
+    opacity: 0; transition: opacity 0.2s ease;
+    pointer-events: none;
+  }
+  .tile:hover .tile-overlay { opacity: 1; }
+  .tile-title {
+    font-family: 'Thmanyah Serif Display', serif;
+    font-size: 0.75rem; color: #f0e6d2; line-height: 1.3; text-align: right;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+
+  .lightbox { border: none; padding: 0; background: transparent; max-width: 100vw; max-height: 100vh; width: 100vw; height: 100vh; }
+  .lightbox::backdrop { background: #1f1a14ee; backdrop-filter: blur(4px); }
+  .lightbox[open] { display: flex; align-items: center; justify-content: center; }
+  .lb-content { display: flex; flex-direction: column; align-items: center; gap: 1rem; max-width: 90vw; max-height: 90vh; }
+  .lb-content img { max-width: 90vw; max-height: 75vh; object-fit: contain; box-shadow: 0 8px 40px rgba(0,0,0,0.6); }
+  .lb-info { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-align: center; max-width: 80vw; }
+  .lb-title { font-family: 'Thmanyah Serif Display', serif; font-size: 1rem; color: #f0e6d2; line-height: 1.4; }
+  .lb-link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.1em;
+    color: #c9a04a; background: transparent; border: 1px solid #c9a04a;
+    padding: 0.5rem 1rem; text-decoration: none; border-radius: 2px;
+    transition: all 0.15s ease;
+  }
+  .lb-link:hover { background: #c9a04a; color: #1f1a14; }
+  .lb-close, .lb-nav {
+    position: fixed; background: #1f1a14cc; border: 1px solid #c9a04a60;
+    color: #f0e6d2; width: 44px; height: 44px; border-radius: 50%;
+    cursor: pointer; font-size: 1.4rem; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; transition: all 0.15s ease;
+  }
+  .lb-close:hover, .lb-nav:hover { background: #c9a04a; color: #1f1a14; }
+  .lb-close { top: 16px; left: 16px; }
+  .lb-prev { right: 16px; top: 50%; transform: translateY(-50%); }
+  .lb-next { left: 16px; top: 50%; transform: translateY(-50%); }
+
+  @media (max-width: 640px) {
+    .filter-label { min-width: 100%; }
+    .filter-search { min-width: 0; width: 100%; }
+    .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 4px; }
+    .lb-prev { right: 8px; }
+    .lb-next { left: 8px; }
+    .lb-close { top: 8px; left: 8px; }
+  }
+</style>
+
+<script>
+  interface PostMeta { slug: string; title: string; year: number; continent: string; }
+  interface AlbumData { posts: PostMeta[]; tiles: Array<[string, number]>; }
+
+  const dataEl = document.getElementById('album-data');
+  if (!dataEl) throw new Error('album data missing');
+  const data: AlbumData = JSON.parse(dataEl.textContent || '{}');
+
+  const grid = document.getElementById('gallery-grid') as HTMLElement;
+  const sentinel = document.getElementById('loading-sentinel') as HTMLElement;
+  const countEl = document.getElementById('img-count');
+  const suffixEl = document.getElementById('img-filter-suffix');
+  const emptyEl = document.getElementById('empty-state');
+  const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
+
+  const state = { year: '', continent: '', search: '' };
+  const BATCH = 200;
+  let filtered: number[] = data.tiles.map((_, i) => i); // indexes into data.tiles
+  let rendered = 0;
+  const totalTiles = data.tiles.length;
+
+  // Lowercase title cache for search
+  const lcTitles = data.posts.map((p) => p.title.toLowerCase());
+
+  function tileMatches(tileIdx: number, search: string): boolean {
+    const postIdx = data.tiles[tileIdx][1];
+    const post = data.posts[postIdx];
+    if (state.year && String(post.year) !== state.year) return false;
+    if (state.continent && post.continent !== state.continent) return false;
+    if (search && !lcTitles[postIdx].includes(search)) return false;
+    return true;
+  }
+
+  function renderBatch() {
+    if (rendered >= filtered.length) return;
+    const end = Math.min(rendered + BATCH, filtered.length);
+    const frag = document.createDocumentFragment();
+    for (let i = rendered; i < end; i++) {
+      const tileIdx = filtered[i];
+      const [src, postIdx] = data.tiles[tileIdx];
+      const post = data.posts[postIdx];
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'tile';
+      btn.dataset.tileIdx = String(tileIdx);
+      btn.innerHTML = `<img src="${src}" alt="" loading="lazy">
+        <span class="tile-overlay"><span class="tile-title">${escapeHtml(post.title)}</span></span>`;
+      frag.appendChild(btn);
+    }
+    grid.appendChild(frag);
+    rendered = end;
+  }
+
+  function escapeHtml(s: string): string {
+    return s.replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    })[c]!);
+  }
+
+  function rebuild() {
+    const search = state.search.trim().toLowerCase();
+    filtered = [];
+    for (let i = 0; i < data.tiles.length; i++) {
+      if (tileMatches(i, search)) filtered.push(i);
+    }
+    grid.innerHTML = '';
+    rendered = 0;
+    if (countEl) countEl.textContent = String(filtered.length);
+    if (suffixEl) {
+      const hasFilter = state.year || state.continent || state.search;
+      if (hasFilter) {
+        suffixEl.style.display = 'inline';
+        suffixEl.textContent = `/ ${totalTiles} (مفلتر)`;
+      } else {
+        suffixEl.style.display = 'none';
+      }
+    }
+    if (emptyEl) emptyEl.style.display = filtered.length === 0 ? 'block' : 'none';
+    renderBatch();
+  }
+
+  // Infinite scroll
+  const io = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) renderBatch();
+  }, { rootMargin: '600px' });
+  io.observe(sentinel);
+
+  document.querySelectorAll<HTMLElement>('.filter-chips').forEach((group) => {
+    const filterKey = group.dataset.filterGroup as 'year' | 'continent' | undefined;
+    if (!filterKey) return;
+    group.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (!target.classList.contains('chip')) return;
+      const value = target.dataset.value || '';
+      state[filterKey] = value;
+      group.querySelectorAll('.chip').forEach((c) => c.classList.toggle('is-active', c === target));
+      rebuild();
+    });
+  });
+
+  if (searchInput) {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    searchInput.addEventListener('input', () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        state.search = searchInput.value;
+        rebuild();
+      }, 200);
+    });
+  }
+
+  document.getElementById('reset-btn')?.addEventListener('click', () => {
+    state.year = ''; state.continent = ''; state.search = '';
+    if (searchInput) searchInput.value = '';
+    document.querySelectorAll<HTMLElement>('.filter-chips').forEach((group) => {
+      group.querySelectorAll('.chip').forEach((c, i) => c.classList.toggle('is-active', i === 0));
+    });
+    rebuild();
+  });
+
+  // Lightbox
+  const lightbox = document.getElementById('lightbox') as HTMLDialogElement | null;
+  const lbImage = document.getElementById('lb-image') as HTMLImageElement | null;
+  const lbTitle = document.getElementById('lb-title');
+  const lbLink = document.getElementById('lb-link') as HTMLAnchorElement | null;
+  let currentFilteredIdx = 0;
+
+  function openLightboxAt(filteredIdx: number) {
+    if (!lightbox || !lbImage || !lbTitle || !lbLink) return;
+    if (filteredIdx < 0 || filteredIdx >= filtered.length) return;
+    currentFilteredIdx = filteredIdx;
+    const tileIdx = filtered[filteredIdx];
+    const [src, postIdx] = data.tiles[tileIdx];
+    const post = data.posts[postIdx];
+    lbImage.src = src;
+    lbImage.alt = post.title;
+    lbTitle.textContent = post.title;
+    lbLink.href = `/blog/${post.slug}/`;
+    if (!lightbox.open) lightbox.showModal();
+  }
+
+  grid.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest('.tile') as HTMLElement | null;
+    if (!btn) return;
+    const tileIdx = Number(btn.dataset.tileIdx);
+    const fi = filtered.indexOf(tileIdx);
+    if (fi >= 0) openLightboxAt(fi);
+  });
+
+  document.getElementById('lb-close')?.addEventListener('click', () => lightbox?.close());
+  document.getElementById('lb-prev')?.addEventListener('click', () => openLightboxAt(currentFilteredIdx - 1));
+  document.getElementById('lb-next')?.addEventListener('click', () => openLightboxAt(currentFilteredIdx + 1));
+
+  lightbox?.addEventListener('click', (e) => {
+    if (e.target === lightbox) lightbox.close();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (!lightbox?.open) return;
+    if (e.key === 'ArrowLeft') openLightboxAt(currentFilteredIdx + 1);
+    if (e.key === 'ArrowRight') openLightboxAt(currentFilteredIdx - 1);
+  });
+
+  // Initial render
+  rebuild();
+</script>

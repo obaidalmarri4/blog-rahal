@@ -1,81 +1,85 @@
 ---
 const navLinks = [
   { href: '/', label: 'الرئيسية' },
+  { href: '/atlas', label: 'خريطة الرحّال' },
   { href: '/destinations', label: 'الوجهات' },
   { href: '/blog', label: 'المدوّنة' },
+  { href: '/album', label: 'ألبوم الرحّال' },
   { href: '/about', label: 'عن الرحّال' },
 ];
+
+const vol = new Date().getFullYear() - 1980 + 1;
 ---
 
-<header class="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-[#0f172a]/80 border-b border-gray-200 dark:border-gray-700">
-  <nav class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-    <!-- Logo -->
-    <a href="/" class="flex items-center gap-2 group shrink-0">
-      <span class="text-2xl md:text-3xl">🧭</span>
-      <div>
-        <h1 class="text-base md:text-xl font-bold text-gray-900 dark:text-white group-hover:text-[#e94560] transition-colors">
-          رحّال الخبر
-        </h1>
-        <p class="text-[10px] md:text-xs text-gray-500 dark:text-gray-400 hidden sm:block">الحياة رحلة</p>
+<header style="background:#1f1a14; border-bottom:2px solid #c9a04a; position:sticky; top:0; z-index:50;">
+  <nav class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+
+    <!-- Logo (right in RTL) -->
+    <a href="/" class="shrink-0" style="text-decoration:none;">
+      <div style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.2em; color:#c9a04a; font-weight:500;">
+        RAHHAL · EST 1980 · KSA
       </div>
     </a>
 
-    <!-- Nav Links (desktop) -->
+    <!-- Desktop Nav (center) -->
     <div class="hidden md:flex items-center gap-6">
       {navLinks.map(link => (
         <a href={link.href}
-           class="text-gray-600 dark:text-gray-300 hover:text-[#e94560] transition-colors font-medium">
+           style="font-family:'Thmanyah Serif Display',serif; font-size:13px; color:#f0e6d2; text-decoration:none; letter-spacing:0.05em; transition:color 0.2s;"
+           onmouseover="this.style.color='#c9a04a'"
+           onmouseout="this.style.color='#f0e6d2'">
           {link.label}
         </a>
       ))}
     </div>
 
-    <div class="flex items-center gap-2">
-      <!-- Theme Toggle -->
-      <button id="theme-toggle"
-              class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              aria-label="تبديل الوضع">
-        <svg id="sun-icon" class="w-5 h-5 hidden dark:block text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />
-        </svg>
-        <svg id="moon-icon" class="w-5 h-5 block dark:hidden text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-        </svg>
-      </button>
+    <!-- Right side: Vol info + mobile btn -->
+    <div class="flex items-center gap-3">
+      <!-- Vol label (hidden on mobile) -->
+      <div class="hidden md:block" style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.15em; color:#c9a04a; white-space:nowrap;">
+        VOL. {vol} — ١٤٤٧ AH
+      </div>
 
       <!-- Mobile Menu Button -->
       <button id="mobile-menu-btn"
-              class="md:hidden p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              class="md:hidden p-2"
+              style="color:#c9a04a; background:none; border:none; cursor:pointer;"
               aria-label="القائمة">
-        <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        <svg id="menu-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <svg id="close-icon" class="hidden" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
     </div>
+
   </nav>
 
   <!-- Mobile Menu -->
-  <div id="mobile-menu" class="hidden md:hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-[#0f172a]">
-    <div class="px-4 py-3 space-y-2">
+  <div id="mobile-menu" class="hidden md:hidden" style="border-top:1px solid #c9a04a40; background:#1f1a14;">
+    <div class="px-4 py-4 flex flex-col gap-3">
       {navLinks.map(link => (
         <a href={link.href}
-           class="block py-2 text-gray-600 dark:text-gray-300 hover:text-[#e94560] font-medium transition-colors">
+           style="font-family:'Thmanyah Serif Display',serif; font-size:15px; color:#f0e6d2; text-decoration:none; padding:8px 0; border-bottom:1px solid #c9a04a20;">
           {link.label}
         </a>
       ))}
+      <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#c9a04a; letter-spacing:0.15em; padding-top:4px;">
+        VOL. {vol} — ١٤٤٧ AH
+      </div>
     </div>
   </div>
 </header>
 
 <script is:inline>
-  document.getElementById('theme-toggle').addEventListener('click', () => {
-    document.documentElement.classList.toggle('dark');
-    localStorage.setItem('theme',
-      document.documentElement.classList.contains('dark') ? 'dark' : 'light'
-    );
-  });
-
-  document.getElementById('mobile-menu-btn').addEventListener('click', () => {
-    document.getElementById('mobile-menu').classList.toggle('hidden');
+  const btn = document.getElementById('mobile-menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  const menuIcon = document.getElementById('menu-icon');
+  const closeIcon = document.getElementById('close-icon');
+  btn.addEventListener('click', () => {
+    menu.classList.toggle('hidden');
+    menuIcon.classList.toggle('hidden');
+    closeIcon.classList.toggle('hidden');
   });
 </script>

@@ -1,33 +1,293 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import PostCard from '../../components/PostCard.astro';
-import { getAllPosts, getExcerpt, getPostCoverImage, getPostSlug } from '../../utils/posts';
+import Timeline from '../../components/Timeline.astro';
+import { getAllPosts, getPostTaxonomy } from '../../utils/posts';
 
 const allPosts = await getAllPosts();
+
+const yearSet = new Set<number>();
+const continentCounts: Record<string, number> = {};
+for (const p of allPosts) {
+  yearSet.add(new Date(p.date).getFullYear());
+  const tx = getPostTaxonomy(p);
+  if (tx?.continent) {
+    continentCounts[tx.continent] = (continentCounts[tx.continent] || 0) + 1;
+  }
+}
+const years = Array.from(yearSet).sort((a, b) => b - a);
+const continents = Object.entries(continentCounts)
+  .sort((a, b) => b[1] - a[1])
+  .map(([name, count]) => ({ name, count }));
 ---
 
-<BaseLayout title="المدوّنة — رحّال الخبر">
-  <section class="max-w-6xl mx-auto px-4 py-12">
-    <div class="mb-10">
-      <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-3">
-        جميع <span class="text-[#e94560]">الرحلات</span>
-      </h1>
-      <p class="text-gray-500 dark:text-gray-400">
-        {allPosts.length} تدوينة من رحلات حول العالم
-      </p>
-    </div>
+<BaseLayout title="دفتر الرحلات — رحّال الخبر">
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {allPosts.map(post => (
-        <PostCard
-          title={post.title}
-          date={post.date}
-          slug={getPostSlug(post)}
-          excerpt={getExcerpt(post.content_text)}
-          image={getPostCoverImage(post)}
-          labels={post.labels}
-        />
-      ))}
+  <!-- Page Header -->
+  <section style="background:#1f1a14; padding:3rem 0 1.5rem; border-bottom:1px solid #c9a04a40;">
+    <div class="max-w-3xl mx-auto px-4">
+      <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.25em; color:#6b7d5a; margin-bottom:0.75rem;">
+        FIELD LOG · CHRONOLOGICAL
+      </div>
+      <h1 style="font-family:'Thmanyah Serif Display',serif; font-size:2.5rem; color:#f0e6d2; font-weight:700; margin-bottom:0.5rem;">
+        دفتر الرحلات
+      </h1>
+      <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#c9a04a;">
+        <span id="entries-count">{allPosts.length}</span> ENTRIES <span id="entries-filter-suffix" style="display:none; color:#c8612e;"></span>
+      </div>
     </div>
   </section>
+
+  <!-- Filter Bar -->
+  <section style="background:#1f1a14; padding:1.5rem 0; border-bottom:1px solid #c9a04a20;">
+    <div class="max-w-3xl mx-auto px-4">
+      <div class="filter-bar">
+
+        <div class="filter-row">
+          <span class="filter-label">السنة</span>
+          <div class="filter-chips" data-filter-group="year">
+            <button type="button" class="chip is-active" data-value="">الكل</button>
+            {years.map((y) => (
+              <button type="button" class="chip" data-value={String(y)}>{y}</button>
+            ))}
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <span class="filter-label">القارة</span>
+          <div class="filter-chips" data-filter-group="continent">
+            <button type="button" class="chip is-active" data-value="">الكل</button>
+            {continents.map((c) => (
+              <button type="button" class="chip" data-value={c.name}>{c.name} <span class="chip-count">{c.count}</span></button>
+            ))}
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <span class="filter-label">بحث</span>
+          <input
+            id="search-input"
+            type="search"
+            placeholder="عنوان التدوينة..."
+            class="filter-search"
+          />
+          <button type="button" id="reset-btn" class="reset-btn">إعادة ضبط</button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Timeline -->
+  <section style="background:#1f1a14; padding:2.5rem 0 3rem;">
+    <div class="max-w-3xl mx-auto px-4">
+      <Timeline posts={allPosts} filterable={true} />
+      <div id="empty-state" style="display:none; text-align:center; padding:3rem 0; font-family:'Thmanyah Serif Display',serif; color:#c9a04a80;">
+        لا توجد نتائج بهذه المرشّحات
+      </div>
+    </div>
+  </section>
+
 </BaseLayout>
+
+<style>
+  .filter-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .filter-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .filter-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #6b7d5a;
+    min-width: 3.5rem;
+  }
+  .filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    flex: 1;
+  }
+  .chip {
+    font-family: 'Thmanyah Serif Display', serif;
+    font-size: 0.78rem;
+    color: #c9a04a;
+    background: transparent;
+    border: 1px solid #c9a04a40;
+    padding: 0.3rem 0.7rem;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .chip:hover {
+    border-color: #c9a04a;
+    background: #c9a04a10;
+  }
+  .chip.is-active {
+    background: #c9a04a;
+    color: #1f1a14;
+    border-color: #c9a04a;
+  }
+  .chip.is-active .chip-count {
+    color: #1f1a14;
+    opacity: 0.7;
+  }
+  .chip-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: #6b7d5a;
+  }
+  .filter-search {
+    flex: 1;
+    min-width: 12rem;
+    background: transparent;
+    border: 1px solid #c9a04a40;
+    color: #f0e6d2;
+    padding: 0.4rem 0.7rem;
+    font-family: 'Thmanyah Serif Display', serif;
+    font-size: 0.85rem;
+    border-radius: 2px;
+    direction: rtl;
+  }
+  .filter-search:focus {
+    outline: none;
+    border-color: #c9a04a;
+  }
+  .filter-search::placeholder { color: #6b7d5a; }
+  .reset-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: #c8612e;
+    background: transparent;
+    border: 1px solid #c8612e40;
+    padding: 0.4rem 0.7rem;
+    cursor: pointer;
+    border-radius: 2px;
+    letter-spacing: 0.05em;
+    transition: all 0.15s ease;
+  }
+  .reset-btn:hover {
+    background: #c8612e15;
+    border-color: #c8612e;
+  }
+
+  @media (max-width: 640px) {
+    .filter-label { min-width: 100%; }
+    .filter-search { min-width: 0; width: 100%; }
+  }
+</style>
+
+<script>
+  const state = { year: '', continent: '', search: '' };
+
+  const entries = document.querySelectorAll<HTMLElement>('.timeline-entry');
+  const months = document.querySelectorAll<HTMLElement>('.timeline-month');
+  const yearHeaders = document.querySelectorAll<HTMLElement>('.timeline-year');
+  const countEl = document.getElementById('entries-count');
+  const suffixEl = document.getElementById('entries-filter-suffix');
+  const emptyEl = document.getElementById('empty-state');
+  const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
+  const totalEntries = entries.length;
+
+  function applyFilters() {
+    const visibleByYear = new Map<string, number>();
+    let visible = 0;
+    const search = state.search.trim().toLowerCase();
+
+    entries.forEach((el) => {
+      const year = el.dataset.year || '';
+      const continent = el.dataset.continent || '';
+      const title = el.dataset.title || '';
+      const matches =
+        (!state.year || state.year === year) &&
+        (!state.continent || state.continent === continent) &&
+        (!search || title.includes(search));
+
+      el.classList.toggle('is-hidden', !matches);
+      if (matches) {
+        visible++;
+        visibleByYear.set(year, (visibleByYear.get(year) || 0) + 1);
+      }
+    });
+
+    // Hide month headers that have no visible entries after them (until next month/year)
+    months.forEach((m) => {
+      let n = m.nextElementSibling as HTMLElement | null;
+      let hasVisible = false;
+      while (n && !n.classList.contains('timeline-month') && !n.classList.contains('timeline-year')) {
+        if (n.classList.contains('timeline-entry') && !n.classList.contains('is-hidden')) {
+          hasVisible = true;
+          break;
+        }
+        n = n.nextElementSibling as HTMLElement | null;
+      }
+      m.classList.toggle('is-hidden', !hasVisible);
+    });
+
+    // Hide year headers that have no visible entries
+    yearHeaders.forEach((y) => {
+      const year = y.dataset.year || '';
+      y.classList.toggle('is-hidden', !visibleByYear.get(year));
+    });
+
+    if (countEl) countEl.textContent = String(visible);
+    if (suffixEl) {
+      const hasFilter = state.year || state.continent || state.search;
+      if (hasFilter) {
+        suffixEl.style.display = 'inline';
+        suffixEl.textContent = `/ ${totalEntries} (مفلتر)`;
+      } else {
+        suffixEl.style.display = 'none';
+      }
+    }
+    if (emptyEl) emptyEl.style.display = visible === 0 ? 'block' : 'none';
+  }
+
+  document.querySelectorAll<HTMLElement>('.filter-chips').forEach((group) => {
+    const filterKey = group.dataset.filterGroup as 'year' | 'continent' | undefined;
+    if (!filterKey) return;
+    group.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (!target.classList.contains('chip')) return;
+      const value = target.dataset.value || '';
+      state[filterKey] = value;
+      group.querySelectorAll('.chip').forEach((c) => c.classList.toggle('is-active', c === target));
+      applyFilters();
+    });
+  });
+
+  if (searchInput) {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    searchInput.addEventListener('input', () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        state.search = searchInput.value;
+        applyFilters();
+      }, 150);
+    });
+  }
+
+  const resetBtn = document.getElementById('reset-btn');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      state.year = '';
+      state.continent = '';
+      state.search = '';
+      if (searchInput) searchInput.value = '';
+      document.querySelectorAll<HTMLElement>('.filter-chips').forEach((group) => {
+        group.querySelectorAll('.chip').forEach((c, i) => c.classList.toggle('is-active', i === 0));
+      });
+      applyFilters();
+    });
+  }
+</script>

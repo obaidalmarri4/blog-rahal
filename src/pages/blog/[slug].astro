@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getAllPosts, getPostSlug, getPostCoverImage } from '../../utils/posts';
+import { getAllPosts, getPostSlug, getPostCoverImage, getPostTaxonomy, getExcerpt } from '../../utils/posts';
 
 export async function getStaticPaths() {
   const posts = await getAllPosts();
@@ -11,79 +11,247 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
+const allPosts = await getAllPosts();
+const postIndex = allPosts.findIndex(p => getPostSlug(p) === getPostSlug(post));
+const entryNumber = allPosts.length - postIndex;
+
+const tx = getPostTaxonomy(post);
+const coverImage = getPostCoverImage(post);
+
+const readTime = Math.ceil((post.content_text?.split(/\s+/).length || 0) / 200);
 
 const formattedDate = (() => {
   try {
     const d = new Date(post.date);
-    return d.toLocaleDateString('ar-SA', {
-      year: 'numeric', month: 'long', day: 'numeric',
-      weekday: 'long'
-    });
-  } catch {
-    return post.date;
-  }
+    return d.toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' });
+  } catch { return post.date; }
 })();
 
-const coverImage = getPostCoverImage(post);
+const monoDate = (() => {
+  try {
+    const d = new Date(post.date);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  } catch { return post.date; }
+})();
+
+const countryCoords: Record<string, string> = {
+  'مالي': '14.4°N · 3.6°W',
+  'الهند': '20.6°N · 78.9°E',
+  'الصين': '35.9°N · 104.2°E',
+  'اليابان': '36.2°N · 138.3°E',
+  'تركيا': '38.9°N · 35.2°E',
+  'إيران': '32.4°N · 53.7°E',
+  'العراق': '33.2°N · 43.7°E',
+  'الأردن': '30.6°N · 36.8°E',
+  'مصر': '26.8°N · 30.8°E',
+  'المغرب': '31.8°N · 7.1°W',
+  'الجزائر': '28.0°N · 1.7°E',
+  'تونس': '33.9°N · 9.6°E',
+  'ليبيا': '26.3°N · 17.2°E',
+  'السودان': '12.9°N · 30.2°E',
+  'إثيوبيا': '9.1°N · 40.5°E',
+  'كينيا': '0.0°N · 37.9°E',
+  'تنزانيا': '6.4°S · 34.9°E',
+  'جنوب أفريقيا': '30.6°S · 22.9°E',
+  'نيجيريا': '9.1°N · 8.7°E',
+  'السنغال': '14.5°N · 14.5°W',
+  'فرنسا': '46.2°N · 2.2°E',
+  'ألمانيا': '51.2°N · 10.5°E',
+  'إيطاليا': '41.9°N · 12.6°E',
+  'إسبانيا': '40.5°N · 3.7°W',
+  'البرتغال': '39.4°N · 8.2°W',
+  'المملكة المتحدة': '55.4°N · 3.4°W',
+  'هولندا': '52.1°N · 5.3°E',
+  'سويسرا': '46.8°N · 8.2°E',
+  'اليونان': '39.1°N · 21.8°E',
+  'روسيا': '61.5°N · 105.3°E',
+  'أمريكا': '37.1°N · 95.7°W',
+  'الولايات المتحدة': '37.1°N · 95.7°W',
+  'كندا': '56.1°N · 106.3°W',
+  'البرازيل': '14.2°S · 51.9°W',
+  'الأرجنتين': '38.4°S · 63.6°W',
+  'أستراليا': '25.3°S · 133.8°E',
+  'إندونيسيا': '0.8°S · 113.9°E',
+  'ماليزيا': '4.2°N · 101.9°E',
+  'تايلاند': '15.9°N · 100.9°E',
+  'باكستان': '30.4°N · 69.3°E',
+  'الكويت': '29.3°N · 47.5°E',
+  'الإمارات': '23.4°N · 53.8°E',
+  'قطر': '25.4°N · 51.2°E',
+  'البحرين': '26.0°N · 50.6°E',
+  'عُمان': '21.5°N · 55.9°E',
+  'اليمن': '15.6°N · 48.5°E',
+  'لبنان': '33.9°N · 35.5°E',
+  'سوريا': '34.8°N · 38.9°E',
+  'فلسطين': '31.9°N · 35.2°E',
+  'أذربيجان': '40.1°N · 47.6°E',
+  'جورجيا': '42.3°N · 43.4°E',
+  'كازاخستان': '48.0°N · 66.9°E',
+  'أوزبكستان': '41.4°N · 64.6°E',
+  'موريتانيا': '20.9°N · 10.9°W',
+  'النيجر': '17.6°N · 8.1°E',
+  'تشاد': '15.5°N · 18.7°E',
+  'الكاميرون': '3.9°N · 11.5°E',
+  'الصومال': '5.2°N · 46.2°E',
+  'أوغندا': '1.4°N · 32.3°E',
+  'ناميبيا': '22.3°S · 17.9°E',
+};
+
+const txCountries = (tx?.countries || []) as string[];
+const primaryCountry = txCountries[0] || null;
+const coordsStr = primaryCountry && countryCoords[primaryCountry]
+  ? countryCoords[primaryCountry]
+  : (primaryCountry || '26.279°N · 50.208°E');
 ---
 
 <BaseLayout title={`${post.title} — رحّال الخبر`} description={post.content_text?.substring(0, 160)}>
-  <article class="max-w-4xl mx-auto px-4 py-12">
-    <!-- Back Link -->
-    <a href="/blog" class="inline-flex items-center gap-2 text-[#e94560] hover:underline mb-8 font-medium">
-      → العودة للمدوّنة
-    </a>
 
-    <!-- Cover Image -->
-    {coverImage && (
-      <div class="rounded-2xl overflow-hidden mb-8 shadow-lg">
-        <img src={coverImage} alt={post.title} class="w-full h-auto" />
+  <!-- ═══ STICKY TOP BAR ═══ -->
+  <div style="position:sticky; top:0; z-index:40; background:#1f1a14; border-bottom:1px solid #c9a04a30; padding:8px 0;">
+    <div class="max-w-5xl mx-auto px-4 flex items-center justify-between gap-4">
+      <a href="/blog"
+         style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.1em; color:#c9a04a; text-decoration:none;">
+        ← BACK / العودة
+      </a>
+      <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#f0e6d280; letter-spacing:0.1em; text-align:center;">
+        ENTRY №{entryNumber} · {monoDate}
       </div>
-    )}
-
-    <!-- Post Header -->
-    <header class="mb-10">
-      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white leading-tight mb-4">
-        {post.title}
-      </h1>
-
-      <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-        <span class="flex items-center gap-1">
-          📅 {formattedDate}
-        </span>
-        {post.image_count > 0 && (
-          <span class="flex items-center gap-1">
-            🖼️ {post.image_count} صورة
-          </span>
-        )}
-      </div>
-
-      {post.labels && post.labels.length > 0 && (
-        <div class="flex flex-wrap gap-2 mt-4">
-          {post.labels.map((label: string) => (
-            <span class="text-xs px-3 py-1 bg-[#e94560]/10 text-[#e94560] rounded-full font-medium">
-              {label}
-            </span>
-          ))}
-        </div>
-      )}
-    </header>
-
-    <!-- Divider -->
-    <hr class="border-gray-200 dark:border-gray-700 mb-10" />
-
-    <!-- Post Content -->
-    <div class="post-content text-gray-800 dark:text-gray-200" set:html={post.content_html} />
-
-    <!-- Author Footer -->
-    <div class="mt-16 p-6 bg-gray-50 dark:bg-[#1e293b] rounded-2xl border border-gray-100 dark:border-gray-700">
-      <div class="flex items-center gap-4">
-        <span class="text-4xl">🧭</span>
-        <div>
-          <p class="font-bold text-gray-900 dark:text-white">د. وائل الدغفق</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">رحّال الخبر — الحياة رحلة</p>
-        </div>
+      <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#c8612e; letter-spacing:0.08em; direction:ltr;">
+        {coordsStr}
       </div>
     </div>
-  </article>
+  </div>
+
+  <!-- ═══ PAPER SECTION ═══ -->
+  <div style="background:#f0e6d2; color:#2a2218;">
+
+    <!-- ─── TITLE BLOCK ─── -->
+    <div style="max-width:1024px; margin:0 auto; padding:3rem 1.5rem 2rem;">
+      <div class="grid md:grid-cols-3 gap-8 items-start">
+
+        <!-- Left 2/3: Category + Title + Meta -->
+        <div class="md:col-span-2">
+          {tx && (
+            <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.25em; color:#c8612e; margin-bottom:1rem;">
+              {tx.continent ? tx.continent.toUpperCase() : ''}{tx.continent && txCountries.length ? ' · ' : ''}{txCountries.join(' + ')}
+            </div>
+          )}
+
+          <h1 style="font-family:'Thmanyah Serif Display',serif; font-size:clamp(2rem,5vw,3.5rem); line-height:1.2; color:#1f1a14; font-weight:700; margin-bottom:1.25rem;">
+            {post.title}
+          </h1>
+
+          <p style="font-family:'Thmanyah Serif Display',serif; font-weight:700; font-size:1.15rem; color:#3a3028; line-height:1.7; margin-bottom:1.5rem;">
+            {getExcerpt(post.content_text, 200)}
+          </p>
+
+          <!-- Meta row -->
+          <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#6b7d5a; letter-spacing:0.1em; border-top:1px solid #c9a04a60; padding-top:1rem; direction:ltr;">
+            {monoDate} · {readTime} MIN READ · {post.image_count} PHOTOS
+          </div>
+        </div>
+
+        <!-- Right 1/3: Mini Map Card -->
+        <div style="border:1px solid #c9a04a; padding:1.25rem; background:#e8dcc4;">
+          <!-- Concentric circles SVG -->
+          <div style="text-align:center; margin-bottom:1rem;">
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="none" style="overflow:visible;">
+              <circle cx="50" cy="50" r="45" stroke="#c9a04a" stroke-width="0.7" opacity="0.5"/>
+              <circle cx="50" cy="50" r="35" stroke="#c9a04a" stroke-width="0.6" opacity="0.5"/>
+              <circle cx="50" cy="50" r="25" stroke="#c9a04a" stroke-width="0.5" opacity="0.6"/>
+              <circle cx="50" cy="50" r="15" stroke="#c9a04a" stroke-width="0.5" opacity="0.7"/>
+              <circle cx="50" cy="50" r="5" stroke="#c9a04a" stroke-width="0.8"/>
+              <circle cx="50" cy="50" r="2.5" fill="#c8612e"/>
+              <line x1="50" y1="2" x2="50" y2="12" stroke="#c9a04a" stroke-width="0.8"/>
+              <line x1="98" y1="50" x2="88" y2="50" stroke="#c9a04a" stroke-width="0.8"/>
+              <line x1="50" y1="98" x2="50" y2="88" stroke="#c9a04a" stroke-width="0.8"/>
+              <line x1="2" y1="50" x2="12" y2="50" stroke="#c9a04a" stroke-width="0.8"/>
+            </svg>
+          </div>
+          <!-- Data rows -->
+          <div style="font-family:'JetBrains Mono',monospace; font-size:9px; color:#3a3028;">
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #c9a04a40; padding:4px 0;">
+              <span style="color:#6b7d5a; letter-spacing:0.1em;">COORDS</span>
+              <span style="color:#c8612e; direction:ltr;">{coordsStr}</span>
+            </div>
+            {txCountries.length > 0 && (
+              <div style="display:flex; justify-content:space-between; border-bottom:1px solid #c9a04a40; padding:4px 0;">
+                <span style="color:#6b7d5a; letter-spacing:0.1em;">SITE</span>
+                <span>{txCountries.join(' + ')}</span>
+              </div>
+            )}
+            {tx?.continent && (
+              <div style="display:flex; justify-content:space-between; border-bottom:1px solid #c9a04a40; padding:4px 0;">
+                <span style="color:#6b7d5a; letter-spacing:0.1em;">REGION</span>
+                <span>{tx.continent}</span>
+              </div>
+            )}
+            <div style="display:flex; justify-content:space-between; padding:4px 0;">
+              <span style="color:#6b7d5a; letter-spacing:0.1em;">ENTRY</span>
+              <span>№{entryNumber}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ─── HERO FIGURE ─── -->
+    {coverImage && (
+      <figure style="margin:0 0 0 0; position:relative;">
+        <img src={coverImage}
+             alt={post.title}
+             style="width:100%; max-height:520px; object-fit:cover; display:block; aspect-ratio:21/9;"
+             loading="eager" />
+        <!-- Rotation stamp -->
+        <div style="position:absolute; bottom:16px; right:24px; border:1px solid #f0e6d2; padding:5px 10px; transform:rotate(1.5deg); background:rgba(42,34,24,0.7);">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:9px; color:#f0e6d2; letter-spacing:0.12em;">
+            FIG. 01 — {monoDate}
+          </div>
+        </div>
+        <figcaption style="font-family:'JetBrains Mono',monospace; font-size:9px; color:#6b7d5a; letter-spacing:0.12em; padding:8px 24px; border-bottom:1px solid #c9a04a30;">
+          FIG. 01 — {post.title} · {monoDate}
+        </figcaption>
+      </figure>
+    )}
+
+    <!-- ─── ARTICLE BODY ─── -->
+    <div style="max-width:1024px; margin:0 auto; padding:2.5rem 1.5rem 4rem;">
+      <div style="display:grid; grid-template-columns:1fr 56px; gap:2rem; direction:rtl;">
+
+        <!-- Prose -->
+        <div>
+          <div class="post-content" id="post-content-body" set:html={post.content_html} />
+        </div>
+
+        <!-- Margin column with § markers -->
+        <div style="display:flex; flex-direction:column; gap:2rem; padding-top:0.5rem; direction:ltr; align-items:center;">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:14px; color:#c8612e; opacity:0.6;">§</span>
+          <span style="font-family:'JetBrains Mono',monospace; font-size:14px; color:#c8612e; opacity:0.4;">§</span>
+          <span style="font-family:'JetBrains Mono',monospace; font-size:14px; color:#c8612e; opacity:0.3;">§</span>
+          <div style="width:1px; flex:1; background:linear-gradient(to bottom, #c9a04a40, transparent);"></div>
+        </div>
+
+      </div>
+
+      <!-- End marker -->
+      <div style="text-align:center; margin-top:3rem; padding-top:2rem; border-top:1px solid #c9a04a40;">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.25em; color:#c9a04a;">
+          END · انتهى · ENTRY №{entryNumber}
+        </div>
+      </div>
+
+      <!-- Author block -->
+      <div style="margin-top:2rem; padding:1.5rem; border:1px solid #c9a04a; background:#e8dcc4; display:flex; align-items:center; gap:1.25rem;">
+        <div>
+          <div style="font-family:'Thmanyah Serif Display',serif; font-size:1.1rem; font-weight:700; color:#1f1a14;">د. وائل الدغفق</div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.15em; color:#6b7d5a; margin-top:4px;">
+            RAHHAL · الخبر · 26.279°N · 50.208°E
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
 </BaseLayout>

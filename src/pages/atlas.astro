@@ -1,0 +1,605 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import {
+  UNVISITED_ISO,
+  UNVISITED_TERRITORIES,
+  CONTINENT_STATS,
+  MIDNIGHT_THEME as T,
+} from '../data/atlas';
+---
+
+<BaseLayout title="خريطة الرحّال · Atlas of Rahhal">
+  <div class="rh-atlas">
+
+    <main class="rh-main">
+      <!-- Right rail (visually-right in RTL): Title + Stats + Continents -->
+      <aside class="rh-rail rh-rail-title">
+        <div class="rh-title-block">
+          <div class="rh-eyebrow">
+            <span class="rh-eyebrow-line"></span>
+            <span>ATLAS ROUTES · مسارات الأطلس</span>
+            <span class="rh-eyebrow-line"></span>
+          </div>
+          <h1 class="rh-title">خريطة الرحّال</h1>
+          <div class="rh-subtitle-en">AN ATLAS OF ONE HUNDRED &amp; EIGHTY</div>
+          <p class="rh-deck">
+            ستٌّ وعشرون سنة من السفر، موثّقةً على كرةٍ تدور ببطء.
+            كلّ بقعةٍ ذهبيّةٍ أرضٌ وطئتها قدمُه؛ وما تبقّى ـ هو ما لم يُكتب بعد.
+          </p>
+        </div>
+
+        <div class="rh-bignums">
+          <div class="rh-stat-big">
+            <div class="rh-stat-val rh-stat-val-xl">١٨٠</div>
+            <div class="rh-stat-label">دولة زارها</div>
+            <div class="rh-stat-sub">180 COUNTRIES</div>
+          </div>
+          <div class="rh-bignum-divider"></div>
+          <div class="rh-stat-big">
+            <div class="rh-stat-val">٦</div>
+            <div class="rh-stat-label">قارّات</div>
+            <div class="rh-stat-sub">6 CONTINENTS</div>
+          </div>
+          <div class="rh-bignum-divider"></div>
+          <div class="rh-stat-big">
+            <div class="rh-stat-val">٢٦</div>
+            <div class="rh-stat-label">عامًا</div>
+            <div class="rh-stat-sub">26 YEARS · EST 2000</div>
+          </div>
+        </div>
+
+        <div class="rh-section-head">
+          <span>التوزيع القارّي</span>
+          <span class="rh-section-en">BY CONTINENT</span>
+        </div>
+        <div class="rh-cont-list">
+          {CONTINENT_STATS.map((r) => {
+            const pct = Math.min(100, (r.count / 50) * 100);
+            return (
+              <div class="rh-cont-row">
+                <div class="rh-cont-head">
+                  <span class="rh-cont-glyph">{r.glyph}</span>
+                  <span class="rh-cont-name">{r.ar}</span>
+                  <span class="rh-cont-en">{r.en}</span>
+                  <span class="rh-cont-count">{r.count}</span>
+                </div>
+                <div class="rh-cont-bar">
+                  <div class="rh-cont-bar-fill" style={`width:${pct}%`}></div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </aside>
+
+      <!-- Center: globe + overlays -->
+      <div class="rh-center">
+        <div id="rh-globe" class="rh-globe"></div>
+
+        <div class="rh-compass" aria-hidden="true">
+          <span class="rh-compass-glyph">✦</span>
+          <span>N</span>
+        </div>
+
+        <div class="rh-legend">
+          <div class="rh-legend-row">
+            <span class="rh-swatch" style={`background:${T.visited}`}></span>
+            <span class="rh-legend-label">دولة زارها</span>
+            <span class="rh-legend-en">VISITED</span>
+          </div>
+          <div class="rh-legend-row">
+            <span class="rh-swatch" style={`background:${T.unvisited}`}></span>
+            <span class="rh-legend-label">دولة لم تُزَر</span>
+            <span class="rh-legend-en">YET TO VISIT</span>
+          </div>
+        </div>
+
+        <div class="rh-marginalia" aria-hidden="true">
+          <div>"الحياةُ رحلةٌ، والكلُّ مرتحلٌ وراحلٌ عنها."</div>
+          <div class="rh-marg-en">— DR. WAEL AL-DAGHFAQ</div>
+        </div>
+
+        <div id="rh-hover-card" class="rh-hover" aria-live="polite">
+          <div id="rh-hover-status" class="rh-hover-status"></div>
+          <div id="rh-hover-ar" class="rh-hover-ar"></div>
+          <div id="rh-hover-en" class="rh-hover-en"></div>
+          <div id="rh-hover-iso" class="rh-hover-iso"></div>
+        </div>
+      </div>
+
+      <!-- Left rail (visually-left in RTL): Unvisited + Archive -->
+      <aside class="rh-rail rh-rail-unvisited">
+        <div class="rh-unvisited">
+          <div class="rh-section-head">
+            <span>الدول التي لم تُزَر بعد</span>
+            <span class="rh-section-en">YET TO VISIT · {Object.keys(UNVISITED_ISO).length}</span>
+          </div>
+          <ul class="rh-uv-list">
+            {Object.entries(UNVISITED_ISO).map(([iso, c]) => (
+              <li class="rh-uv-item" data-rh-iso={iso}>
+                <span class="rh-uv-dot"></span>
+                <span class="rh-uv-ar">{c.ar}</span>
+                <span class="rh-uv-en">{c.en}</span>
+                <span class="rh-uv-iso">{iso}</span>
+              </li>
+            ))}
+          </ul>
+          <div class="rh-uv-foot">
+            <span>وجزرٌ متفرّقة</span>
+            <span class="rh-uv-foot-list">
+              {UNVISITED_TERRITORIES.map((t) => t.ar).join(' · ')}
+            </span>
+          </div>
+        </div>
+
+        <div class="rh-archive">
+          <div class="rh-section-head">
+            <span>من الأرشيف</span>
+            <span class="rh-section-en">FROM THE ARCHIVE</span>
+          </div>
+          <ul class="rh-archive-list">
+            <li><span class="rh-arch-num">٧٦</span><span>تدوينة من آسيا</span></li>
+            <li><span class="rh-arch-num">٧٤</span><span>تدوينة من الشرق الأوسط</span></li>
+            <li><span class="rh-arch-num">٣٨</span><span>تدوينة من أفريقيا</span></li>
+            <li><span class="rh-arch-num">٩٣</span><span>مقالة أخرى</span></li>
+          </ul>
+        </div>
+      </aside>
+    </main>
+  </div>
+</BaseLayout>
+
+<style define:vars={{
+  bg: T.bg,
+  ocean: T.ocean,
+  visited: T.visited,
+  unvisited: T.unvisited,
+  text: T.text,
+  textMuted: T.textMuted,
+  accent: T.accent,
+  border: T.border,
+  panel: T.panel,
+}}>
+  /* override body bg for this page */
+  :global(body:has(.rh-atlas)) {
+    background: var(--bg) !important;
+    color: var(--text) !important;
+  }
+
+  .rh-atlas {
+    min-height: calc(100vh - 60px);
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Reem Kufi', sans-serif;
+  }
+
+  .rh-main {
+    display: grid;
+    grid-template-columns: minmax(240px, 280px) minmax(380px, 1fr) minmax(260px, 300px);
+    gap: 0;
+    min-height: calc(100vh - 60px);
+    min-block-size: 0;
+  }
+
+  .rh-rail {
+    padding: 28px 24px;
+    border-inline-start: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+    min-block-size: 0;
+  }
+  .rh-rail-title {
+    border-inline-start: none;
+    border-inline-end: 1px solid var(--border);
+  }
+
+  /* Title block */
+  .rh-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-block-end: 18px;
+  }
+  .rh-eyebrow-line {
+    flex: 1;
+    height: 1px;
+    background: var(--accent);
+    opacity: 0.6;
+  }
+  .rh-title {
+    font-family: 'Amiri', serif;
+    font-weight: 700;
+    font-size: 64px;
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    margin: 0 0 8px;
+  }
+  .rh-subtitle-en {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 18px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--textMuted);
+    margin-block-end: 16px;
+  }
+  .rh-deck {
+    font-family: 'Amiri', serif;
+    font-size: 15px;
+    line-height: 1.85;
+    color: var(--text);
+    margin: 0;
+  }
+
+  /* Big stats */
+  .rh-bignums {
+    display: grid;
+    grid-template-columns: 1.4fr auto 1fr auto 1fr;
+    align-items: center;
+    gap: 16px;
+    padding: 22px 0;
+    border-block: 1px solid var(--border);
+  }
+  .rh-stat-big {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .rh-stat-val {
+    font-family: 'Amiri', serif;
+    font-weight: 700;
+    font-size: 44px;
+    line-height: 0.9;
+    color: var(--accent);
+  }
+  .rh-stat-val-xl {
+    font-size: 64px;
+  }
+  .rh-stat-label {
+    font-family: 'Reem Kufi', sans-serif;
+    font-size: 12px;
+    color: var(--text);
+  }
+  .rh-stat-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--textMuted);
+  }
+  .rh-bignum-divider {
+    inline-size: 1px;
+    block-size: 60%;
+    background: var(--border);
+  }
+
+  /* Section head */
+  .rh-section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-block-end: 12px;
+    border-block-end: 1px solid var(--border);
+    margin-block-start: 4px;
+    color: var(--textMuted);
+  }
+  .rh-section-head > span:first-child {
+    font-family: 'Reem Kufi', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+  .rh-section-en {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  /* Continent rows */
+  .rh-cont-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .rh-cont-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .rh-cont-head {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .rh-cont-glyph { color: var(--accent); font-size: 12px; }
+  .rh-cont-name { font-family: 'Reem Kufi', sans-serif; font-size: 13px; color: var(--text); }
+  .rh-cont-en { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 12px; color: var(--textMuted); }
+  .rh-cont-count { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500; color: var(--accent); }
+  .rh-cont-bar { height: 2px; background: var(--border); position: relative; overflow: hidden; }
+  .rh-cont-bar-fill { height: 100%; background: var(--accent); transition: width 0.6s cubic-bezier(.2,.7,.2,1); }
+
+  /* Center / Globe */
+  .rh-center {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+    min-block-size: 600px;
+  }
+  .rh-globe {
+    position: absolute;
+    inset: 0;
+    cursor: grab;
+  }
+  .rh-globe:active { cursor: grabbing; }
+
+  .rh-compass {
+    position: absolute;
+    inset-block-start: 18px;
+    inset-inline-start: 18px;
+    padding: 8px 12px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(8px) saturate(140%);
+    -webkit-backdrop-filter: blur(8px) saturate(140%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--textMuted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    z-index: 2;
+  }
+  .rh-compass-glyph {
+    color: var(--accent);
+    animation: rh-spin 32s linear infinite;
+    display: inline-block;
+  }
+  @keyframes rh-spin { to { transform: rotate(360deg); } }
+
+  .rh-legend {
+    position: absolute;
+    inset-block-start: 18px;
+    inset-inline-end: 18px;
+    padding: 10px 14px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(8px) saturate(140%);
+    -webkit-backdrop-filter: blur(8px) saturate(140%);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 2;
+  }
+  .rh-legend-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .rh-swatch {
+    inline-size: 11px;
+    block-size: 11px;
+    border: 1px solid var(--border);
+  }
+  .rh-legend-label {
+    font-family: 'Reem Kufi', sans-serif;
+    font-size: 12px;
+    color: var(--text);
+  }
+  .rh-legend-en {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--textMuted);
+    margin-inline-start: auto;
+  }
+
+  .rh-marginalia {
+    position: absolute;
+    inset-block-end: 24px;
+    inset-inline-start: 24px;
+    max-inline-size: 240px;
+    font-family: 'Amiri', serif;
+    font-style: italic;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--textMuted);
+    pointer-events: none;
+    z-index: 2;
+  }
+  .rh-marg-en {
+    margin-block-start: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-style: normal;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .rh-hover {
+    position: absolute;
+    inset-block-end: 24px;
+    inset-inline-start: 50%;
+    transform: translateX(-50%) translateY(8px);
+    min-inline-size: 220px;
+    padding: 14px 18px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(8px) saturate(140%);
+    -webkit-backdrop-filter: blur(8px) saturate(140%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    text-align: center;
+    z-index: 3;
+  }
+  .rh-hover-status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-block-end: 4px;
+  }
+  .rh-hover-ar {
+    font-family: 'Amiri', serif;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 1.1;
+    color: var(--text);
+    margin-block-end: 4px;
+  }
+  .rh-hover-en {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--textMuted);
+    margin-block-end: 6px;
+  }
+  .rh-hover-iso {
+    display: inline-block;
+    padding: 2px 6px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+  }
+
+  /* Unvisited list */
+  .rh-unvisited { display: flex; flex-direction: column; }
+  .rh-uv-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .rh-uv-item {
+    display: grid;
+    grid-template-columns: 10px 1fr auto;
+    grid-template-rows: auto auto;
+    column-gap: 10px;
+    row-gap: 2px;
+    align-items: center;
+    padding: 11px 4px;
+    padding-inline-start: 4px;
+    border-block-end: 1px dashed var(--border);
+    cursor: pointer;
+    transition: padding 0.2s, background 0.2s;
+  }
+  .rh-uv-item:hover, .rh-uv-item-hot {
+    background: rgba(212, 184, 122, 0.04);
+    padding-inline-start: 8px;
+  }
+  .rh-uv-dot {
+    grid-row: span 2;
+    inline-size: 10px;
+    block-size: 10px;
+    background: var(--unvisited);
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+  }
+  .rh-uv-ar { font-family: 'Amiri', serif; font-weight: 700; font-size: 17px; color: var(--text); }
+  .rh-uv-en { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 12px; color: var(--textMuted); }
+  .rh-uv-iso {
+    grid-row: span 2;
+    padding: 2px 6px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+  }
+  .rh-uv-foot {
+    padding-block-start: 14px;
+    margin-block-start: 10px;
+    border-block-start: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: var(--textMuted);
+  }
+  .rh-uv-foot > span:first-child {
+    font-family: 'Reem Kufi', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+  .rh-uv-foot-list {
+    font-family: 'Amiri', serif;
+    font-style: italic;
+    font-size: 13px;
+  }
+
+  /* Archive */
+  .rh-archive { margin-block-start: 24px; }
+  .rh-archive-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .rh-archive-list li {
+    display: grid;
+    grid-template-columns: 50px 1fr;
+    align-items: baseline;
+    gap: 12px;
+    padding: 10px 0;
+    border-block-end: 1px dashed var(--border);
+  }
+  .rh-arch-num {
+    font-family: 'Amiri', serif;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .rh-archive-list li > span:last-child {
+    font-family: 'Reem Kufi', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  /* Responsive: stack on tablets/phones */
+  @media (max-width: 960px) {
+    .rh-main {
+      grid-template-columns: 1fr;
+    }
+    .rh-rail {
+      border: none;
+      border-block-start: 1px solid var(--border);
+    }
+    .rh-rail-title { order: 1; border-block-start: none; }
+    .rh-center { order: 2; min-block-size: 60vh; }
+    .rh-rail-unvisited { order: 3; }
+    .rh-compass, .rh-marginalia { display: none; }
+    .rh-title { font-size: 44px; }
+    .rh-stat-val-xl { font-size: 48px; }
+    .rh-stat-val { font-size: 32px; }
+    .rh-bignums {
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+    }
+  }
+</style>
+
+<script>
+  import { initAtlas } from '../scripts/atlas';
+
+  const el = document.getElementById('rh-globe');
+  if (el) initAtlas(el);
+</script>
+

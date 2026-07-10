@@ -1,81 +1,551 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PostCard from '../components/PostCard.astro';
+import Timeline from '../components/Timeline.astro';
 import { getAllPosts, getExcerpt, getPostCoverImage, getPostSlug } from '../utils/posts';
 
 const allPosts = await getAllPosts();
-const latestPosts = allPosts.slice(0, 9);
+const featuredPost = allPosts[0];
+const logPosts = allPosts.slice(1, 11);
+
+const quotes = [
+  {
+    text: 'سافر لتعرف، وتأمل لتشكر، وعد لتُحدّث بما رأيت من جمالِ اللهِ في أرضه.',
+    source: 'من رحلة الصين الخامسة',
+    slug: '2025-10-1447',
+  },
+  {
+    text: 'حين تسافر بعين الفطرة، ترى العالم كما خلقه الله.',
+    source: 'النمط الترحالي',
+    slug: '2024-12-blog-post',
+  },
+  {
+    text: 'اخترتُ السفر سبيلًا لفهم الحياة، لا من خلال الكتب فقط، بل من أفواه الناس وتقاليدهم وأعراسهم وأحزانهم.',
+    source: 'خواطر ترحالية',
+    slug: '2022-06-blog-post_10',
+  },
+  {
+    text: 'كلُّ رحلةٍ نقوم بها ليست مجرد انتقالٍ من مكانٍ إلى آخر، بل هي انتقالٌ في الزمنِ وفي فهمِنا للعالم.',
+    source: 'من بنما — جسر العالم',
+    slug: '2024-08-2011',
+  },
+  {
+    text: 'إذا أردتَ أن تسافرَ دون أن تهرب، فاجعلْ وجهتَكَ إلى حيث تتنفّسُ الأرضُ بسلام.',
+    source: 'من جزر الآزور',
+    slug: '2022-07-1443',
+  },
+  {
+    text: 'الرَّحّالُ الخبيرُ من عرفَ كيف يرى ويسمعُ ويلمسُ ويحسُّ بما حوله، ثم يوثِّقُهُ على شكلٍ أدبيٍّ بديع.',
+    source: 'خواطر ترحالية',
+    slug: '2022-06-blog-post_10',
+  },
+];
+
+function getReadTime(text: string): number {
+  return Math.ceil((text?.split(/\s+/).length || 0) / 200);
+}
+
+function formatMonoDate(dateStr: string): string {
+  try {
+    const d = new Date(dateStr);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  } catch { return dateStr; }
+}
 ---
 
-<BaseLayout title="رحّال الخبر — مدوّنة السفر والتوثيق الحضاري">
-  <!-- Hero Section -->
-  <section class="relative bg-gradient-to-br from-[#0f3460] via-[#1a1a2e] to-[#16213e] text-white py-24 overflow-hidden">
-    <div class="absolute inset-0 opacity-10">
-      <div class="absolute top-10 right-20 text-9xl">🌍</div>
-      <div class="absolute bottom-10 left-20 text-8xl">✈️</div>
-      <div class="absolute top-1/2 left-1/2 text-7xl">🏔️</div>
-    </div>
-    <div class="max-w-4xl mx-auto px-4 text-center relative z-10">
-      <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-        رحّال <span class="text-[#e94560]">الخبر</span>
-      </h1>
-      <p class="text-xl md:text-2xl text-gray-300 mb-4 leading-relaxed">
-        الحياة رحلة ، والكل مرتحل وراحل عنها
-      </p>
-      <p class="text-gray-400 text-lg">
-        د. وائل بن عبدالعزيز الدغفق — توثيق رحلات عبر أكثر من <span class="font-num">175</span> دولة
-      </p>
-      <div class="mt-8 flex justify-center gap-4">
-        <a href="/blog" class="px-8 py-3 bg-[#e94560] hover:bg-[#d63851] text-white rounded-full font-medium transition-colors">
-          تصفح الرحلات
-        </a>
-        <a href="/about" class="px-8 py-3 border border-white/30 hover:bg-white/10 text-white rounded-full font-medium transition-colors">
-          عن الرحّال
-        </a>
-      </div>
-    </div>
-  </section>
+<BaseLayout title="رحّال الخبر — مُذَكِّراتُ رَحّال">
 
-  <!-- Stats -->
-  <section class="max-w-4xl mx-auto px-4 -mt-8 relative z-20">
-    <div class="grid grid-cols-3 gap-4">
-      <div class="bg-white dark:bg-[#1e293b] rounded-2xl p-6 text-center shadow-lg border border-gray-100 dark:border-gray-700">
-        <p class="text-3xl font-bold text-[#e94560] font-num">{allPosts.length}+</p>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">تدوينة</p>
-      </div>
-      <div class="bg-white dark:bg-[#1e293b] rounded-2xl p-6 text-center shadow-lg border border-gray-100 dark:border-gray-700">
-        <p class="text-3xl font-bold text-[#0f3460] dark:text-blue-400 font-num">175+</p>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">دولة</p>
-      </div>
-      <div class="bg-white dark:bg-[#1e293b] rounded-2xl p-6 text-center shadow-lg border border-gray-100 dark:border-gray-700">
-        <p class="text-3xl font-bold text-[#533483] dark:text-purple-400 font-num">40+</p>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">سنة ترحال</p>
-      </div>
-    </div>
-  </section>
+  <!-- ═══ HERO ═══ -->
+  <section class="hero-section">
+    <div class="hero-bg" aria-hidden="true"></div>
 
-  <!-- Latest Posts -->
-  <section class="max-w-6xl mx-auto px-4 py-16">
-    <div class="flex items-center justify-between mb-10">
-      <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
-        آخر <span class="text-[#e94560]">الرحلات</span>
-      </h2>
-      <a href="/blog" class="text-[#e94560] hover:underline font-medium">
-        عرض الكل ←
+    <!-- Floating quote decorations (ambient — all 6 scattered around hero) -->
+    {quotes.map((q, i) => (
+      <a href={`/blog/${q.slug}/`} class={`floating-quote fq-${i + 1}`} aria-label={q.source}>
+        <span class="fq-mark">❝</span>
+        <span class="fq-text">{q.text}</span>
       </a>
-    </div>
+    ))}
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {latestPosts.map(post => (
-        <PostCard
-          title={post.title}
-          date={post.date}
-          slug={getPostSlug(post)}
-          excerpt={getExcerpt(post.content_text)}
-          image={getPostCoverImage(post)}
-          labels={post.labels}
-        />
-      ))}
+    <div class="max-w-6xl mx-auto px-4 relative z-10 w-full py-16 md:py-24">
+      <div class="hero-grid">
+
+        <!-- Portrait (left in RTL flow = ltr-end) -->
+        <div class="hero-portrait-wrap">
+          <div class="portrait-frame">
+            <img src="/images/rahhal-portrait.png" alt="د. وائل بن عبدالعزيز الدغفق — رحّال الخبر" class="portrait-img" />
+            <div class="portrait-corner tl"></div>
+            <div class="portrait-corner tr"></div>
+            <div class="portrait-corner bl"></div>
+            <div class="portrait-corner br"></div>
+          </div>
+          <div class="portrait-stamp">
+            <span class="stamp-line">✦ ATLAS · FIELD AGENT</span>
+            <span class="stamp-line stamp-coords">26.279°N · 50.208°E</span>
+          </div>
+        </div>
+
+        <!-- Text side -->
+        <div class="hero-text">
+          <div class="hero-eyebrow">
+            ✦ FIELD JOURNAL · مُذَكِّراتُ رَحّال
+          </div>
+
+          <h1 class="hero-title">
+            رحّـالُ <span style="color:#c8612e;">الخُبر</span>
+          </h1>
+
+          <p class="hero-tagline">
+            الحياةُ رحلة ، والكلُّ مرتحلٌ وراحلٌ عنها
+          </p>
+
+          <div class="hero-divider"></div>
+
+          <div class="hero-agent">
+            <div class="agent-label">FIELD AGENT</div>
+            <div class="agent-name">د. وائل بن عبدالعزيز الدغفق</div>
+            <div class="agent-location">الخبر — المملكة العربية السعودية</div>
+            <div class="agent-coords">EST. ١٤٠٠هـ / 1980 — VOL. 47</div>
+          </div>
+
+          <div class="hero-cta">
+            <a href="/blog" class="cta-primary">تصفّح دفتر الرحلات ←</a>
+            <a href="/atlas" class="cta-secondary">خريطة الرحّال</a>
+          </div>
+        </div>
+
+      </div>
     </div>
   </section>
+
+  <!-- ═══ STATS (Ticket Stubs) ═══ -->
+  <section class="max-w-5xl mx-auto px-4 py-12">
+    <div class="grid grid-cols-3 gap-4 md:gap-6">
+
+      <!-- Stub 1: Posts -->
+      <div class="relative" style="border:1px dashed #c8612e; padding:1.25rem 1rem; text-align:center;">
+        <div class="absolute" style="width:14px; height:14px; border-radius:50%; background:#1f1a14; border:1px dashed #c8612e; top:-7px; right:-7px;"></div>
+        <div class="absolute" style="width:14px; height:14px; border-radius:50%; background:#1f1a14; border:1px dashed #c8612e; bottom:-7px; right:-7px;"></div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.2em; color:#c8612e; margin-bottom:0.5rem;">ENTRIES · تدوينات</div>
+        <div style="font-family:'Thmanyah Serif Display',serif; font-size:3rem; line-height:1; color:#f0e6d2; font-weight:700;">{allPosts.length}</div>
+        <div style="font-family:'Thmanyah Serif Display',serif; font-size:0.75rem; color:#c9a04a; margin-top:0.25rem;">تدوينة</div>
+      </div>
+
+      <!-- Stub 2: Countries -->
+      <div class="relative" style="border:1px dashed #c9a04a; padding:1.25rem 1rem; text-align:center;">
+        <div class="absolute" style="width:14px; height:14px; border-radius:50%; background:#1f1a14; border:1px dashed #c9a04a; top:-7px; right:-7px;"></div>
+        <div class="absolute" style="width:14px; height:14px; border-radius:50%; background:#1f1a14; border:1px dashed #c9a04a; bottom:-7px; right:-7px;"></div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.2em; color:#c9a04a; margin-bottom:0.5rem;">NATIONS · دول</div>
+        <div style="font-family:'Thmanyah Serif Display',serif; font-size:3rem; line-height:1; color:#f0e6d2; font-weight:700;">175+</div>
+        <div style="font-family:'Thmanyah Serif Display',serif; font-size:0.75rem; color:#c9a04a; margin-top:0.25rem;">دولة</div>
+      </div>
+
+      <!-- Stub 3: Years -->
+      <div class="relative" style="border:1px dashed #6b7d5a; padding:1.25rem 1rem; text-align:center;">
+        <div class="absolute" style="width:14px; height:14px; border-radius:50%; background:#1f1a14; border:1px dashed #6b7d5a; top:-7px; right:-7px;"></div>
+        <div class="absolute" style="width:14px; height:14px; border-radius:50%; background:#1f1a14; border:1px dashed #6b7d5a; bottom:-7px; right:-7px;"></div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.2em; color:#6b7d5a; margin-bottom:0.5rem;">YEARS · سنوات</div>
+        <div style="font-family:'Thmanyah Serif Display',serif; font-size:3rem; line-height:1; color:#f0e6d2; font-weight:700;">40+</div>
+        <div style="font-family:'Thmanyah Serif Display',serif; font-size:0.75rem; color:#c9a04a; margin-top:0.25rem;">سنة ترحال</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══ FEATURED ENTRY ═══ -->
+  <section style="background:#f0e6d2; color:#2a2218; padding:4rem 0;">
+    <div class="max-w-5xl mx-auto px-4">
+
+      <!-- Section label -->
+      <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.25em; color:#3a5566; margin-bottom:2rem; border-bottom:1px solid #c9a04a; padding-bottom:0.75rem;">
+        ✦ FEATURED ENTRY · أبرز التدوينات
+      </div>
+
+      {featuredPost && (
+        <div class="grid md:grid-cols-2 gap-8 items-center">
+          <!-- Map/Image side -->
+          <div class="relative">
+            {getPostCoverImage(featuredPost) ? (
+              <img
+                src={getPostCoverImage(featuredPost)}
+                alt={featuredPost.title}
+                style="width:100%; aspect-ratio:4/3; object-fit:cover; display:block;"
+                loading="lazy"
+              />
+            ) : (
+              <!-- Topographic placeholder -->
+              <div style="width:100%; aspect-ratio:4/3; background:#e8dcc4; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center;">
+                <svg width="100%" height="100%" viewBox="0 0 400 300" style="position:absolute; inset:0; opacity:0.4;">
+                  <ellipse cx="200" cy="150" rx="180" ry="130" fill="none" stroke="#c9a04a" stroke-width="1"/>
+                  <ellipse cx="200" cy="150" rx="150" ry="105" fill="none" stroke="#c9a04a" stroke-width="0.8"/>
+                  <ellipse cx="200" cy="150" rx="120" ry="80" fill="none" stroke="#c9a04a" stroke-width="0.7"/>
+                  <ellipse cx="200" cy="150" rx="90" ry="58" fill="none" stroke="#c9a04a" stroke-width="0.6"/>
+                  <ellipse cx="200" cy="150" rx="60" ry="36" fill="none" stroke="#c9a04a" stroke-width="0.5"/>
+                  <ellipse cx="200" cy="150" rx="30" ry="18" fill="none" stroke="#c9a04a" stroke-width="0.4"/>
+                  <circle cx="200" cy="150" r="5" fill="#c8612e" opacity="0.8"/>
+                </svg>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#c9a04a; text-align:center; position:relative; z-index:1;">
+                  TOPOGRAPHIC MAP
+                </div>
+              </div>
+            )}
+            <!-- Rotation stamp -->
+            <div style="position:absolute; bottom:12px; left:12px; border:1px solid #c9a04a; padding:4px 8px; transform:rotate(-2deg); background:#f0e6d2cc;">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:9px; color:#c9a04a; letter-spacing:0.1em;">ATLAS · {new Date(featuredPost.date).getFullYear()}</div>
+            </div>
+          </div>
+
+          <!-- Article info -->
+          <div>
+            {featuredPost.labels && featuredPost.labels.length > 0 && (
+              <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.2em; color:#c8612e; margin-bottom:1rem;">
+                {featuredPost.labels[0].toUpperCase()}
+              </div>
+            )}
+            <h2 style="font-family:'Thmanyah Serif Display',serif; font-size:2rem; line-height:1.3; color:#1f1a14; margin-bottom:1rem; font-weight:700;">
+              {featuredPost.title}
+            </h2>
+            <p style="font-family:'Thmanyah Serif Display',serif; font-weight:700; font-size:1.05rem; color:#3a3028; line-height:1.7; margin-bottom:1.5rem;">
+              {getExcerpt(featuredPost.content_text, 180)}
+            </p>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#6b7d5a; letter-spacing:0.1em; margin-bottom:1.5rem;">
+              {formatMonoDate(featuredPost.date)} · {getReadTime(featuredPost.content_text)} دقيقة قراءة · {featuredPost.image_count} صورة
+            </div>
+            <a href={`/blog/${getPostSlug(featuredPost)}/`}
+               style="display:inline-block; background:#1f1a14; color:#f0e6d2; font-family:'Thmanyah Serif Display',serif; font-size:0.9rem; padding:10px 24px; text-decoration:none; border:1px solid #c9a04a; transition:background 0.2s;">
+              قراءة التدوينة
+            </a>
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- ═══ FIELD LOG (Timeline) ═══ -->
+  <section style="background:#1f1a14; padding:4rem 0;">
+    <div class="max-w-3xl mx-auto px-4">
+
+      <!-- Section header -->
+      <div class="mb-8" style="border-bottom:1px solid #c9a04a40; padding-bottom:1rem;">
+        <div style="font-family:'Thmanyah Serif Display',serif; font-size:1.5rem; color:#f0e6d2; font-weight:700;">✦ دفتر الرحلات</div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.2em; color:#6b7d5a; margin-top:4px;">FIELD LOG · CHRONOLOGICAL · أحدث {logPosts.length}</div>
+      </div>
+
+      <Timeline posts={logPosts} />
+
+      <!-- Archive link -->
+      <div style="text-align:center; margin-top:2.5rem;">
+        <a href="/blog"
+           style="display:inline-block; border:1px dashed #c9a04a; color:#c9a04a; font-family:'Thmanyah Serif Display',serif; font-size:0.9rem; padding:10px 28px; text-decoration:none; transition:background 0.2s;"
+           onmouseover="this.style.background='#c9a04a15'"
+           onmouseout="this.style.background='transparent'">
+          عرض الأرشيف الكامل ←
+        </a>
+      </div>
+
+    </div>
+  </section>
+
 </BaseLayout>
+
+<style>
+  /* ═══ HERO ═══ */
+  .hero-section {
+    position: relative;
+    background: #1f1a14;
+    min-height: 85vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 30%, #c9a04a08, transparent 50%),
+      radial-gradient(circle at 80% 70%, #c8612e08, transparent 50%);
+    pointer-events: none;
+  }
+  /* Make the hero content wrapper transparent to pointer events,
+     so floating quotes underneath remain hoverable in empty areas.
+     Interactive elements re-enable pointer-events explicitly below. */
+  .hero-section > .max-w-6xl,
+  .hero-grid,
+  .hero-portrait-wrap,
+  .hero-text,
+  .hero-eyebrow,
+  .hero-title,
+  .hero-tagline,
+  .hero-divider,
+  .hero-agent,
+  .hero-cta {
+    pointer-events: none;
+  }
+  .portrait-frame,
+  .portrait-img,
+  .cta-primary,
+  .cta-secondary {
+    pointer-events: auto;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+  @media (min-width: 880px) {
+    .hero-grid {
+      grid-template-columns: 380px 1fr;
+      gap: 4rem;
+    }
+  }
+
+  .hero-portrait-wrap {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  .portrait-frame {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+    aspect-ratio: 1;
+    padding: 12px;
+    background: #1f1a14;
+    border: 1px solid #c9a04a40;
+  }
+  .portrait-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: sepia(0.15) saturate(0.95) contrast(1.05);
+  }
+  .portrait-corner {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 1px solid #c9a04a;
+  }
+  .portrait-corner.tl { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+  .portrait-corner.tr { top: -1px; right: -1px; border-left: none; border-bottom: none; }
+  .portrait-corner.bl { bottom: -1px; left: -1px; border-right: none; border-top: none; }
+  .portrait-corner.br { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+  .portrait-stamp {
+    text-align: center;
+    border-top: 1px dashed #c9a04a40;
+    padding-top: 0.85rem;
+    width: 100%;
+    max-width: 360px;
+  }
+  .stamp-line {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: #6b7d5a;
+    margin-bottom: 4px;
+  }
+  .stamp-coords { color: #c8612e; }
+
+  .hero-text { text-align: right; }
+  .hero-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: #c9a04a;
+    margin-bottom: 1.25rem;
+  }
+  .hero-title {
+    font-family: 'Thmanyah Serif Display', serif;
+    font-size: clamp(56px, 9vw, 96px);
+    line-height: 1;
+    color: #f0e6d2;
+    margin: 0 0 1.5rem;
+  }
+  .hero-tagline {
+    font-family: 'Thmanyah Serif Display', serif;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: #c9a04a;
+    line-height: 1.7;
+    margin: 0 0 1.5rem;
+  }
+  .hero-divider {
+    width: 60px;
+    height: 1px;
+    background: linear-gradient(to left, transparent, #c9a04a, transparent);
+    margin: 0 0 1.5rem auto;
+  }
+  .hero-agent { margin-bottom: 1.75rem; }
+  .agent-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    color: #6b7d5a;
+    margin-bottom: 0.45rem;
+  }
+  .agent-name {
+    font-family: 'Thmanyah Serif Display', serif;
+    font-size: 1.1rem;
+    color: #f0e6d2;
+    margin-bottom: 0.25rem;
+  }
+  .agent-location {
+    font-family: 'Thmanyah Serif Display', serif;
+    font-size: 0.9rem;
+    color: #c9a04a;
+    margin-bottom: 0.45rem;
+  }
+  .agent-coords {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: #c8612e;
+    letter-spacing: 0.1em;
+  }
+  .hero-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: flex-start;
+  }
+  .cta-primary, .cta-secondary {
+    font-family: 'Thmanyah Serif Display', serif;
+    font-size: 0.95rem;
+    padding: 0.6rem 1.4rem;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: all 0.15s ease;
+  }
+  .cta-primary {
+    background: #c9a04a;
+    color: #1f1a14;
+    border: 1px solid #c9a04a;
+  }
+  .cta-primary:hover { background: #d6ae5a; }
+  .cta-secondary {
+    background: transparent;
+    color: #c9a04a;
+    border: 1px solid #c9a04a;
+  }
+  .cta-secondary:hover { background: #c9a04a15; }
+
+  /* ═══ FLOATING QUOTES (ambient background decorations) ═══ */
+  .floating-quote {
+    position: absolute;
+    display: block;
+    max-width: 280px;
+    padding: 10px 14px;
+    font-family: 'Thmanyah Serif Display', serif;
+    font-style: italic;
+    line-height: 1.6;
+    color: #f0e6d2;
+    opacity: 0.18;
+    text-decoration: none;
+    z-index: 1;
+    transition: opacity 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+    pointer-events: auto;
+    border: 1px dashed transparent;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .floating-quote::after {
+    content: 'اذهب للمدوّنة ←';
+    position: absolute;
+    bottom: -10px;
+    inset-inline-end: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: #c9a04a;
+    background: #1f1a14;
+    padding: 2px 8px;
+    border: 1px solid #c9a04a;
+    border-radius: 2px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+  }
+  .floating-quote:hover {
+    opacity: 0.95;
+    background: #c9a04a0a;
+    border-color: #c9a04a40;
+  }
+  .floating-quote:hover::after {
+    opacity: 1;
+  }
+  .floating-quote .fq-mark {
+    display: inline-block;
+    font-size: 1.6em;
+    color: #c8612e;
+    margin-left: 0.2rem;
+    vertical-align: -0.15em;
+    line-height: 0;
+  }
+  .floating-quote .fq-text {
+    display: inline;
+  }
+
+  /* All 6 quotes scattered around the hero */
+  .fq-1 {
+    /* top-right (above portrait) */
+    top: 4%; right: 3%;
+    max-width: 250px;
+    font-size: 1.0rem;
+    transform: rotate(-2deg);
+    text-align: right;
+  }
+  .fq-2 {
+    /* top-left */
+    top: 5%; left: 3%;
+    max-width: 260px;
+    font-size: 1.0rem;
+    transform: rotate(1.5deg);
+    text-align: left;
+  }
+  .fq-3 {
+    /* far-left middle */
+    top: 42%; left: 2%;
+    max-width: 230px;
+    font-size: 0.95rem;
+    transform: rotate(-3deg);
+    text-align: left;
+  }
+  .fq-4 {
+    /* bottom-left */
+    bottom: 5%; left: 4%;
+    max-width: 260px;
+    font-size: 1.0rem;
+    transform: rotate(-1.5deg);
+    text-align: left;
+  }
+  .fq-5 {
+    /* bottom-center */
+    bottom: 4%; left: 32%;
+    max-width: 270px;
+    font-size: 1.0rem;
+    transform: rotate(2deg);
+    text-align: left;
+  }
+  .fq-6 {
+    /* bottom-right (below portrait) */
+    bottom: 6%; right: 3%;
+    max-width: 250px;
+    font-size: 0.95rem;
+    transform: rotate(-2deg);
+    text-align: right;
+  }
+
+  @media (max-width: 880px) {
+    .floating-quote { display: none; }
+  }
+
+  @media (max-width: 879px) {
+    .hero-text { text-align: center; }
+    .hero-divider { margin: 0 auto 1.5rem; }
+    .hero-cta { justify-content: center; }
+  }
+</style>

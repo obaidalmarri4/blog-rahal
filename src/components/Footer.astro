@@ -2,17 +2,24 @@
 const year = new Date().getFullYear();
 ---
 
-<footer class="bg-gray-50 dark:bg-[#0b1120] border-t border-gray-200 dark:border-gray-800 mt-16">
-  <div class="max-w-6xl mx-auto px-4 py-8 text-center">
-    <p class="text-2xl mb-2">🧭</p>
-    <p class="text-gray-600 dark:text-gray-400 text-sm">
-      رحّال الخبر — د. وائل بن عبدالعزيز الدغفق
-    </p>
-    <p class="text-gray-400 dark:text-gray-500 text-xs mt-2">
+<footer style="background:#0f0c08; border-top:2px solid #c9a04a;">
+  <div class="max-w-6xl mx-auto px-4 py-10 text-center">
+    <!-- Amiri Wordmark -->
+    <div style="font-family:'Thmanyah Serif Display',serif; font-size:2rem; font-weight:700; color:#f0e6d2; margin-bottom:0.5rem; letter-spacing:0.02em;">
+      رحّـالُ <span style="color:#c8612e;">الخُبر</span>
+    </div>
+
+    <!-- Tagline -->
+    <p style="font-family:'Thmanyah Serif Display',serif; font-weight:700; font-size:1rem; color:#c9a04a; margin-bottom:1.5rem;">
       الحياة رحلة ، والكل مرتحل وراحل عنها
     </p>
-    <p class="text-gray-400 dark:text-gray-600 text-xs mt-4">
-      © {year} جميع الحقوق محفوظة
+
+    <!-- Ochre line -->
+    <div style="width:60px; height:1px; background:#c9a04a; margin:0 auto 1.5rem;"></div>
+
+    <!-- Copyright -->
+    <p style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.15em; color:#6b7d5a;">
+      &copy; {year} &middot; DR. WAEL AL-DAGHFAQ &middot; ALL ROUTES RESERVED
     </p>
   </div>
 </footer>
