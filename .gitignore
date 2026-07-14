@@ -23,8 +23,9 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
-# Images (hosted on Blogger/Google CDN)
-public/images/
+# Images (hosted on Blogger/Google CDN) — site assets like the portrait are re-included
+public/images/*
+!public/images/rahhal-portrait.png
 .vercel
 
 # Claude Code agent tooling and scratch state (worktrees, plans, skills)
