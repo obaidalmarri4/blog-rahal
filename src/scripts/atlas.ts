@@ -2,7 +2,7 @@ import Globe from 'globe.gl';
 import * as topojson from 'topojson-client';
 import { UNVISITED_ISO, AR_NAMES, NUM_TO_A3, MIDNIGHT_THEME } from '../data/atlas';
 
-type GeoFeature = {
+export type GeoFeature = {
   id?: string | number;
   geometry: { type: string; coordinates: any };
   properties: {
@@ -13,6 +13,12 @@ type GeoFeature = {
   };
 };
 
+export type CountryPayload = {
+  ar: string;
+  url: string;
+  posts: { t: string; s: string; d: string; i: string }[];
+};
+
 const theme = MIDNIGHT_THEME;
 
 function flatten(c: any): [number, number][] {
@@ -21,15 +27,55 @@ function flatten(c: any): [number, number][] {
   return c.flatMap(flatten);
 }
 
-export function initAtlas(containerEl: HTMLElement) {
+let featuresPromise: Promise<GeoFeature[]> | null = null;
+
+export function loadCountryFeatures(): Promise<GeoFeature[]> {
+  if (!featuresPromise) {
+    featuresPromise = fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+      .then((r) => r.json())
+      .then((topo: any) => {
+        const collection = (topojson as any).feature(topo, topo.objects.countries) as any;
+        const features = collection.features as GeoFeature[];
+        features.forEach((f) => {
+          let alpha3 = NUM_TO_A3[String(f.id)] || '';
+          f.properties = f.properties || {};
+          // الخريطة تعرض فلسطين موحّدة: مضلّع ISR في topojson يُصنَّف فلسطين
+          if (alpha3 === 'ISR') {
+            alpha3 = 'PSE';
+            f.properties.name = 'Palestine';
+          }
+          f.properties.ISO_A3 = alpha3;
+          f.properties.ADMIN = f.properties.name || f.properties.ADMIN;
+          f.properties.NAME = f.properties.name;
+        });
+        return features;
+      });
+  }
+  return featuresPromise;
+}
+
+export function initAtlas(
+  containerEl: HTMLElement,
+  countryData: Record<string, CountryPayload> = {}
+) {
   const hoverCard = document.getElementById('rh-hover-card');
   const hoverStatus = document.getElementById('rh-hover-status');
   const hoverAr = document.getElementById('rh-hover-ar');
   const hoverEn = document.getElementById('rh-hover-en');
   const hoverIso = document.getElementById('rh-hover-iso');
 
+  const panel = document.getElementById('rh-country-panel');
+  const panelStatus = document.getElementById('rh-popup-status');
+  const panelAr = document.getElementById('rh-popup-ar');
+  const panelCount = document.getElementById('rh-popup-count');
+  const panelClose = document.getElementById('rh-popup-close');
+  const panelList = document.getElementById('rh-popup-list');
+  const panelMore = document.getElementById('rh-popup-more') as HTMLAnchorElement | null;
+  const panelEmpty = document.getElementById('rh-popup-empty');
+
   let hovered: GeoFeature | null = null;
   let focusIso: string | null = null;
+  let selectedIso: string | null = null;
   let features: GeoFeature[] = [];
 
   const world: any = (Globe as any)()(containerEl);
@@ -74,6 +120,7 @@ export function initAtlas(containerEl: HTMLElement) {
       .polygonCapColor((d: GeoFeature) => {
         const iso = d.properties.ISO_A3 || '';
         if (UNVISITED_ISO[iso]) return theme.unvisited;
+        if (selectedIso && iso === selectedIso) return theme.visitedHover;
         if (focusIso && iso === focusIso) return theme.visitedHover;
         if (hovered && d === hovered) return theme.visitedHover;
         return theme.visited;
@@ -85,11 +132,23 @@ export function initAtlas(containerEl: HTMLElement) {
       })
       .polygonAltitude((d: GeoFeature) => {
         const iso = d.properties.ISO_A3 || '';
+        if (selectedIso && iso === selectedIso) return 0.04;
         if (focusIso && iso === focusIso) return 0.04;
         if (UNVISITED_ISO[iso]) return 0.004;
         return 0.009;
       })
       .polygonStrokeColor(() => theme.stroke);
+  };
+
+  const flyTo = (iso: string, altitude = 1.6) => {
+    const target = features.find((d) => d.properties.ISO_A3 === iso);
+    if (!target) return;
+    const coords = flatten(target.geometry.coordinates);
+    if (!coords.length) return;
+    let lng = 0, lat = 0;
+    coords.forEach(([x, y]) => { lng += x; lat += y; });
+    lng /= coords.length; lat /= coords.length;
+    world.pointOfView({ lat, lng, altitude }, 1200);
   };
 
   const updateHoverCard = (p: GeoFeature | null) => {
@@ -119,26 +178,145 @@ export function initAtlas(containerEl: HTMLElement) {
     hoverCard.style.transform = 'translateX(-50%) translateY(0)';
   };
 
+  const dateFmt = new Intl.DateTimeFormat('ar', { year: 'numeric', month: 'long' });
+
+  const openPopup = (p: GeoFeature) => {
+    if (!panel) return;
+    const iso = p.properties.ISO_A3 || '';
+    if (!iso) return;
+    const payload = countryData[iso];
+    const unvisited = UNVISITED_ISO[iso];
+
+    const ar = unvisited?.ar || payload?.ar || AR_NAMES[iso] || p.properties.ADMIN || iso;
+    if (panelAr) panelAr.textContent = ar;
+    if (panelList) panelList.innerHTML = '';
+
+    if (unvisited) {
+      if (panelStatus) {
+        panelStatus.textContent = '◇ لم تُزَر بعد';
+        panelStatus.style.color = '#c97070';
+      }
+      if (panelCount) panelCount.textContent = '';
+      if (panelEmpty) {
+        panelEmpty.textContent = 'لم يزرها الرحّال بعد — الحكاية لم تُكتب.';
+        panelEmpty.hidden = false;
+      }
+      if (panelList) panelList.hidden = true;
+      if (panelMore) panelMore.hidden = true;
+    } else if (payload && payload.posts.length > 0) {
+      if (panelStatus) {
+        panelStatus.textContent = '◆ من دفتر الرحلات';
+        panelStatus.style.color = theme.accent;
+      }
+      if (panelCount) {
+        const n = payload.posts.length;
+        panelCount.textContent = n === 1 ? 'تدوينة واحدة' : n === 2 ? 'تدوينتان' : `${n} تدوينات`;
+      }
+      if (panelEmpty) panelEmpty.hidden = true;
+      if (panelList) {
+        panelList.hidden = false;
+        payload.posts.forEach((post) => {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.href = `/blog/${post.s}/`;
+
+          if (post.i) {
+            const img = document.createElement('img');
+            img.className = 'rh-popup-post-img';
+            img.src = post.i;
+            img.alt = '';
+            img.loading = 'lazy';
+            img.addEventListener('error', () => {
+              const ph = document.createElement('span');
+              ph.className = 'rh-popup-post-img rh-popup-post-noimg';
+              ph.textContent = '✦';
+              img.replaceWith(ph);
+            });
+            a.appendChild(img);
+          } else {
+            const ph = document.createElement('span');
+            ph.className = 'rh-popup-post-img rh-popup-post-noimg';
+            ph.textContent = '✦';
+            a.appendChild(ph);
+          }
+
+          const text = document.createElement('span');
+          text.className = 'rh-popup-post-text';
+          const title = document.createElement('span');
+          title.className = 'rh-popup-post-title';
+          title.textContent = post.t;
+          const date = document.createElement('span');
+          date.className = 'rh-popup-post-date';
+          const parsed = new Date(post.d);
+          date.textContent = isNaN(parsed.getTime()) ? post.d : dateFmt.format(parsed);
+          text.append(title, date);
+          a.appendChild(text);
+          li.appendChild(a);
+          panelList.appendChild(li);
+        });
+        panelList.scrollTop = 0;
+      }
+      if (panelMore) {
+        panelMore.hidden = !payload.url;
+        if (payload.url) panelMore.href = payload.url;
+      }
+    } else {
+      if (panelStatus) {
+        panelStatus.textContent = '◆ زارها الرحّال';
+        panelStatus.style.color = theme.accent;
+      }
+      if (panelCount) panelCount.textContent = '';
+      if (panelEmpty) {
+        panelEmpty.textContent = 'لا توجد تدوينات عن هذه الوجهة بعد.';
+        panelEmpty.hidden = false;
+      }
+      if (panelList) panelList.hidden = true;
+      if (panelMore) panelMore.hidden = true;
+    }
+
+    panel.hidden = false;
+    selectedIso = iso;
+    applyPolygons();
+    flyTo(iso);
+    ctrls.autoRotate = false;
+    updateHoverCard(null);
+  };
+
+  const closePopup = () => {
+    if (!panel || panel.hidden) return;
+    panel.hidden = true;
+    selectedIso = null;
+    applyPolygons();
+    ctrls.autoRotate = true;
+  };
+
+  panelClose?.addEventListener('click', closePopup);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closePopup();
+  });
+
   // Load countries
-  fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
-    .then((r) => r.json())
-    .then((topo: any) => {
-      const collection = (topojson as any).feature(topo, topo.objects.countries) as any;
-      features = collection.features as GeoFeature[];
-      features.forEach((f) => {
-        const alpha3 = NUM_TO_A3[String(f.id)] || '';
-        f.properties = f.properties || {};
-        f.properties.ISO_A3 = alpha3;
-        f.properties.ADMIN = f.properties.name || f.properties.ADMIN;
-        f.properties.NAME = f.properties.name;
-      });
+  loadCountryFeatures()
+    .then((feats) => {
+      features = feats;
       world.polygonsData(features);
       applyPolygons();
       world.onPolygonHover((p: GeoFeature | null) => {
         hovered = p;
         document.body.style.cursor = p ? 'crosshair' : 'default';
         applyPolygons();
-        updateHoverCard(p);
+        if (!selectedIso) updateHoverCard(p);
+      });
+      let lastPolygonClick = 0;
+      world.onPolygonClick((p: GeoFeature | null) => {
+        lastPolygonClick = performance.now();
+        if (p) openPopup(p);
+        else closePopup();
+      });
+      // ocean click closes the panel; guard in case both events fire for one click
+      world.onGlobeClick(() => {
+        if (performance.now() - lastPolygonClick < 50) return;
+        closePopup();
       });
     })
     .catch((err) => console.error('[atlas] geojson load failed', err));
@@ -150,14 +328,7 @@ export function initAtlas(containerEl: HTMLElement) {
       focusIso = iso;
       el.classList.add('rh-uv-item-hot');
       applyPolygons();
-      const target = features.find((d) => d.properties.ISO_A3 === iso);
-      if (!target) return;
-      const coords = flatten(target.geometry.coordinates);
-      if (!coords.length) return;
-      let lng = 0, lat = 0;
-      coords.forEach(([x, y]) => { lng += x; lat += y; });
-      lng /= coords.length; lat /= coords.length;
-      world.pointOfView({ lat, lng, altitude: 1.6 }, 1200);
+      flyTo(iso);
     });
     el.addEventListener('mouseleave', () => {
       focusIso = null;

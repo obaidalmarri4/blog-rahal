@@ -4,8 +4,52 @@ import {
   UNVISITED_ISO,
   UNVISITED_TERRITORIES,
   CONTINENT_STATS,
+  ISO_TO_TAXONOMY,
   MIDNIGHT_THEME as T,
 } from '../data/atlas';
+import { getAllPosts, getPostTaxonomy, getPostSlug } from '../utils/posts';
+import taxonomyData from '../data/taxonomy.json';
+
+type CountryPayload = {
+  ar: string;
+  url: string;
+  posts: { t: string; s: string; d: string; i: string }[];
+};
+
+const taxonomy = taxonomyData as {
+  continents: Record<string, { emoji: string; slug: string }>;
+  countries: Record<string, { slug: string; continent: string }>;
+};
+
+const allPosts = await getAllPosts();
+const COUNTRY_POSTS: Record<string, CountryPayload> = {};
+for (const [iso, arName] of Object.entries(ISO_TO_TAXONOMY)) {
+  const meta = taxonomy.countries[arName];
+  if (!meta) continue;
+  const continentSlug = taxonomy.continents[meta.continent]?.slug;
+  const countryPosts = allPosts.filter((post) => {
+    const tx = getPostTaxonomy(post);
+    return tx?.type === 'travel' && (tx.countries || []).includes(arName);
+  });
+  // صفحة الدولة تُبنى فقط إذا وُجدت تدوينة قارتها الأساسية = قارة الدولة
+  // (نفس شرط getStaticPaths في destinations/[continent]/[country].astro)
+  const hasPage = countryPosts.some(
+    (post) => getPostTaxonomy(post)?.continent === meta.continent
+  );
+  COUNTRY_POSTS[iso] = {
+    ar: arName,
+    url: hasPage && continentSlug ? `/destinations/${continentSlug}/${meta.slug}/` : '',
+    posts: countryPosts.map((post) => {
+      const raw = post.images?.[0]?.thumbnail_url || post.images?.[0]?.original_url || '';
+      // صور Google/Blogger: نطلب نسخة 160px مربعة بدل الحجم الكامل
+      let thumb = raw;
+      if (/\/s\d+(-c)?\//.test(thumb)) thumb = thumb.replace(/\/s\d+(-c)?\//, '/s160-c/');
+      else if (/=s\d+[^/]*$/.test(thumb)) thumb = thumb.replace(/=s\d+[^/]*$/, '=s160-c');
+      else if (/googleusercontent\.com|ggpht\.com/.test(thumb)) thumb += '=s160-c';
+      return { t: post.title, s: getPostSlug(post), d: post.date, i: thumb };
+    }),
+  };
+}
 ---
 
 <BaseLayout title="خريطة الرحّال · Atlas of Rahhal">
@@ -104,6 +148,20 @@ import {
           <div id="rh-hover-ar" class="rh-hover-ar"></div>
           <div id="rh-hover-en" class="rh-hover-en"></div>
           <div id="rh-hover-iso" class="rh-hover-iso"></div>
+        </div>
+
+        <div id="rh-country-panel" class="rh-popup" hidden>
+          <div class="rh-popup-head">
+            <div class="rh-popup-head-text">
+              <div id="rh-popup-status" class="rh-popup-status"></div>
+              <div id="rh-popup-ar" class="rh-popup-ar"></div>
+              <div id="rh-popup-count" class="rh-popup-count"></div>
+            </div>
+            <button id="rh-popup-close" class="rh-popup-close" type="button" aria-label="إغلاق">✕</button>
+          </div>
+          <ul id="rh-popup-list" class="rh-popup-list"></ul>
+          <div id="rh-popup-empty" class="rh-popup-empty" hidden></div>
+          <a id="rh-popup-more" class="rh-popup-more" hidden>كل التدوينات عن هذه الوجهة ←</a>
         </div>
       </div>
 
@@ -574,6 +632,151 @@ import {
     color: var(--text);
   }
 
+  /* Country popup panel */
+  .rh-popup {
+    position: absolute;
+    inset-inline-end: 18px;
+    inset-block-start: 50%;
+    transform: translateY(-50%);
+    inline-size: min(330px, calc(100% - 36px));
+    max-block-size: 70%;
+    display: flex;
+    flex-direction: column;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(8px) saturate(140%);
+    -webkit-backdrop-filter: blur(8px) saturate(140%);
+    z-index: 4;
+  }
+  .rh-popup[hidden] { display: none; }
+  .rh-popup-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 16px 12px;
+    border-block-end: 1px solid var(--border);
+  }
+  .rh-popup-head-text { flex: 1; min-inline-size: 0; }
+  .rh-popup-status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-block-end: 4px;
+  }
+  .rh-popup-ar {
+    font-family: 'Thmanyah Serif Display', serif;
+    font-weight: 700;
+    font-size: 22px;
+    line-height: 1.2;
+    color: var(--text);
+  }
+  .rh-popup-count {
+    font-family: 'Thmanyah Serif Display', serif;
+    font-size: 11px;
+    color: var(--textMuted);
+    margin-block-start: 2px;
+  }
+  .rh-popup-close {
+    flex: none;
+    inline-size: 26px;
+    block-size: 26px;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--textMuted);
+    font-size: 11px;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .rh-popup-close:hover {
+    color: var(--text);
+    border-color: var(--accent);
+  }
+  .rh-popup-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    min-block-size: 0;
+  }
+  /* عناصر القائمة تُنشأ بالجافاسكربت — يلزمها :global لأن تنسيقات Astro مقيّدة النطاق */
+  .rh-popup-list :global(li) {
+    border-block-end: 1px dashed var(--border);
+  }
+  .rh-popup-list :global(li:last-child) { border-block-end: none; }
+  .rh-popup-list :global(a) {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .rh-popup-list :global(a:hover) {
+    background: rgba(212, 184, 122, 0.06);
+  }
+  .rh-popup-list :global(.rh-popup-post-img) {
+    flex: none;
+    inline-size: 44px;
+    block-size: 44px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    background: rgba(212, 184, 122, 0.05);
+  }
+  .rh-popup-list :global(.rh-popup-post-noimg) {
+    display: grid;
+    place-items: center;
+    color: var(--accent);
+    font-size: 14px;
+    opacity: 0.6;
+  }
+  .rh-popup-list :global(.rh-popup-post-text) {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-inline-size: 0;
+  }
+  .rh-popup-list :global(.rh-popup-post-title) {
+    font-family: 'Thmanyah Serif Display', serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .rh-popup-list :global(.rh-popup-post-date) {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+    color: var(--textMuted);
+  }
+  .rh-popup-empty {
+    padding: 18px 16px;
+    font-family: 'Thmanyah Serif Display', serif;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--textMuted);
+  }
+  .rh-popup-more {
+    display: block;
+    padding: 11px 16px;
+    border-block-start: 1px solid var(--border);
+    font-family: 'Thmanyah Serif Display', serif;
+    font-size: 13px;
+    color: var(--accent);
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .rh-popup-more:hover {
+    background: rgba(212, 184, 122, 0.06);
+  }
+  .rh-popup-more[hidden], .rh-popup-empty[hidden] { display: none; }
+
   /* Responsive: stack on tablets/phones */
   @media (max-width: 960px) {
     .rh-main {
@@ -593,13 +796,33 @@ import {
     .rh-bignums {
       grid-template-columns: 1fr auto 1fr auto 1fr;
     }
+    .rh-popup {
+      inset-inline: 12px;
+      inset-inline-end: 12px;
+      inset-block-end: 12px;
+      inset-block-start: auto;
+      transform: none;
+      inline-size: auto;
+      max-block-size: 45%;
+    }
   }
 </style>
+
+<script type="application/json" id="rh-country-data" set:html={JSON.stringify(COUNTRY_POSTS).replace(/</g, '\\u003c')} />
 
 <script>
   import { initAtlas } from '../scripts/atlas';
 
   const el = document.getElementById('rh-globe');
-  if (el) initAtlas(el);
+  if (el) {
+    const dataEl = document.getElementById('rh-country-data');
+    let countryData = {};
+    try {
+      countryData = JSON.parse(dataEl?.textContent || '{}');
+    } catch (e) {
+      console.error('[atlas] country data parse failed', e);
+    }
+    initAtlas(el, countryData);
+  }
 </script>
 

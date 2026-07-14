@@ -109,8 +109,19 @@ function formatMonoDate(dateStr: string): string {
 
           <div class="hero-cta">
             <a href="/blog" class="cta-primary">تصفّح دفتر الرحلات ←</a>
-            <a href="/atlas" class="cta-secondary">خريطة الرحّال</a>
           </div>
+        </div>
+
+        <!-- Globe frame (far left in RTL — mirror of the portrait) -->
+        <div class="hero-globe-wrap">
+          <a href="/atlas" class="globe-frame" aria-label="خريطة الرحّال — استكشف الأطلس">
+            <div id="rh-mini-globe" class="globe-frame-canvas" aria-hidden="true"></div>
+            <div class="portrait-corner tl"></div>
+            <div class="portrait-corner tr"></div>
+            <div class="portrait-corner bl"></div>
+            <div class="portrait-corner br"></div>
+          </a>
+          <a href="/atlas" class="globe-cta">استكشف الخريطة ←</a>
         </div>
 
       </div>
@@ -247,7 +258,90 @@ function formatMonoDate(dateStr: string): string {
 
 </BaseLayout>
 
+<script>
+  const miniGlobeEl = document.getElementById('rh-mini-globe');
+  if (miniGlobeEl) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        io.disconnect();
+        import('../scripts/miniGlobe').then(({ initMiniGlobe }) => initMiniGlobe(miniGlobeEl));
+      }
+    }, { rootMargin: '200px' });
+    io.observe(miniGlobeEl);
+  }
+</script>
+
 <style>
+  /* ═══ HERO GLOBE FRAME (mirror of the portrait, far-left) ═══ */
+  .hero-globe-wrap {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  .globe-frame {
+    position: relative;
+    display: block;
+    width: 100%;
+    max-width: 360px;
+    aspect-ratio: 1;
+    padding: 12px;
+    background: #1f1a14;
+    border: 1px solid #c9a04a40;
+    transition: border-color 0.25s;
+  }
+  .globe-frame:hover {
+    border-color: #c9a04a;
+  }
+  .globe-frame-canvas {
+    width: 100%;
+    height: 100%;
+    background: #0a0e1a;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .globe-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 360px;
+    min-height: 56px;
+    box-sizing: border-box;
+    text-align: center;
+    font-family: 'Thmanyah Serif Display', serif;
+    font-size: 0.95rem;
+    padding: 0 1.4rem;
+    text-decoration: none;
+    border-radius: 2px;
+    background: transparent;
+    color: #c9a04a;
+    border: 1px solid #c9a04a;
+    transition: all 0.15s ease;
+  }
+  .globe-cta:hover { background: #c9a04a15; }
+  @media (max-width: 1199px) and (min-width: 880px) {
+    .hero-globe-wrap { display: none; }
+  }
+  .mini-globe-badge {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    padding: 8px 20px;
+    background: rgba(15, 20, 36, 0.7);
+    border: 1px solid rgba(212, 184, 122, 0.3);
+    backdrop-filter: blur(8px) saturate(140%);
+    -webkit-backdrop-filter: blur(8px) saturate(140%);
+    font-family: 'Thmanyah Serif Display', serif;
+    font-size: 0.9rem;
+    color: #f0e6d2;
+    opacity: 0.75;
+    transition: opacity 0.25s, transform 0.25s, border-color 0.25s;
+    white-space: nowrap;
+  }
+
   /* ═══ HERO ═══ */
   .hero-section {
     position: relative;
@@ -283,7 +377,9 @@ function formatMonoDate(dateStr: string): string {
   .portrait-frame,
   .portrait-img,
   .cta-primary,
-  .cta-secondary {
+  .cta-secondary,
+  .globe-frame,
+  .globe-cta {
     pointer-events: auto;
   }
   .hero-grid {
@@ -296,6 +392,13 @@ function formatMonoDate(dateStr: string): string {
     .hero-grid {
       grid-template-columns: 380px 1fr;
       gap: 4rem;
+    }
+  }
+  @media (min-width: 1200px) {
+    .hero-grid {
+      /* الصورة يمين · النص وسط · الكرة يسار */
+      grid-template-columns: 360px 1fr 360px;
+      gap: 3rem;
     }
   }
 
@@ -339,6 +442,8 @@ function formatMonoDate(dateStr: string): string {
     padding-top: 0.85rem;
     width: 100%;
     max-width: 360px;
+    min-height: 56px;
+    box-sizing: border-box;
   }
   .stamp-line {
     display: block;
