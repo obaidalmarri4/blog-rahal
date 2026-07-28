@@ -21,5 +21,76 @@ const year = new Date().getFullYear();
     <p style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.15em; color:#6b7d5a;">
       &copy; {year} &middot; DR. WAEL AL-DAGHFAQ &middot; ALL ROUTES RESERVED
     </p>
+
+    <!-- Developer credit -->
+    <div class="rh-dev">
+      <div class="rh-dev-label">تصميم وتطوير &middot; DEVELOPED BY</div>
+      <div class="rh-dev-name">عبيد المري</div>
+      <div class="rh-dev-links">
+        <a href="https://x.com/iiice7g" target="_blank" rel="noopener noreferrer">
+          <span aria-hidden="true">𝕏</span> iiice7g
+        </a>
+        <span class="rh-dev-sep" aria-hidden="true">&middot;</span>
+        <a href="mailto:iice7g@gmail.com">iice7g@gmail.com</a>
+        <span class="rh-dev-sep" aria-hidden="true">&middot;</span>
+        <a href="tel:+966583461122" dir="ltr">+966 58 346 1122</a>
+      </div>
+    </div>
   </div>
 </footer>
+
+<style>
+  .rh-dev {
+    margin-top: 1.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px dashed rgba(201, 160, 74, 0.25);
+  }
+  .rh-dev-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: #6b7d5a;
+    margin-bottom: 0.4rem;
+  }
+  .rh-dev-name {
+    font-family: 'Thmanyah Serif Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #c9a04a;
+    margin-bottom: 0.5rem;
+  }
+  .rh-dev-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+  }
+  .rh-dev-links a {
+    color: #8a8475;
+    text-decoration: none;
+    padding: 2px 0;
+    border-bottom: 1px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .rh-dev-links a:hover {
+    color: #c9a04a;
+    border-bottom-color: #c9a04a;
+  }
+  .rh-dev-sep {
+    color: #6b7d5a;
+    opacity: 0.5;
+  }
+  @media (max-width: 520px) {
+    .rh-dev-links {
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .rh-dev-sep {
+      display: none;
+    }
+  }
+</style>

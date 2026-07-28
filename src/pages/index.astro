@@ -125,6 +125,54 @@ function formatMonoDate(dateStr: string): string {
         </div>
 
       </div>
+
+      <!-- ═══ PREFACE (مقدّمة المدوّنة) — أسفل الهيرو، بعرضه كامل ═══ -->
+      <div id="preface">
+        <!-- Section label -->
+        <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.25em; color:#6b7d5a; margin-bottom:1.1rem; border-bottom:1px solid #c9a04a40; padding-bottom:0.6rem;">
+          ✦ PREFACE · مقدّمة المدوّنة
+        </div>
+
+        <!-- The letter itself -->
+        <div class="preface-card relative">
+          <div class="portrait-corner tl"></div>
+          <div class="portrait-corner tr"></div>
+          <div class="portrait-corner bl"></div>
+          <div class="portrait-corner br"></div>
+
+          <div class="preface-body">
+            <p>
+              الحمدلله ، خرجت هذه المدوّنة إلى النور، بفضل الله ثم بجهد عبيد المري جزاه الله خيراً لجهوده…
+              فهو من حمّل وصمّم هذه المدوّنة بما تحمل من خلاصة رحلاتي منذ عام 1400هـ، و47 عامًا عبر التجول
+              لنحو 189 دولة، وقرابة 500 موضوع ومقال وكتاب، وما يزال التدوين مستمرًا حتى تكتمل حكاية الرحلة
+              إلى دول العالم.
+            </p>
+            <p>
+              لم تكن الرحلات عندي انتقالًا بين الأمكنة، ولا التدوين لمجرد الحفظ…
+              إنما هي حبسُ اللحظة ونشرُ اللقطة، ومحاولة فهم الفكرة…
+            </p>
+            <p>
+              وما وراء كل تلك المشاهد، هناك نتأمل أثر المكان والإنسان والثقافة، ثم نقل ذلك بأمانة لمن يأتي
+              بعدنا.
+            </p>
+            <p>
+              وأقدّم هذه المدوّنة هديةً للمعرفة، ورغبةً في التقارب بين الشعوب، وتبادل الخبرات والثقافات،
+              راجيًا بها ثواب الله، وأن يجعل في كل حرفٍ وصورةٍ وتجربةٍ نفعًا لكل محبٍ للسفر والمعرفة.
+            </p>
+          </div>
+
+          <!-- Signature -->
+          <div class="preface-sign">
+            <div style="font-family:'Thmanyah Serif Display',serif; font-size:0.9rem; font-weight:700; color:#f0e6d2;">
+              — د. وائل بن عبدالعزيز الدغفق
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.15em; color:#6b7d5a; margin-top:6px;">
+              RAHHAL AL-KHOBAR · الخبر
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -146,7 +194,7 @@ function formatMonoDate(dateStr: string): string {
         <div class="absolute" style="width:14px; height:14px; border-radius:50%; background:#1f1a14; border:1px dashed #c9a04a; top:-7px; right:-7px;"></div>
         <div class="absolute" style="width:14px; height:14px; border-radius:50%; background:#1f1a14; border:1px dashed #c9a04a; bottom:-7px; right:-7px;"></div>
         <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.2em; color:#c9a04a; margin-bottom:0.5rem;">NATIONS · دول</div>
-        <div style="font-family:'Thmanyah Serif Display',serif; font-size:3rem; line-height:1; color:#f0e6d2; font-weight:700;">175+</div>
+        <div style="font-family:'Thmanyah Serif Display',serif; font-size:3rem; line-height:1; color:#f0e6d2; font-weight:700;">189</div>
         <div style="font-family:'Thmanyah Serif Display',serif; font-size:0.75rem; color:#c9a04a; margin-top:0.25rem;">دولة</div>
       </div>
 
@@ -155,7 +203,7 @@ function formatMonoDate(dateStr: string): string {
         <div class="absolute" style="width:14px; height:14px; border-radius:50%; background:#1f1a14; border:1px dashed #6b7d5a; top:-7px; right:-7px;"></div>
         <div class="absolute" style="width:14px; height:14px; border-radius:50%; background:#1f1a14; border:1px dashed #6b7d5a; bottom:-7px; right:-7px;"></div>
         <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.2em; color:#6b7d5a; margin-bottom:0.5rem;">YEARS · سنوات</div>
-        <div style="font-family:'Thmanyah Serif Display',serif; font-size:3rem; line-height:1; color:#f0e6d2; font-weight:700;">40+</div>
+        <div style="font-family:'Thmanyah Serif Display',serif; font-size:3rem; line-height:1; color:#f0e6d2; font-weight:700;">47</div>
         <div style="font-family:'Thmanyah Serif Display',serif; font-size:0.75rem; color:#c9a04a; margin-top:0.25rem;">سنة ترحال</div>
       </div>
 
@@ -379,7 +427,8 @@ function formatMonoDate(dateStr: string): string {
   .cta-primary,
   .cta-secondary,
   .globe-frame,
-  .globe-cta {
+  .globe-cta,
+  #preface {
     pointer-events: auto;
   }
   .hero-grid {
@@ -435,6 +484,44 @@ function formatMonoDate(dateStr: string): string {
   .portrait-corner.tr { top: -1px; right: -1px; border-left: none; border-bottom: none; }
   .portrait-corner.bl { bottom: -1px; left: -1px; border-right: none; border-top: none; }
   .portrait-corner.br { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+  /* ═══ PREFACE CARD ═══ */
+  #preface {
+    position: relative;
+    z-index: 2; /* above the ambient floating quotes */
+    margin-top: 3.5rem;
+    /* يفتح شريطاً أسفل البطاقة تسكنه الاقتباسات الشبحية بدل أن تتداخل معها */
+    margin-bottom: 3.5rem;
+  }
+  .preface-card {
+    background: #1f1a1499; /* keeps the letter legible over the hero backdrop */
+    border: 1px dashed #c9a04a66;
+    padding: 1.5rem 2rem 1.25rem;
+  }
+  .preface-body p {
+    font-family: 'Thmanyah Serif Display', serif;
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: #e8dcc4;
+  }
+  .preface-body p + p {
+    margin-top: 0.7rem;
+  }
+  .preface-sign {
+    margin-top: 1.1rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid #c9a04a;
+    text-align: left;
+  }
+  @media (max-width: 640px) {
+    .preface-card {
+      padding: 1.25rem 1rem 1rem;
+    }
+    .preface-body p {
+      font-size: 0.9rem;
+      line-height: 1.75;
+    }
+  }
 
   .portrait-stamp {
     text-align: center;
@@ -620,8 +707,8 @@ function formatMonoDate(dateStr: string): string {
     text-align: left;
   }
   .fq-4 {
-    /* bottom-left */
-    bottom: 5%; left: 4%;
+    /* bottom-left — بالبكسل لا بالنسبة، فالهيرو صار أطول بعد إضافة المقدّمة */
+    bottom: 1.25rem; left: 4%;
     max-width: 260px;
     font-size: 1.0rem;
     transform: rotate(-1.5deg);
@@ -629,7 +716,7 @@ function formatMonoDate(dateStr: string): string {
   }
   .fq-5 {
     /* bottom-center */
-    bottom: 4%; left: 32%;
+    bottom: 1rem; left: 32%;
     max-width: 270px;
     font-size: 1.0rem;
     transform: rotate(2deg);
@@ -637,7 +724,7 @@ function formatMonoDate(dateStr: string): string {
   }
   .fq-6 {
     /* bottom-right (below portrait) */
-    bottom: 6%; right: 3%;
+    bottom: 1.5rem; right: 3%;
     max-width: 250px;
     font-size: 0.95rem;
     transform: rotate(-2deg);

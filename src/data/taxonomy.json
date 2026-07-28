@@ -2708,6 +2708,108 @@
         "الهند"
       ],
       "type": "travel"
+    },
+    "2015-01-2014": {
+      "continent": "أوروبا",
+      "countries": [
+        "سلوفينيا",
+        "النمسا",
+        "ألمانيا"
+      ],
+      "type": "travel"
+    },
+    "2015-04-blog-post_21": {
+      "continent": "أفريقيا",
+      "countries": [
+        "مدغشقر"
+      ],
+      "type": "travel"
+    },
+    "2025-08-blog-post": {
+      "continent": "الشرق الأوسط",
+      "countries": [
+        "السعودية"
+      ],
+      "type": "travel"
+    },
+    "2026-07-2018": {
+      "continent": "الشرق الأوسط",
+      "countries": [
+        "عمان"
+      ],
+      "type": "travel"
+    },
+    "2026-07-blog-post": {
+      "continent": null,
+      "countries": [],
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2026-07-blog-post_171": {
+      "continent": "الشرق الأوسط",
+      "countries": [
+        "السعودية"
+      ],
+      "type": "travel"
+    },
+    "2026-07-blog-post_28": {
+      "continent": "آسيا",
+      "countries": [
+        "تركيا"
+      ],
+      "type": "travel"
+    },
+    "2026-07-blog-post_348": {
+      "continent": "آسيا",
+      "countries": [
+        "جورجيا"
+      ],
+      "type": "travel"
+    },
+    "2026-07-blog-post_548": {
+      "continent": "أفريقيا",
+      "countries": [
+        "مالي",
+        "غانا",
+        "غينيا",
+        "السنغال"
+      ],
+      "type": "travel"
+    },
+    "2026-07-blog-post_664": {
+      "continent": "الشرق الأوسط",
+      "countries": [
+        "السعودية"
+      ],
+      "type": "travel"
+    },
+    "2026-07-blog-post_685": {
+      "continent": "أوقيانوسيا",
+      "countries": [
+        "أستراليا"
+      ],
+      "type": "travel"
+    },
+    "2026-07-blog-post_688": {
+      "continent": "أوروبا",
+      "countries": [
+        "سويسرا"
+      ],
+      "type": "travel"
+    },
+    "2026-07-blog-post_97": {
+      "continent": "أوروبا",
+      "countries": [
+        "روسيا"
+      ],
+      "type": "travel"
+    },
+    "2026-07-macarena-national-park": {
+      "continent": "أمريكا الجنوبية",
+      "countries": [
+        "كولومبيا"
+      ],
+      "type": "travel"
     }
   },
   "continents": {
@@ -3004,6 +3106,30 @@
     "بريطانيا": {
       "slug": "uk",
       "continent": "أوروبا"
+    },
+    "مدغشقر": {
+      "slug": "madagascar",
+      "continent": "أفريقيا"
+    },
+    "السنغال": {
+      "slug": "senegal",
+      "continent": "أفريقيا"
+    },
+    "غانا": {
+      "slug": "ghana",
+      "continent": "أفريقيا"
+    },
+    "غينيا": {
+      "slug": "guinea",
+      "continent": "أفريقيا"
+    },
+    "سويسرا": {
+      "slug": "switzerland",
+      "continent": "أوروبا"
+    },
+    "أستراليا": {
+      "slug": "australia",
+      "continent": "أوقيانوسيا"
     }
   }
 }
