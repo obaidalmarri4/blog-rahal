@@ -2810,6 +2810,198 @@
         "كولومبيا"
       ],
       "type": "travel"
+    },
+    "2017-01-2016_9": {
+      "continent": "أوروبا",
+      "countries": [
+        "النرويج"
+      ],
+      "type": "travel"
+    },
+    "2017-01-2016": {
+      "continent": "أوروبا",
+      "countries": [
+        "ألبانيا",
+        "كوسوفا",
+        "مقدونيا"
+      ],
+      "type": "travel"
+    },
+    "2016-12-blog-post_18": {
+      "continent": "آسيا",
+      "countries": [
+        "إندونيسيا"
+      ],
+      "type": "travel"
+    },
+    "2015-11-blog-post": {
+      "continent": "الشرق الأوسط",
+      "countries": [
+        "السعودية"
+      ],
+      "type": "travel"
+    },
+    "2013-12-blog-post_2": {
+      "continent": "أفريقيا",
+      "countries": [
+        "موريشيوس"
+      ],
+      "type": "travel"
+    },
+    "2013-12-blog-post_15": {
+      "continent": "آسيا",
+      "countries": [
+        "بوتان"
+      ],
+      "type": "travel"
+    },
+    "2026-08-blog-post_614": {
+      "continent": "آسيا",
+      "countries": [
+        "اليابان"
+      ],
+      "type": "travel"
+    },
+    "2026-08-blog-post_735": {
+      "continent": "أمريكا الجنوبية",
+      "countries": [
+        "البرازيل"
+      ],
+      "type": "travel"
+    },
+    "2012-08-blog-post_3474": {
+      "continent": "أمريكا الجنوبية",
+      "countries": [
+        "البرازيل"
+      ],
+      "type": "travel"
+    },
+    "2026-08-2012": {
+      "continent": "أمريكا الجنوبية",
+      "countries": [
+        "البرازيل"
+      ],
+      "type": "travel"
+    },
+    "2026-08-blog-post_36": {
+      "continent": "أمريكا الجنوبية",
+      "countries": [
+        "البرازيل"
+      ],
+      "type": "travel"
+    },
+    "2026-08-blog-post_01": {
+      "continent": "آسيا",
+      "countries": [
+        "تايلند"
+      ],
+      "type": "travel"
+    },
+    "2012-08-blog-post_4": {
+      "continent": "أفريقيا",
+      "countries": [
+        "إثيوبيا"
+      ],
+      "type": "travel"
+    },
+    "2016-02-20151436": {
+      "continent": "أوروبا",
+      "countries": [
+        "إسبانيا",
+        "البرتغال"
+      ],
+      "type": "travel"
+    },
+    "2026-08-blog-post": {
+      "continent": null,
+      "countries": [],
+      "type": "other",
+      "category": "عام"
+    },
+    "2017-01-1437-2016": {
+      "continent": "أفريقيا",
+      "countries": [
+        "موريتانيا"
+      ],
+      "type": "travel"
+    },
+    "2018-05-2016-1436": {
+      "continent": "أفريقيا",
+      "countries": [
+        "المغرب"
+      ],
+      "type": "travel"
+    },
+    "2026-07-2020": {
+      "continent": "أمريكا الجنوبية",
+      "countries": [
+        "الإكوادور"
+      ],
+      "type": "travel"
+    },
+    "2026-07-blog-post_29": {
+      "continent": "آسيا",
+      "countries": [
+        "قيرغيزستان"
+      ],
+      "type": "travel"
+    },
+    "2017-11-blog-post": {
+      "continent": "أوروبا",
+      "countries": [
+        "بيلاروسيا"
+      ],
+      "type": "travel"
+    },
+    "2018-01-2018": {
+      "continent": "آسيا",
+      "countries": [
+        "فيتنام"
+      ],
+      "type": "travel"
+    },
+    "2026-07-2011": {
+      "continent": "أمريكا الشمالية",
+      "countries": [
+        "بنما"
+      ],
+      "type": "travel"
+    },
+    "2026-06-1447": {
+      "continent": null,
+      "countries": [],
+      "type": "other",
+      "category": "تاريخ وثقافة"
+    },
+    "2026-05-blog-post": {
+      "continent": "آسيا",
+      "countries": [
+        "الهند",
+        "باكستان"
+      ],
+      "type": "travel"
+    },
+    "2026-04-blog-post": {
+      "continent": "الشرق الأوسط",
+      "countries": [
+        "السعودية",
+        "مصر"
+      ],
+      "type": "travel"
+    },
+    "2026-04-1447": {
+      "continent": "الشرق الأوسط",
+      "countries": [
+        "السعودية",
+        "مصر"
+      ],
+      "type": "travel"
+    },
+    "2026-03-blog-post": {
+      "continent": null,
+      "countries": [],
+      "type": "other",
+      "category": "تاريخ وثقافة"
     }
   },
   "continents": {
@@ -3130,6 +3322,34 @@
     "أستراليا": {
       "slug": "australia",
       "continent": "أوقيانوسيا"
+    },
+    "موريشيوس": {
+      "slug": "mauritius",
+      "continent": "أفريقيا"
+    },
+    "إثيوبيا": {
+      "slug": "ethiopia",
+      "continent": "أفريقيا"
+    },
+    "موريتانيا": {
+      "slug": "mauritania",
+      "continent": "أفريقيا"
+    },
+    "بيلاروسيا": {
+      "slug": "belarus",
+      "continent": "أوروبا"
+    },
+    "كوسوفا": {
+      "slug": "kosovo",
+      "continent": "أوروبا"
+    },
+    "فيتنام": {
+      "slug": "vietnam",
+      "continent": "آسيا"
+    },
+    "مقدونيا": {
+      "slug": "north-macedonia",
+      "continent": "أوروبا"
     }
   }
 }

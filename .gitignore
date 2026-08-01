@@ -32,3 +32,6 @@ public/images/*
 .claude/
 .agents/
 plans/
+
+# Python
+__pycache__/
