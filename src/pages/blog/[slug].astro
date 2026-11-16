@@ -98,6 +98,11 @@ const countryCoords: Record<string, string> = {
   'ناورو': '0.5°S · 166.9°E',
 };
 
+// محرّر Blogger يلصق الكلمات أحياناً بمسافات غير قابلة للكسر (&nbsp;) فتصير الجملة كلها
+// «كلمة» واحدة لا تلتفّ على شاشة الجوال. نحوّل ما وقع منها بين كلمتين إلى مسافة عادية،
+// ونترك البقية (مثل <p>&nbsp;</p> المستعملة كسطر فارغ) كما هي.
+const bodyHtml = post.content_html.replace(/(?<=[^\s>])(?:&nbsp;| )+(?=[^\s<&])/g, ' ');
+
 const txCountries = (tx?.countries || []) as string[];
 const primaryCountry = txCountries[0] || null;
 const coordsStr = primaryCountry && countryCoords[primaryCountry]
@@ -131,7 +136,7 @@ const coordsStr = primaryCountry && countryCoords[primaryCountry]
       <div class="grid md:grid-cols-3 gap-8 items-start">
 
         <!-- Left 2/3: Category + Title + Meta -->
-        <div class="md:col-span-2">
+        <div class="md:col-span-2" style="min-width:0; overflow-wrap:anywhere;">
           {tx && (
             <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.25em; color:#c8612e; margin-bottom:1rem;">
               {tx.continent ? tx.continent.toUpperCase() : ''}{tx.continent && txCountries.length ? ' · ' : ''}{txCountries.join(' + ')}
@@ -218,15 +223,16 @@ const coordsStr = primaryCountry && countryCoords[primaryCountry]
 
     <!-- ─── ARTICLE BODY ─── -->
     <div style="max-width:1024px; margin:0 auto; padding:2.5rem 1.5rem 4rem;">
-      <div style="display:grid; grid-template-columns:1fr 56px; gap:2rem; direction:rtl;">
+      <!-- أعمدة الشبكة في global.css (.post-layout) ليُخفى الهامش الزخرفي على الجوال -->
+      <div class="post-layout" style="direction:rtl;">
 
         <!-- Prose -->
-        <div>
-          <div class="post-content" id="post-content-body" set:html={post.content_html} />
+        <div style="min-width:0;">
+          <div class="post-content" id="post-content-body" set:html={bodyHtml} />
         </div>
 
         <!-- Margin column with § markers -->
-        <div style="display:flex; flex-direction:column; gap:2rem; padding-top:0.5rem; direction:ltr; align-items:center;">
+        <div class="post-margin" style="flex-direction:column; gap:2rem; padding-top:0.5rem; direction:ltr; align-items:center;">
           <span style="font-family:'JetBrains Mono',monospace; font-size:14px; color:#c8612e; opacity:0.6;">§</span>
           <span style="font-family:'JetBrains Mono',monospace; font-size:14px; color:#c8612e; opacity:0.4;">§</span>
           <span style="font-family:'JetBrains Mono',monospace; font-size:14px; color:#c8612e; opacity:0.3;">§</span>
