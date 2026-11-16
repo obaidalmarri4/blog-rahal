@@ -9,8 +9,14 @@
  *   node scripts/sync-blogger.mjs --dry-run       عرض الناقص بدون كتابة
  *   node scripts/sync-blogger.mjs                 استيراد كل الناقص
  *   node scripts/sync-blogger.mjs --limit 14      استيراد أحدث 14 ناقصة فقط
+ *   node scripts/sync-blogger.mjs --abort-over 25 توقّف بلا كتابة إن زاد الناقص عن 25
  *
  * السكربت إضافي فقط: لا يعدّل ولا يحذف أي تدوينة موجودة.
+ *
+ * يُشغَّل آلياً من .github/workflows/sync-blogger.yml. هناك يُستعمل --abort-over
+ * كصمّام أمان (عدد ناقص غير معقول يعني خللاً في الفيد لا دفعة حقيقية)، ويكتب
+ * السكربت نتيجته في GITHUB_OUTPUT (imported/failed) وعناوين المستورَد في
+ * الملف المسمّى بالمتغيّر SYNC_TITLES_FILE.
  */
 
 import fs from 'node:fs';
@@ -23,10 +29,18 @@ const PAGE_SIZE = 25; // Blogger يقصّ الصفحة الواحدة عند ه�
 
 const args = process.argv.slice(2);
 const DRY_RUN = args.includes('--dry-run');
-const LIMIT = (() => {
-  const i = args.indexOf('--limit');
-  return i !== -1 && args[i + 1] ? parseInt(args[i + 1], 10) : Infinity;
-})();
+function numberArg(flag) {
+  const i = args.indexOf(flag);
+  if (i === -1) return Infinity;
+  const n = parseInt(args[i + 1], 10);
+  if (!Number.isFinite(n) || n < 0) {
+    console.error(`قيمة غير صالحة للخيار ${flag}`);
+    process.exit(2);
+  }
+  return n;
+}
+const LIMIT = numberArg('--limit');
+const ABORT_OVER = numberArg('--abort-over');
 
 // ── أدوات مساعدة ────────────────────────────────────────────────────────────
 
@@ -210,8 +224,16 @@ if (DRY_RUN) {
   process.exit(0);
 }
 
+if (missing.length > ABORT_OVER) {
+  console.error(
+    `\n⛔ الناقص (${missing.length}) يتجاوز حدّ الأمان (${ABORT_OVER}) — لم يُكتب شيء.` +
+      '\n   إن كانت دفعة حقيقية فشغّل السكربت يدوياً بدون --abort-over.'
+  );
+  process.exit(1);
+}
+
 let n = maxPrefix;
-let ok = 0;
+const importedTitles = [];
 for (const rec of targets) {
   try {
     const post = await fetchPost(rec);
@@ -219,11 +241,23 @@ for (const rec of targets) {
     const file = path.join(POSTS_DIR, `${String(n).padStart(4, '0')}_${rec.slug}.json`);
     fs.writeFileSync(file, JSON.stringify(post, null, 2) + '\n', 'utf-8');
     console.log(`  ✅ ${path.basename(file)}  (${post.image_count} صورة، ${post.content_text.length} حرفاً)`);
-    ok += 1;
+    importedTitles.push(rec.title.trim());
   } catch (err) {
     console.error(`  ❌ ${rec.slug}: ${err.message}`);
   }
 }
 
+const ok = importedTitles.length;
+const failed = targets.length - ok;
 console.log(`\nتمّ استيراد ${ok}/${targets.length}.`);
-console.log('التالي: تشغيل التصنيف لتحديث src/data/taxonomy.json وإلا لن تظهر في صفحات القارات والدول.');
+if (ok > 0) {
+  console.log('التالي: إضافة مفاتيحها إلى src/data/taxonomy.json وإلا لن تظهر في صفحات القارات والدول.');
+}
+
+// مخرجات للتشغيل الآلي (GitHub Actions) — لا أثر لها عند التشغيل اليدوي
+if (process.env.SYNC_TITLES_FILE) {
+  fs.writeFileSync(process.env.SYNC_TITLES_FILE, importedTitles.map((t) => `${t}\n`).join(''), 'utf-8');
+}
+if (process.env.GITHUB_OUTPUT) {
+  fs.appendFileSync(process.env.GITHUB_OUTPUT, `imported=${ok}\nfailed=${failed}\n`);
+}
