@@ -3002,6 +3002,172 @@
       "countries": [],
       "type": "other",
       "category": "تاريخ وثقافة"
+    },
+    "2026-11-nauru": {
+      "continent": "أوقيانوسيا",
+      "countries": [
+        "ناورو"
+      ],
+      "type": "travel"
+    },
+    "2026-11-blog-post_634": {
+      "continent": null,
+      "countries": [],
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2026-11-blog-post_11": {
+      "continent": null,
+      "countries": [],
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2026-11-blog-post": {
+      "continent": null,
+      "countries": [],
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2026-10-blog-post_30": {
+      "continent": null,
+      "countries": [],
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2026-10-blog-post_28": {
+      "continent": null,
+      "countries": [],
+      "type": "other",
+      "category": "تاريخ وثقافة"
+    },
+    "2026-10-blog-post": {
+      "continent": null,
+      "countries": [],
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2026-10-1902-1950": {
+      "continent": null,
+      "countries": [],
+      "type": "other",
+      "category": "تاريخ وثقافة"
+    },
+    "2026-10-1507-2026": {
+      "continent": null,
+      "countries": [],
+      "type": "other",
+      "category": "تاريخ وثقافة"
+    },
+    "2026-09-4000-2026": {
+      "continent": "آسيا",
+      "countries": [
+        "تركيا"
+      ],
+      "type": "travel"
+    },
+    "2026-08-blog-post_833": {
+      "continent": "الشرق الأوسط",
+      "countries": [
+        "السعودية"
+      ],
+      "type": "travel"
+    },
+    "2026-08-blog-post_16": {
+      "continent": null,
+      "countries": [],
+      "type": "other",
+      "category": "عام"
+    },
+    "2026-08-blog-post_14": {
+      "continent": null,
+      "countries": [],
+      "type": "other",
+      "category": "تراث محلي"
+    },
+    "2026-08-blog-post_421": {
+      "continent": "آسيا",
+      "countries": [
+        "تركيا"
+      ],
+      "type": "travel"
+    },
+    "2026-08-blog-post_762": {
+      "continent": "الشرق الأوسط",
+      "countries": [
+        "عمان"
+      ],
+      "type": "travel"
+    },
+    "2026-08-blog-post_220": {
+      "continent": "أفريقيا",
+      "countries": [
+        "تونس"
+      ],
+      "type": "travel"
+    },
+    "2026-08-blog-post_12": {
+      "continent": "أفريقيا",
+      "countries": [
+        "تونس"
+      ],
+      "type": "travel"
+    },
+    "2026-08-blog-post_938": {
+      "continent": "الشرق الأوسط",
+      "countries": [
+        "السعودية"
+      ],
+      "type": "travel"
+    },
+    "2017-01-blog-post_10": {
+      "continent": null,
+      "countries": [],
+      "type": "other",
+      "category": "تاريخ وثقافة"
+    },
+    "2026-08-blog-post_143": {
+      "continent": "الشرق الأوسط",
+      "countries": [
+        "السعودية"
+      ],
+      "type": "travel"
+    },
+    "2017-02-14382017": {
+      "continent": null,
+      "countries": [],
+      "type": "other",
+      "category": "عام"
+    },
+    "2026-08-blog-post_56": {
+      "continent": null,
+      "countries": [],
+      "type": "other",
+      "category": "طعام ومشروبات"
+    },
+    "2026-08-blog-post_445": {
+      "continent": null,
+      "countries": [],
+      "type": "other",
+      "category": "نصائح سفر"
+    },
+    "2026-08-blog-post_04": {
+      "continent": null,
+      "countries": [],
+      "type": "other",
+      "category": "نصائح سفر"
+    },
+    "2021-12-blog-post": {
+      "continent": null,
+      "countries": [],
+      "type": "other",
+      "category": "طعام ومشروبات"
+    },
+    "2026-08-blog-post_03": {
+      "continent": "أوروبا",
+      "countries": [
+        "إسبانيا"
+      ],
+      "type": "travel"
     }
   },
   "continents": {
@@ -3350,6 +3516,10 @@
     "مقدونيا": {
       "slug": "north-macedonia",
       "continent": "أوروبا"
+    },
+    "ناورو": {
+      "slug": "nauru",
+      "continent": "أوقيانوسيا"
     }
   }
 }

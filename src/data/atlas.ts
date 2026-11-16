@@ -47,7 +47,7 @@ export const AR_NAMES: Record<string, string> = {
   ZAF: 'جنوب أفريقيا', NAM: 'ناميبيا', BWA: 'بوتسوانا', ZWE: 'زيمبابوي',
   MOZ: 'موزمبيق', MDG: 'مدغشقر', GHA: 'غانا', GIN: 'غينيا', NGA: 'نيجيريا',
   CIV: 'ساحل العاج', SEN: 'السنغال', AUS: 'أستراليا', NZL: 'نيوزيلندا',
-  FJI: 'فيجي', PNG: 'بابوا غينيا الجديدة',
+  FJI: 'فيجي', PNG: 'بابوا غينيا الجديدة', NRU: 'ناورو',
   LBY: 'ليبيا', TCD: 'تشاد', NER: 'النيجر', CUB: 'كوبا',
   PRK: 'كوريا الشمالية', SLB: 'جزر سليمان',
 };
@@ -81,7 +81,7 @@ export const ISO_TO_TAXONOMY: Record<string, string> = {
   USA: 'أمريكا', MEX: 'المكسيك', PAN: 'بنما', BRA: 'البرازيل', ARG: 'الأرجنتين',
   CHL: 'تشيلي', PER: 'البيرو', COL: 'كولومبيا', ECU: 'الإكوادور', BOL: 'بوليفيا',
   // أوقيانوسيا
-  NZL: 'نيوزلندا', AUS: 'أستراليا',
+  NZL: 'نيوزلندا', AUS: 'أستراليا', NRU: 'ناورو',
 };
 
 export interface ContinentStat {
