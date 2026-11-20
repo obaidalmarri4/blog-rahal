@@ -35,3 +35,7 @@ plans/
 
 # Python
 __pycache__/
+
+# local-only overrides (never commit: holds the studio dev key)
+.env.local
+.env.*.local

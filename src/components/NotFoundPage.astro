@@ -1,0 +1,52 @@
+---
+/**
+ * صفحة «غير موجودة» كاملة. تُعرض من مكانين ويجب أن يخرج منهما الناتج نفسه حرفياً:
+ *   - src/pages/404.astro              ساكنة، يرسلها Vercel لأي عنوان خاطئ.
+ *   - src/pages/studio/not-found.astro من الخادم، لمن يفتح لوحة التحرير بلا اقتران.
+ * لذلك لا تأخذ خصائص ولا تقرأ الطلب — أي اختلاف بين النسختين يكشف وجود اللوحة.
+ * (يتحقق من التطابق scripts/studio-access-check.mjs.)
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const links = [
+  { href: '/', label: 'الرئيسية' },
+  { href: '/blog', label: 'المدوّنة' },
+  { href: '/destinations', label: 'الوجهات' },
+];
+---
+
+<BaseLayout title="الصفحة غير موجودة — رحّال الخبر">
+
+  <!-- Dark header band -->
+  <section style="background:#1f1a14; border-bottom:2px solid #c9a04a40; padding:3rem 0 2rem;">
+    <div class="max-w-4xl mx-auto px-4">
+      <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.25em; color:#6b7d5a; margin-bottom:0.75rem;">
+        404 · OFF THE MAP
+      </div>
+      <h1 style="font-family:'Thmanyah Serif Display',serif; font-size:2.5rem; color:#f0e6d2; font-weight:700;">
+        هذه الصفحة <span style="color:#c8612e;">خارج الخريطة</span>
+      </h1>
+    </div>
+  </section>
+
+  <!-- Paper content area -->
+  <section style="background:#f0e6d2; color:#2a2218; padding:3rem 0 5rem;">
+    <div class="max-w-4xl mx-auto px-4">
+      <p style="font-family:'Thmanyah Serif Display',serif; font-size:1.2rem; line-height:2; margin-bottom:2rem;">
+        العنوان الذي فتحته غير موجود، أو تغيّر مكانه. تابع من هنا:
+      </p>
+
+      <div style="display:flex; flex-wrap:wrap; gap:0.75rem;">
+        {links.map((link, i) => (
+          <a
+            href={link.href}
+            style={`font-family:'Thmanyah Serif Display',serif; font-size:1.05rem; font-weight:700; padding:0.6rem 1.4rem; text-decoration:none; border:1px solid ${i === 0 ? '#c8612e' : '#c9a04a'}; background:${i === 0 ? '#c8612e' : 'transparent'}; color:${i === 0 ? '#f0e6d2' : '#2a2218'};`}
+          >
+            {link.label}
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>

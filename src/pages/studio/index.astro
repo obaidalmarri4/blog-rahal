@@ -1,0 +1,34 @@
+---
+import StudioLayout from '../../layouts/StudioLayout.astro';
+import { requireStudio } from '../../lib/studio/guard.ts';
+
+export const prerender = false;
+
+const denied = requireStudio(Astro.locals);
+if (denied) return denied;
+---
+
+<StudioLayout title="لوحة التحرير — رحّال الخبر">
+  <h1 class="studio-h1">أهلاً د. وائل</h1>
+  <p class="studio-lead">
+    هذه لوحتك الخاصة لإدارة تدوينات المدوّنة، وتُفتح من هذا الجهاز مباشرة.
+  </p>
+
+  <section class="studio-card">
+    <h2>الأدوات قيد التجهيز</h2>
+    <p>قريباً من هذه الصفحة: كتابة تدوينة جديدة، وتعديل التدوينات السابقة أو حذفها.</p>
+  </section>
+
+  <details class="studio-unpair">
+    <summary>إغلاق اللوحة على هذا الجهاز</summary>
+    <p>
+      استعمل هذا إن كان الجهاز ليس لك. بعد الإغلاق لا تُفتح اللوحة منه، ولفتحها من جديد
+      اضغط الرابط الخاص الذي وصلك.
+    </p>
+    <form method="post" action="/api/studio/unpair">
+      <button type="submit" class="studio-button studio-button--danger">
+        نعم، أغلقها على هذا الجهاز
+      </button>
+    </form>
+  </details>
+</StudioLayout>

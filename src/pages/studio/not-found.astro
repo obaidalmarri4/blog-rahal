@@ -1,0 +1,16 @@
+---
+/**
+ * توأم ‎/404‎ المعروض من الخادم. الحارس (src/middleware.ts) يحوّل إليه داخلياً كل طلب للوحة
+ * بلا اقتران صالح، فيرى صاحبه صفحة «غير موجودة» العادية.
+ *
+ * لماذا ليست ‎/404‎ نفسها: تلك ساكنة، و Astro يمنع التحويل من صفحة خادم إلى صفحة ساكنة،
+ * وبديله (ردّ 404 فارغ) يجلب ‎/404.html‎ من الشبكة ويفشل على أي نطاق خارج allowedDomains.
+ */
+import NotFoundPage from '../../components/NotFoundPage.astro';
+
+export const prerender = false;
+
+Astro.response.status = 404;
+---
+
+<NotFoundPage />
