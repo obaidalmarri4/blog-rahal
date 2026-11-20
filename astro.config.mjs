@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 
 import tailwindcss from '@tailwindcss/vite';
 import vercel from '@astrojs/vercel';
+import { studioIndex } from './src/lib/studio/index-plugin.mjs';
 
 // https://astro.build/config
 export default defineConfig({
@@ -22,6 +23,6 @@ export default defineConfig({
   },
 
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss(), studioIndex()]
   }
 });

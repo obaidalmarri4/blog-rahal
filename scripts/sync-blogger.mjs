@@ -12,6 +12,8 @@
  *   node scripts/sync-blogger.mjs --abort-over 25 توقّف بلا كتابة إن زاد الناقص عن 25
  *
  * السكربت إضافي فقط: لا يعدّل ولا يحذف أي تدوينة موجودة.
+ * ولا يعيد ما حُذف من لوحة التحرير: slugs المسجّلة في src/data/removed-posts.json تُعامَل
+ * كأنها موجودة، وإلا رجعت التدوينة المحذوفة في المزامنة التالية.
  *
  * يُشغَّل آلياً من .github/workflows/sync-blogger.yml. هناك يُستعمل --abort-over
  * كصمّام أمان (عدد ناقص غير معقول يعني خللاً في الفيد لا دفعة حقيقية)، ويكتب
@@ -23,9 +25,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { cleanSlug, slugFromUrl, htmlToText, extractImages } from './lib/post-html.mjs';
+import { readRemovedSlugs } from './lib/removed-posts.mjs';
 
 const BLOG = 'https://rahal-k.blogspot.com';
 const POSTS_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '../src/content/posts');
+const REMOVED_FILE = path.join(path.dirname(fileURLToPath(import.meta.url)), '../src/data/removed-posts.json');
 const PAGE_SIZE = 25; // Blogger يقصّ الصفحة الواحدة عند هذا الحد عملياً
 
 const args = process.argv.slice(2);
@@ -131,6 +135,10 @@ for (const f of fs.readdirSync(POSTS_DIR)) {
   if (p) maxPrefix = Math.max(maxPrefix, parseInt(p[1], 10));
 }
 console.log(`📁 محلياً: ${existing.size} slug فريد (أعلى ترقيم ${maxPrefix})`);
+
+const removed = readRemovedSlugs(REMOVED_FILE);
+for (const slug of removed) existing.add(slug);
+if (removed.size > 0) console.log(`🗑️  محذوفة من لوحة التحرير: ${removed.size} (لن تُستورد من جديد)`);
 
 const { total, entries } = await fetchFeedEntries();
 console.log(`🌐 في المدوّنة: ${total} تدوينة (تم جلب ${entries.length} مدخلاً)`);

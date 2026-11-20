@@ -43,6 +43,8 @@ const KEY = newKey();
 // البيئة قبل تحميل الدالة: كما هي على Vercel في الإنتاج
 process.env.STUDIO_KEY = KEY;
 process.env.VERCEL_ENV = 'production';
+// بلا توكن GitHub: هذه البوابة تختبر الباب وحده، ولا يجوز أن تصل إلى أي مستودع
+for (const name of ['STUDIO_GITHUB_TOKEN', 'STUDIO_GITHUB_API', 'STUDIO_BRANCH', 'STUDIO_REPO']) delete process.env[name];
 
 const output = await createOutputServer(OUTPUT_DIR, { forceFunctionHeader: FORCE_FUNCTION });
 const port = await output.listen();
@@ -129,7 +131,7 @@ section('١. بلا اقتران: كل شيء «غير موجود»');
 const anyMissingPage = await request('/no-such-page');
 check('عنوان خاطئ عادي يعيد صفحة 404 الساكنة', looksNotFound(anyMissingPage), describe(anyMissingPage));
 
-for (const pathname of ['/studio', '/studio/', '/studio/not-found', '/api/studio/whatever']) {
+for (const pathname of ['/studio', '/studio/', '/studio/not-found', '/studio/post/2025-12-blog-post', `/api/studio/status?sha=${'a'.repeat(40)}`, '/api/studio/whatever']) {
   const res = await request(pathname);
   check(`${pathname} يطابق صفحة 404 حرفياً`, looksNotFound(res), describe(res));
 }
@@ -146,8 +148,10 @@ for (const [label, candidate] of [
   check(`رابط اقتران ${label} مرفوض`, looksNotFound(res), describe(res));
 }
 
-const unpairUnpaired = await formPost('/api/studio/unpair');
-check('POST ‎/api/studio/unpair‎ بلا كوكي يطابق صفحة 404 حرفياً', looksNotFound(unpairUnpaired), describe(unpairUnpaired));
+for (const pathname of ['/api/studio/unpair', '/studio/post/2025-12-blog-post']) {
+  const res = await formPost(pathname);
+  check(`POST ${pathname} بلا كوكي يطابق صفحة 404 حرفياً`, looksNotFound(res), describe(res));
+}
 
 check(
   'ردّ اللوحة المغلقة يحمل Cache-Control الملفات الساكنة نفسه',
@@ -298,6 +302,8 @@ for (const pathname of [
   '/STUDIO',
   '/studio;x',
   '/studio/not-found?x_astro_path=/studio',
+  '/studio/not-found?x_astro_path=/studio/post/2025-12-blog-post',
+  '/studio/post/%2e%2e',
   `/studio/not-found?x_astro_path=${encodeURIComponent('@evil.example/studio')}`,
   '/_image?href=%2Ffavicon.svg&w=16&h=16&f=png',
   '/_server-islands/Anything',
@@ -317,10 +323,12 @@ const onDemand = output.routes.filter((route) => !route.dest.startsWith('/')).ma
 const EXPECTED_ON_DEMAND = [
   '^/_image/?$',
   '^/_server-islands/([^/]+?)/?$',
+  '^/api/studio/status/?$',
   '^/api/studio/unpair/?$',
   '^/studio/?$',
   '^/studio/enter/([^/]+?)/?$',
   '^/studio/not-found/?$',
+  '^/studio/post/([^/]+?)/?$',
 ];
 check(
   'ما يذهب إلى الخادم هو مسارات اللوحة فقط (ومعها نقطتا Astro الداخليتان المغلقتان)',

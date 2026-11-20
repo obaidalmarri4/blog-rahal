@@ -9,3 +9,9 @@ declare namespace App {
     studio?: 'paired' | 'entering';
   }
 }
+
+/** فهرس التدوينات المحسوب وقت البناء — src/lib/studio/index-plugin.mjs */
+declare module 'virtual:studio-index' {
+  const index: import('./lib/studio/store.ts').PostSummary[];
+  export default index;
+}

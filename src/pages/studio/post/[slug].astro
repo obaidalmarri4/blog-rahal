@@ -1,0 +1,234 @@
+---
+/**
+ * صفحة التدوينة في اللوحة: تعديل بياناتها (العنوان، التاريخ، الوسوم، التصنيف) وحذفها.
+ * نموذجان عاديان بلا JavaScript — الحفظ يحوّل إلى الصفحة نفسها مع شريط حالة النشر.
+ * (نص التدوينة نفسه يُحرَّر في المرحلة 3.)
+ */
+import DeployStatus from '../../../components/studio/DeployStatus.astro';
+import StudioLayout from '../../../layouts/StudioLayout.astro';
+import { publishesToSite, studioRepo } from '../../../lib/studio/config.ts';
+import { describeFailure, displayDate } from '../../../lib/studio/failure.ts';
+import type { Failure } from '../../../lib/studio/failure.ts';
+import { requireStudio } from '../../../lib/studio/guard.ts';
+import { deletePost, getPost, updatePostMeta } from '../../../lib/studio/store.ts';
+import { CATEGORIES, countriesByContinent } from '../../../lib/studio/taxonomy.ts';
+import { cleanLine, diffMeta, readBase, readMetaForm } from '../../../lib/studio/validate.ts';
+import type { FieldErrors, MetaValues } from '../../../lib/studio/validate.ts';
+
+export const prerender = false;
+
+const denied = requireStudio(Astro.locals);
+if (denied) return denied;
+
+const repo = studioRepo();
+if (!repo) return Astro.redirect('/studio', 303);
+
+const slug = Astro.params.slug ?? '';
+const here = `/studio/post/${encodeURIComponent(slug)}`;
+/** كلمة التأكيد قبل الحذف */
+const DELETE_WORD = 'حذف';
+
+let errors: FieldErrors = {};
+let deleteError = '';
+let submitted: MetaValues | null = null;
+let failure: Failure | null = null;
+
+if (Astro.request.method === 'POST') {
+  try {
+    const form = await Astro.request.formData();
+    if (form.get('action') === 'delete') {
+      if (cleanLine(String(form.get('confirm') ?? '')) !== DELETE_WORD) {
+        deleteError = `اكتب كلمة «${DELETE_WORD}» في الخانة للتأكيد.`;
+      } else {
+        const result = await deletePost(repo, slug);
+        if (result.kind === 'deleted') return Astro.redirect(`/studio?deleted=${result.commit}`, 303);
+        if (result.kind === 'brake') {
+          deleteError = `حُذفت عدة تدوينات خلال الساعة الأخيرة، فأُوقف الحذف مؤقتاً للحماية. حاول بعد ${result.minutes} دقيقة.`;
+        }
+      }
+    } else {
+      const base = readBase(form);
+      submitted = readMetaForm(form);
+      if (!base) {
+        errors = { form: 'تعذّرت قراءة النموذج. حدّث الصفحة وحاول من جديد.' };
+      } else {
+        const result = await updatePostMeta(repo, slug, diffMeta(base, submitted));
+        if (result.kind === 'saved') return Astro.redirect(`${here}?saved=${result.commit}`, 303);
+        if (result.kind === 'unchanged') return Astro.redirect(`${here}?saved=none`, 303);
+        if (result.kind === 'invalid') errors = result.errors;
+      }
+    }
+  } catch (err) {
+    failure = describeFailure(err);
+  }
+}
+
+let view: Awaited<ReturnType<typeof getPost>> = null;
+if (!failure) {
+  try {
+    view = await getPost(repo, slug);
+  } catch (err) {
+    failure = describeFailure(err);
+  }
+}
+
+if (failure) Astro.response.status = 502;
+else if (!view) Astro.response.status = 404;
+else if (Object.keys(errors).length > 0 || deleteError) Astro.response.status = 422;
+
+const post = view?.post;
+/** ما في المستودع الآن — يُرسَل مع النموذج ليُعرف ما غيّره المستخدم فعلاً */
+const base: MetaValues | null = post
+  ? { title: post.title, date: post.date.slice(0, 10), labels: post.labels, classification: post.classification }
+  : null;
+/** ما يُعرض في الحقول: ما كتبه المستخدم إن رُفض الحفظ، وإلا ما في المستودع */
+const shown = submitted ?? base;
+
+const groups = view ? countriesByContinent(view.taxonomy) : [];
+const chosen = shown?.classification.type === 'travel' ? shown.classification.countries : [];
+const category = shown?.classification.type === 'other' ? shown.classification.category : CATEGORIES[0];
+
+const saved = Astro.url.searchParams.get('saved') ?? '';
+const savedCommit = /^[0-9a-f]{40}$/.test(saved) ? saved : null;
+const today = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+---
+
+<StudioLayout title={post ? `${post.title.trim()} — لوحة التحرير` : 'لوحة التحرير — رحّال الخبر'}>
+  <p class="studio-back"><a href="/studio">كل التدوينات</a></p>
+
+  {savedCommit && <DeployStatus commit={savedCommit} message="تم الحفظ ✓" live={publishesToSite(repo)} />}
+  {saved === 'none' && <div class="studio-flash" role="status"><strong>لا يوجد تغيير للحفظ.</strong></div>}
+
+  {
+    failure && (
+      <section class="studio-card studio-card--error" role="alert">
+        <h2>لم يتم الأمر</h2>
+        <p>{failure.message}</p>
+        <p class="studio-detail">{failure.detail}</p>
+      </section>
+    )
+  }
+
+  {
+    !failure && !post && (
+      <section class="studio-card">
+        <h2>هذه التدوينة غير موجودة</h2>
+        <p>ربما حُذفت. ارجع إلى قائمة التدوينات.</p>
+      </section>
+    )
+  }
+
+  {
+    post && shown && (
+      <>
+        <h1 class="studio-h1">{post.title.trim() || '(بلا عنوان)'}</h1>
+        <p class="studio-meta">
+          {displayDate(post.date)} · {post.imageCount} صورة ·
+          <a href={`/blog/${encodeURIComponent(post.slug)}`} target="_blank" rel="noopener">عرضها على الموقع</a>
+        </p>
+
+        <form method="post" action={here} class="studio-form">
+          <input type="hidden" name="action" value="save" />
+          <input type="hidden" name="base" value={JSON.stringify(base)} />
+
+          {errors.form && <p class="studio-error" role="alert">{errors.form}</p>}
+
+          <label class="studio-field">
+            <span>العنوان</span>
+            <input class="studio-input" type="text" name="title" value={shown.title} maxlength="300" required />
+            {errors.title && <span class="studio-error" role="alert">{errors.title}</span>}
+          </label>
+
+          <label class="studio-field">
+            <span>التاريخ</span>
+            <input class="studio-input studio-input--date" type="date" name="date" value={shown.date} max={today} required />
+            {errors.date && <span class="studio-error" role="alert">{errors.date}</span>}
+          </label>
+
+          <label class="studio-field">
+            <span>الوسوم</span>
+            <textarea class="studio-input" name="labels" rows={Math.max(3, shown.labels.length + 1)}>{shown.labels.join('\n')}</textarea>
+            <small>وسم في كل سطر. اتركها فارغة إن لم ترد وسوماً.</small>
+            {errors.labels && <span class="studio-error" role="alert">{errors.labels}</span>}
+          </label>
+
+          <fieldset class="studio-cls">
+            <legend>أين تظهر التدوينة</legend>
+
+            <label class="studio-choice">
+              <input type="radio" name="type" value="travel" checked={shown.classification.type === 'travel'} />
+              <span>رحلة — تظهر في صفحة الدولة والقارّة</span>
+            </label>
+            <div class="studio-cls__travel">
+              <label class="studio-field">
+                <span>الدولة</span>
+                <select class="studio-input" name="country">
+                  <option value="">اختر الدولة</option>
+                  {groups.map((group) => (
+                    <optgroup label={group.continent}>
+                      {group.countries.map((country) => (
+                        <option value={country} selected={chosen[0] === country}>{country}</option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </label>
+              <details class="studio-more" open={chosen.length > 1}>
+                <summary>الرحلة شملت دولاً أخرى</summary>
+                {groups.map((group) => (
+                  <div class="studio-checks">
+                    <strong>{group.continent}</strong>
+                    {group.countries.map((country) => (
+                      <label>
+                        <input type="checkbox" name="countries" value={country} checked={chosen.slice(1).includes(country)} />
+                        {country}
+                      </label>
+                    ))}
+                  </div>
+                ))}
+              </details>
+            </div>
+
+            <label class="studio-choice">
+              <input type="radio" name="type" value="other" checked={shown.classification.type === 'other'} />
+              <span>موضوع آخر — تظهر في «مواضيع أخرى»</span>
+            </label>
+            <div class="studio-cls__other">
+              <label class="studio-field">
+                <span>الفئة</span>
+                <select class="studio-input" name="category">
+                  {CATEGORIES.map((name) => <option value={name} selected={category === name}>{name}</option>)}
+                </select>
+              </label>
+            </div>
+
+            <label class="studio-choice">
+              <input type="radio" name="type" value="none" checked={shown.classification.type === 'none'} />
+              <span>بلا تصنيف — تظهر في المدوّنة والرئيسية فقط</span>
+            </label>
+
+            {errors.classification && <span class="studio-error" role="alert">{errors.classification}</span>}
+          </fieldset>
+
+          <button type="submit" class="studio-button studio-button--primary">حفظ التعديلات</button>
+        </form>
+
+        <details class="studio-unpair" open={Boolean(deleteError)}>
+          <summary>حذف هذه التدوينة</summary>
+          <p>
+            تُحذف «{post.title.trim()}» من الموقع كله خلال دقيقتين. إن حذفتها بالخطأ فاسترجاعها ممكن — أخبر عبيد.
+          </p>
+          <form method="post" action={here} class="studio-form">
+            <input type="hidden" name="action" value="delete" />
+            <label class="studio-field">
+              <span>للتأكيد اكتب كلمة «{DELETE_WORD}»</span>
+              <input class="studio-input studio-input--short" type="text" name="confirm" autocomplete="off" />
+              {deleteError && <span class="studio-error" role="alert">{deleteError}</span>}
+            </label>
+            <button type="submit" class="studio-button studio-button--danger">احذف التدوينة</button>
+          </form>
+        </details>
+      </>
+    )
+  }
+</StudioLayout>

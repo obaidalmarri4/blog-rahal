@@ -1,23 +1,120 @@
 ---
+import DeployStatus from '../../components/studio/DeployStatus.astro';
 import StudioLayout from '../../layouts/StudioLayout.astro';
+import { publishesToSite, studioRepo } from '../../lib/studio/config.ts';
+import { describeFailure, displayDate } from '../../lib/studio/failure.ts';
+import type { Failure } from '../../lib/studio/failure.ts';
 import { requireStudio } from '../../lib/studio/guard.ts';
+import { listPosts } from '../../lib/studio/store.ts';
+import type { Listing } from '../../lib/studio/store.ts';
+import type { Classification } from '../../lib/studio/taxonomy.ts';
+import { searchKey } from '../../lib/studio/text.ts';
 
 export const prerender = false;
 
 const denied = requireStudio(Astro.locals);
 if (denied) return denied;
+
+const repo = studioRepo();
+let listing: Listing | null = null;
+let failure: Failure | null = null;
+if (repo) {
+  try {
+    listing = await listPosts(repo);
+  } catch (err) {
+    failure = describeFailure(err);
+    Astro.response.status = 502;
+  }
+}
+
+const deleted = Astro.url.searchParams.get('deleted') ?? '';
+const showDeleted = repo && /^[0-9a-f]{40}$/.test(deleted);
+
+const unclassified = listing?.posts.filter((post) => post.classification.type === 'none').length ?? 0;
+
+function badge(classification: Classification): string {
+  if (classification.type === 'travel') return classification.countries.join('، ');
+  if (classification.type === 'other') return classification.category;
+  return 'بلا تصنيف';
+}
 ---
 
 <StudioLayout title="لوحة التحرير — رحّال الخبر">
-  <h1 class="studio-h1">أهلاً د. وائل</h1>
-  <p class="studio-lead">
-    هذه لوحتك الخاصة لإدارة تدوينات المدوّنة، وتُفتح من هذا الجهاز مباشرة.
-  </p>
+  {showDeleted && <DeployStatus commit={deleted} message="حُذفت التدوينة ✓" live={publishesToSite(repo!)} />}
 
-  <section class="studio-card">
-    <h2>الأدوات قيد التجهيز</h2>
-    <p>قريباً من هذه الصفحة: كتابة تدوينة جديدة، وتعديل التدوينات السابقة أو حذفها.</p>
-  </section>
+  <h1 class="studio-h1">أهلاً د. وائل</h1>
+
+  {
+    !repo && (
+      <section class="studio-card">
+        <h2>اللوحة لم تُوصَل بالمستودع بعد</h2>
+        <p>تظهر تدويناتك هنا بعد أن يكمل عبيد إعداد الربط.</p>
+      </section>
+    )
+  }
+
+  {
+    failure && (
+      <section class="studio-card studio-card--error" role="alert">
+        <h2>تعذّر فتح قائمة التدوينات</h2>
+        <p>{failure.message}</p>
+        <p class="studio-detail">{failure.detail}</p>
+      </section>
+    )
+  }
+
+  {
+    listing && (
+      <>
+        <p class="studio-lead">تدويناتك كلها هنا. اضغط تدوينة لتعديل بياناتها أو حذفها.</p>
+
+        <div class="studio-tools">
+          <input
+            type="search"
+            class="studio-input"
+            data-studio-search
+            placeholder="ابحث في العناوين"
+            aria-label="ابحث في العناوين"
+            autocomplete="off"
+          />
+          <div class="studio-filters">
+            <button type="button" class="studio-chip" data-filter="all" aria-pressed="true">الكل</button>
+            <button type="button" class="studio-chip" data-filter="none" aria-pressed="false">
+              بلا تصنيف ({unclassified})
+            </button>
+            <button type="button" class="studio-chip studio-chip--plain" data-studio-order>الأحدث أولاً</button>
+          </div>
+        </div>
+
+        <p class="studio-count" data-studio-count>{listing.posts.length} تدوينة</p>
+
+        <ol class="studio-posts" data-studio-list>
+          {listing.posts.map((post) => (
+            <li class="studio-post" data-post data-key={searchKey(post.title)} data-cls={post.classification.type}>
+              <a href={`/studio/post/${encodeURIComponent(post.slug)}`}>
+                {post.cover ? (
+                  <img src={post.cover} alt="" width="64" height="64" loading="lazy" decoding="async" />
+                ) : (
+                  <span class="studio-post__blank" />
+                )}
+                <span class="studio-post__body">
+                  <span class="studio-post__title">{post.title.trim() || '(بلا عنوان)'}</span>
+                  <span class="studio-post__meta">
+                    {displayDate(post.date)}
+                    <span class:list={['studio-badge', { 'studio-badge--none': post.classification.type === 'none' }]}>
+                      {badge(post.classification)}
+                    </span>
+                  </span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ol>
+
+        <p class="studio-count" data-studio-empty hidden>لا توجد تدوينة بهذا البحث.</p>
+      </>
+    )
+  }
 
   <details class="studio-unpair">
     <summary>إغلاق اللوحة على هذا الجهاز</summary>
@@ -32,3 +129,7 @@ if (denied) return denied;
     </form>
   </details>
 </StudioLayout>
+
+<script>
+  import '../../scripts/studio/list.ts';
+</script>

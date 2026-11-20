@@ -1,0 +1,27 @@
+---
+/**
+ * شريط «تم الحفظ» بعد كل كتابة، ومعه حالة النشر الحيّة: التعديل يُحفظ فوراً في المستودع،
+ * ويظهر على الموقع بعد أن يبنيه Vercel (دقيقة إلى دقيقتين). السكربت يسأل
+ * ‎/api/studio/status‎ حتى ينتهي البناء.
+ */
+interface Props {
+  /** معرّف الـcommit الذي كُتب */
+  commit: string;
+  message: string;
+  /** هل هذا الفرع يُنشر على الموقع الحيّ؟ */
+  live: boolean;
+}
+
+const { commit, message, live } = Astro.props;
+---
+
+<div class="studio-flash" role="status" data-deploy-sha={live ? commit : undefined}>
+  <strong>{message}</strong>
+  <span data-deploy-text>
+    {live ? 'جارٍ النشر على الموقع…' : 'هذا فرع تجربة: التعديل محفوظ ولا يُنشر على الموقع.'}
+  </span>
+</div>
+
+<script>
+  import '../../scripts/studio/deploy-status.ts';
+</script>
