@@ -15,7 +15,10 @@ Compressed index of the project files. AI agents: read the indexed files before 
 |src/content/posts (400 JSON posts; Post schema in utils/posts.ts: title,date,url,slug,content_html,content_text,labels[],images[],image_count):{*.json}
 |src/styles:{global.css}
 |src/scripts (client globe):{atlas.ts}
-|scripts (build/import tooling):{import-posts.cjs,classify-posts.py,reclassify-posts.py}
+|scripts (build/import tooling):{import-posts.cjs,classify-posts.py,reclassify-posts.py,sync-blogger.mjs,extract-inline-images.mjs,studio-roundtrip.mjs}
+|scripts/lib (single source for deriving slug/content_text/images[] from post HTML — used by sync and the studio):{post-html.mjs}
+|src/lib/studio (owner editing page, in progress; TipTap schema shared by browser + Node):{schema.js}
+|public/media/posts (images extracted out of post bodies, served as /media/posts/<slug>/NN.jpg):{<slug>/*}
 |stack: Astro 5.17 + Tailwind4(@tailwindcss/vite) + globe.gl/three/topojson; RTL Arabic; deploy=Vercel
 ```
 
@@ -41,4 +44,7 @@ Compressed index of the project files. AI agents: read the indexed files before 
 - The classification key in `taxonomy.posts` is the slug (output of `getPostSlug`) — it must match, otherwise the post won't appear on continent/country pages.
 - A post's `type` is either `travel` (has continent/countries) or `other` (has `category`). Destination pages show only `travel`; `destinations/other.astro` shows the rest.
 - **New posts arrive automatically and unclassified.** `.github/workflows/sync-blogger.yml` runs `scripts/sync-blogger.mjs` every 3 hours and commits anything newly published on `rahal-k.blogspot.com` straight to `main` (Vercel then deploys). Those posts have no key in `taxonomy.posts`, so they show in `/blog`, the homepage, the album and their own page, but not on continent/country pages until their key is added. `git pull` before working — the bot may have pushed.
+- **Post bodies must not carry inline base64 images.** Blogger lets the author paste images straight into a post, which stores them inside `content_html` (one post reached 43MB). `node scripts/extract-inline-images.mjs` moves them to `public/media/posts/<slug>/` and is safe to re-run; run it if a synced post arrives with `data:image/` in it.
+- **One slug = one file.** Astro silently builds only the last file (alphabetically) when two posts share a slug.
+- **Editor schema changes must pass the round-trip gate:** `node scripts/studio-roundtrip.mjs` pushes every post through `src/lib/studio/schema.js` and fails if any text, image, link, embed or table is lost. Don't swap the custom `fontSize`/`textColor`/`highlight` marks for TipTap's `TextStyle` extension — its nested-span merging grows exponentially on Blogger HTML.
 - Backup files exist in the repo (`index.astro.backup-quotes-organized` and others) — ignore them, they are not live routes.

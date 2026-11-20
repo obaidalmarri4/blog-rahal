@@ -22,6 +22,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { cleanSlug, slugFromUrl, htmlToText, extractImages } from './lib/post-html.mjs';
 
 const BLOG = 'https://rahal-k.blogspot.com';
 const POSTS_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '../src/content/posts');
@@ -44,41 +45,6 @@ const ABORT_OVER = numberArg('--abort-over');
 
 // ── أدوات مساعدة ────────────────────────────────────────────────────────────
 
-/** نفس منطق getPostSlug في src/utils/posts.ts */
-function cleanSlug(slug) {
-  return slug.replace(/\.html$/, '').replace(/\//g, '-');
-}
-
-/** يحوّل رابط تدوينة كامل إلى slug: /2026/07/blog-post.html → 2026-07-blog-post */
-function slugFromUrl(url) {
-  return cleanSlug(url.replace(/^https?:\/\/[^/]+\//, ''));
-}
-
-function decodeEntities(s) {
-  const named = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' };
-  return s
-    .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(Number(d)))
-    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
-    .replace(/&([a-z]+);/gi, (m, n) => (n.toLowerCase() in named ? named[n.toLowerCase()] : m));
-}
-
-/** استخراج نص مقروء من HTML التدوينة — الفواصل بين الكتل تصبح أسطراً */
-function htmlToText(html) {
-  return decodeEntities(
-    html
-      .replace(/<(script|style)[\s\S]*?<\/\1>/gi, '')
-      .replace(/<br\s*\/?>/gi, '\n')
-      .replace(/<\/(p|div|h[1-6]|li|tr|blockquote)>/gi, '\n')
-      .replace(/<[^>]+>/g, '')
-  )
-    .replace(/[ \t ]+/g, ' ')
-    .split('\n')
-    .map((l) => l.trim())
-    .filter((l, i, a) => l !== '' || (i > 0 && a[i - 1] !== ''))
-    .join('\n')
-    .trim();
-}
-
 /**
  * يقتطع <div class="post-body entry-content"> ... </div> مع احترام التداخل.
  * regex وحده يفشل هنا لأن جسم التدوينة مليء بـ <div> متداخلة.
@@ -97,47 +63,6 @@ function extractPostBody(html) {
     if (depth === 0) return html.slice(start, m.index + m[0].length);
   }
   return null;
-}
-
-/** صور Blogger: الرابط الملفوف = النسخة الكبيرة، وسمة src = المصغّرة */
-function extractImages(bodyHtml) {
-  const images = [];
-  const seen = new Set();
-
-  const wrapped = /<a[^>]+href=["']([^"']*(?:googleusercontent|blogspot)[^"']*)["'][^>]*>\s*<img([^>]*)>/gi;
-  let m;
-  while ((m = wrapped.exec(bodyHtml)) !== null) {
-    const src = /src=["']([^"']+)["']/i.exec(m[2]);
-    if (!src) continue;
-    const original = decodeEntities(m[1]);
-    if (seen.has(original)) continue;
-    seen.add(original);
-    seen.add(decodeEntities(src[1]));
-    images.push({
-      original_url: original,
-      thumbnail_url: decodeEntities(src[1]),
-      alt: decodeEntities((/alt=["']([^"']*)["']/i.exec(m[2]) || ['', ''])[1]),
-      local_path: '',
-    });
-  }
-
-  // صور غير ملفوفة برابط
-  const bare = /<img([^>]*)>/gi;
-  while ((m = bare.exec(bodyHtml)) !== null) {
-    const src = /src=["']([^"']+)["']/i.exec(m[1]);
-    if (!src) continue;
-    const url = decodeEntities(src[1]);
-    if (seen.has(url) || !/googleusercontent|blogspot|ggpht/.test(url)) continue;
-    seen.add(url);
-    images.push({
-      original_url: url,
-      thumbnail_url: url,
-      alt: decodeEntities((/alt=["']([^"']*)["']/i.exec(m[1]) || ['', ''])[1]),
-      local_path: '',
-    });
-  }
-
-  return images;
 }
 
 async function getJson(url) {
