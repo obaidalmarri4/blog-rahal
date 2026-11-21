@@ -8,7 +8,8 @@
  * يستعمله scripts/studio-write-check.mjs ليختبر الكتابة بلا مساس بالمستودع الحقيقي، وليصنع
  * ما لا يُصنع على GitHub عند الطلب: دفعة من البوت بين القراءة والكتابة، عطل، توكن مرفوض.
  *
- * أشكال الردود (ومنها خطأ STALE_DATA) منقولة عن ردود GitHub الحقيقية في 2026-11-20.
+ * أشكال الردود (ومنها خطأ STALE_DATA) منقولة عن ردود GitHub الحقيقية في 2026-11-20، وردّ
+ * الكتابتين المتزامنتين (FORBIDDEN ‎"is at … but expected …"‎) عن تجربة فرع studio-sandbox في 2026-11-21.
  * تغيير في src/lib/studio/github.ts يغيّر الاستعلام يحتاج تحديثاً هنا.
  */
 
@@ -80,8 +81,17 @@ export async function createFakeGitHub({ root, token, repo, branch, seed }) {
 
     /** دوال تُنفَّذ — واحدة لكل طلب كتابة قادم — قبل أن يُفحص expectedHeadOid */
     beforeCommit: [],
+    /**
+     * كتابة أخرى وصلت في اللحظة نفسها وسبقت: الدالة تُنفَّذ بعد أن يمرّ فحص expectedHeadOid، فيفشل
+     * تحديث الفرع ويردّ GitHub بـFORBIDDEN (لا STALE_DATA).
+     */
+    duringCommit: [],
+    /** رفض قادم: كل عنصر مصفوفة `errors` يُردّ بها على طلب الكتابة التالي بلا كتابة (صلاحيات مثلاً) */
+    commitErrors: [],
     /** أعطال قادمة: كل عنصر رمز حالة HTTP يُردّ به على الطلب التالي */
     failures: [],
+    /** مثلها لطلبات الكتابة وحدها: رمز حالة HTTP يُردّ به على طلب الكتابة التالي بلا تنفيذه */
+    commitFailures: [],
 
     close: () => new Promise((resolve) => server.close(resolve)),
   };
@@ -139,6 +149,21 @@ export async function createFakeGitHub({ root, token, repo, branch, seed }) {
       };
     }
 
+    const refusal = fake.commitErrors.shift();
+    if (refusal) {
+      fake.log.push({ kind: 'refused', errors: refusal });
+      return { data: { createCommitOnBranch: null }, errors: refusal };
+    }
+
+    fake.duringCommit.shift()?.();
+    if (input.expectedHeadOid !== head) {
+      fake.log.push({ kind: 'stale', race: true, expected: input.expectedHeadOid, head });
+      return {
+        data: { createCommitOnBranch: null },
+        errors: [{ type: 'FORBIDDEN', message: `is at ${head} but expected ${input.expectedHeadOid}` }],
+      };
+    }
+
     const additions = input.fileChanges?.additions ?? [];
     const deletions = input.fileChanges?.deletions ?? [];
     const missing = deletions.find((file) => !files.has(file.path));
@@ -178,6 +203,10 @@ export async function createFakeGitHub({ root, token, repo, branch, seed }) {
       const url = new URL(req.url, 'http://fake');
       if (req.method === 'POST' && url.pathname === '/graphql') {
         const { query, variables } = JSON.parse(Buffer.concat(chunks).toString('utf-8'));
+        if (query.includes('createCommitOnBranch') && fake.commitFailures.length > 0) {
+          fake.log.push({ kind: 'commit-failed' });
+          return send(res, fake.commitFailures.shift(), { message: 'Server Error' });
+        }
         return send(res, 200, query.includes('createCommitOnBranch') ? commit(variables) : snapshot(variables));
       }
 

@@ -74,8 +74,11 @@ export interface CommitRequest {
 export type DeployState = 'pending' | 'success' | 'failure' | 'unknown';
 
 const TIMEOUT_MS = 20_000;
+/** أعطال عابرة من GitHub نفسه — ظهر 503 على قراءة أثناء تجربة فرع studio-sandbox (2026-11-21) */
+const TRANSIENT = new Set([502, 503, 504]);
+const RETRY_PAUSE_MS = 400;
 
-async function call(repo: RepoConfig, path: string, init: RequestInit = {}): Promise<Response> {
+async function send(repo: RepoConfig, path: string, init: RequestInit): Promise<Response> {
   try {
     return await fetch(`${repo.api}${path}`, {
       ...init,
@@ -92,22 +95,50 @@ async function call(repo: RepoConfig, path: string, init: RequestInit = {}): Pro
   }
 }
 
+/**
+ * طلب إلى GitHub. `repeatable` = قراءة لا تغيّر شيئاً: تُعاد مرة واحدة إن ردّ GitHub بعطل عابر.
+ * الكتابة لا تُعاد هكذا أبداً — ردّ 5xx لا يقول هل نُفّذ الـcommit أم لا.
+ */
+async function call(repo: RepoConfig, path: string, init: RequestInit = {}, repeatable = false): Promise<Response> {
+  const res = await send(repo, path, init);
+  if (!repeatable || !TRANSIENT.has(res.status)) return res;
+  await res.body?.cancel();
+  await new Promise((resolve) => setTimeout(resolve, RETRY_PAUSE_MS));
+  return send(repo, path, init);
+}
+
 interface GraphQLError {
   type?: string;
   message?: string;
 }
 
-async function graphql<T>(repo: RepoConfig, query: string, variables: Record<string, unknown>): Promise<T> {
-  const res = await call(repo, '/graphql', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query, variables }),
-  });
+/**
+ * «الفرع تحرّك منذ قُرئ» يقولها GitHub بشكلين (الثاني ثبت بالتجربة على المستودع الحقيقي 2026-11-21):
+ *   - `STALE_DATA`: الفرع تحرّك قبل وصول طلب الكتابة.
+ *   - `FORBIDDEN` برسالة ‎"is at <oid> but expected <oid>"‎: كتابتان وصلتا في اللحظة نفسها؛ فحص الرأس
+ *     مرّ للاثنتين، ثم خسرت هذه تحديث الفرع.
+ * النوع `FORBIDDEN` يحمله أيضاً رفض الصلاحيات الحقيقي (توكن للقراءة فقط)، وذاك لا يُعاد؛ فلا يميّز
+ * الحالة الثانية إلا نص رسالتها كاملاً.
+ */
+const HEAD_MOVED_MESSAGE = /^is at [0-9a-f]{40} but expected [0-9a-f]{40}$/;
+const headMoved = (error: GraphQLError): boolean => error.type === 'STALE_DATA' || HEAD_MOVED_MESSAGE.test(error.message ?? '');
+
+async function graphql<T>(repo: RepoConfig, query: string, variables: Record<string, unknown>, repeatable = false): Promise<T> {
+  const res = await call(
+    repo,
+    '/graphql',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, variables }),
+    },
+    repeatable
+  );
   if (!res.ok) throw new GitHubError('http', `GitHub GraphQL ${res.status}`, res.status);
 
   const payload = (await res.json()) as { data?: T; errors?: GraphQLError[] };
   if (payload.errors?.length) {
-    if (payload.errors.some((error) => error.type === 'STALE_DATA')) throw new StaleHeadError();
+    if (payload.errors.some(headMoved)) throw new StaleHeadError();
     throw new GitHubError('graphql', payload.errors.map((error) => error.message).join(' | '));
   }
   if (!payload.data) throw new GitHubError('graphql', 'empty GraphQL response');
@@ -155,12 +186,17 @@ export interface SnapshotPaths {
 
 /** رأس الفرع + ملفّا التصنيف والمحذوفات + أسماء ملفات التدوينات ومعرّفاتها — في طلب واحد */
 export async function readSnapshot(repo: RepoConfig, paths: SnapshotPaths): Promise<Snapshot> {
-  const data = await graphql<SnapshotData>(repo, SNAPSHOT_QUERY, {
-    owner: repo.owner,
-    name: repo.name,
-    ref: `refs/heads/${repo.branch}`,
-    ...paths,
-  });
+  const data = await graphql<SnapshotData>(
+    repo,
+    SNAPSHOT_QUERY,
+    {
+      owner: repo.owner,
+      name: repo.name,
+      ref: `refs/heads/${repo.branch}`,
+      ...paths,
+    },
+    true
+  );
 
   const target = data.repository?.ref?.target;
   if (!target) throw new GitHubError('no_branch', `branch "${repo.branch}" not found`);
@@ -187,9 +223,12 @@ export async function readSnapshot(repo: RepoConfig, paths: SnapshotPaths): Prom
 /** محتوى ملف كما هو عند commit بعينه (حتى 100MB) */
 export async function readFile(repo: RepoConfig, path: string, ref: string): Promise<string> {
   const encoded = path.split('/').map(encodeURIComponent).join('/');
-  const res = await call(repo, `/repos/${repo.owner}/${repo.name}/contents/${encoded}?ref=${encodeURIComponent(ref)}`, {
-    headers: { Accept: 'application/vnd.github.raw+json' },
-  });
+  const res = await call(
+    repo,
+    `/repos/${repo.owner}/${repo.name}/contents/${encoded}?ref=${encodeURIComponent(ref)}`,
+    { headers: { Accept: 'application/vnd.github.raw+json' } },
+    true
+  );
   if (!res.ok) throw new GitHubError('http', `GitHub contents ${res.status} for ${path}`, res.status);
   return res.text();
 }
@@ -222,9 +261,7 @@ export async function createCommit(repo: RepoConfig, request: CommitRequest): Pr
 
 /** حالة نشر commit كما يكتبها Vercel على GitHub — فلا تحتاج اللوحة توكن Vercel */
 export async function deployState(repo: RepoConfig, sha: string): Promise<{ state: DeployState; url: string | null }> {
-  const res = await call(repo, `/repos/${repo.owner}/${repo.name}/commits/${sha}/status`, {
-    headers: { Accept: 'application/vnd.github+json' },
-  });
+  const res = await call(repo, `/repos/${repo.owner}/${repo.name}/commits/${sha}/status`, { headers: { Accept: 'application/vnd.github+json' } }, true);
   if (!res.ok) throw new GitHubError('http', `GitHub status ${res.status}`, res.status);
 
   const payload = (await res.json()) as { statuses?: { context: string; state: string; target_url: string | null }[] };

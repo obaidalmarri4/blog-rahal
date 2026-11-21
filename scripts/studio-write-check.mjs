@@ -280,6 +280,25 @@ check('دفعة من البوت بين القراءة والكتابة: الحف
 check('لم يضع شيء: تدوينة البوت وتعديل اللوحة معاً في المستودع', github.read(BOT_FILE) === BOT_POST && readPost(A).title === 'تعديل تزامن مع البوت');
 check('القائمة تعرض تدوينة البوت التي لم يعرفها البناء', (await request('/studio')).text.includes('تدوينة البوت'));
 
+// كتابتان في اللحظة نفسها: GitHub الحقيقي يردّ على الخاسرة بـFORBIDDEN «is at … but expected …» لا STALE_DATA
+stale = github.count('stale');
+github.duringCommit.push(() => github.push({ additions: { [BOT_FILE]: `${BOT_POST}\n` }, headline: 'كتابة سبقت في اللحظة نفسها' }));
+res = await save(A, { title: 'تعديل خسر السباق ثم أُعيد' });
+check(
+  'كتابتان في اللحظة نفسها (ردّ FORBIDDEN «is at … but expected …»): تُعاد المحاولة ويُحفظ الاثنان',
+  res.status === 303 && github.count('stale') - stale === 1 && github.log.some((entry) => entry.kind === 'stale' && entry.race) && readPost(A).title === 'تعديل خسر السباق ثم أُعيد' && github.read(BOT_FILE) === `${BOT_POST}\n`,
+  `${res.status}، مرفوضات: ${github.count('stale') - stale}`
+);
+
+let countBeforeRefusal = commits().length;
+github.commitErrors.push([{ type: 'FORBIDDEN', message: 'Resource not accessible by personal access token' }]);
+res = await save(A, { title: 'لن يُحفظ: التوكن بلا صلاحية كتابة' });
+check(
+  'رفض صلاحيات حقيقي (FORBIDDEN برسالة أخرى) لا يُعاد: خطأ واضح بعد محاولة واحدة، بلا كتابة',
+  res.status === 502 && github.count('refused') === 1 && github.commitErrors.length === 0 && commits().length === countBeforeRefusal && readPost(A).title === 'تعديل خسر السباق ثم أُعيد',
+  `الحالة ${res.status}، محاولات مرفوضة: ${github.count('refused')}`
+);
+
 const deviceOne = (await open(A)).base;
 const deviceTwo = (await open(A)).base;
 await save(A, { title: 'عنوان من الجهاز الأول' }, deviceOne);
@@ -468,6 +487,19 @@ section('٩. أعطال المستودع');
 github.failures.push(500);
 res = await request('/studio');
 check('عطل في GitHub: رسالة واضحة (502) والصفحة لا تنهار', res.status === 502 && res.text.includes('تعذّر فتح قائمة التدوينات') && res.text.includes('أهلاً د. وائل'), `الحالة ${res.status}`);
+
+github.failures.push(503);
+res = await request('/studio');
+check('عطل عابر (503) على قراءة: تُعاد مرة واحدة والقائمة تفتح', res.status === 200 && github.failures.length === 0 && (res.text.match(/data-post /g)?.length ?? 0) > 400, `الحالة ${res.status}`);
+
+github.failures.push(503, 503);
+res = await request('/studio');
+check('عطل يتكرّر: إعادة واحدة لا أكثر، ثم رسالة واضحة (502)', res.status === 502 && github.failures.length === 0 && res.text.includes('تعذّر فتح قائمة التدوينات'), `الحالة ${res.status}`);
+
+count = commits().length;
+github.commitFailures.push(503);
+res = await save(A, { title: 'عطل أثناء الكتابة' });
+check('عطل (503) على طلب الكتابة نفسه: لا يُعاد إرساله، خطأ واضح بلا كتابة', res.status === 502 && github.count('commit-failed') === 1 && github.commitFailures.length === 0 && commits().length === count, `الحالة ${res.status}، محاولات: ${github.count('commit-failed')}`);
 
 github.truncateOver = 2000;
 res = await request('/studio');
