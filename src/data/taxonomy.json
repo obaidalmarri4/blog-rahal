@@ -1,11 +1,10 @@
 {
   "posts": {
     "2025-12-blog-post": {
-      "continent": "أفريقيا",
-      "countries": [
-        "مالي"
-      ],
-      "type": "travel"
+      "continent": null,
+      "countries": [],
+      "type": "other",
+      "category": "عام"
     },
     "2025-11-1447": {
       "continent": null,
