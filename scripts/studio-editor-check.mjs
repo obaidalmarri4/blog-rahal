@@ -24,8 +24,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { JSDOM } from 'jsdom';
 import { Transform } from '@tiptap/pm/transform';
-import { reconcileImages } from './lib/post-html.mjs';
-import { bodyForSave, loadBody, parseBody } from '../src/lib/studio/document.js';
+import { extractImages, reconcileImages } from './lib/post-html.mjs';
+import { bodyForSave, loadBody, parseBody, schema } from '../src/lib/studio/document.js';
 import { FONT_SIZES, TEXT_COLORS } from '../src/lib/studio/formatting.js';
 import { cleanPastedHTML } from '../src/lib/studio/paste.js';
 import { expandRawBlocks, splitRawBlocks } from '../src/lib/studio/raw-blocks.js';
@@ -311,6 +311,43 @@ for (const [label, needle] of [
 ]) {
   check(`${label}: قاعدة في global.css`, css.includes(needle));
 }
+
+// ── 7. صورة مرفوعة ──────────────────────────────────────────────────────────
+
+section('٧. صورة مرفوعة من الجوال (Blob)');
+
+// ما يدرجه المحرّر بعد الرفع (src/scripts/studio/editor.ts): فقرة فيها الصورة بنسختيها
+const UPLOADED = 'https://abc123.public.blob.vercel-storage.com/posts/2026/11/k3Jx9QmZ2pLw';
+const uploadedImage = () =>
+  schema.nodes.paragraph.create(null, schema.nodes.image.create({ src: `${UPLOADED}.jpg`, thumb: `${UPLOADED}-thumb.jpg`, alt: 'وصف', loading: 'lazy' }));
+
+const fresh = loadBody('', document).doc;
+const freshDoc = new Transform(fresh).insert(0, [schema.nodes.paragraph.create(null, schema.text('نص التدوينة')), uploadedImage()]).doc;
+const freshHtml = bodyForSave(freshDoc, document);
+const freshVerdict = checkBody(freshHtml, [], '');
+check('تدوينة جديدة بصورة مرفوعة: يقبلها الخادم كما هي', freshVerdict.ok && freshVerdict.html === freshHtml, freshVerdict.ok ? freshVerdict.html : freshVerdict.reason);
+const freshImages = extractImages(freshHtml);
+check(
+  '…و‎images[]‎ تأخذ النسختين والوصف (الغلاف = أول صورة)',
+  freshImages.length === 1 && freshImages[0].original_url === `${UPLOADED}.jpg` && freshImages[0].thumbnail_url === `${UPLOADED}-thumb.jpg` && freshImages[0].alt === 'وصف',
+  JSON.stringify(freshImages)
+);
+
+const withPhotos = posts.find((post) => post.images.length >= 2 && post.content_html.length < 200_000);
+const oldDoc = loadBody(withPhotos.content_html, document).doc;
+const addedDoc = new Transform(oldDoc).insert(oldDoc.content.size, uploadedImage()).doc;
+const addedHtml = expandRawBlocks(bodyForSave(addedDoc, document));
+const addedWire = splitRawBlocks(bodyForSave(addedDoc, document));
+const addedVerdict = checkBody(addedWire.html, addedWire.raw, withPhotos.content_html);
+const reconciled = reconcileImages(withPhotos.images, withPhotos.content_html, addedHtml);
+check('صورة مرفوعة تُضاف لتدوينة قديمة: يقبلها الخادم', addedVerdict.ok, addedVerdict.ok ? '' : addedVerdict.reason);
+check(
+  '…و‎images[]‎ القديمة كما هي حرفاً، والجديدة في آخرها',
+  reconciled.length === withPhotos.images.length + 1 &&
+    JSON.stringify(reconciled.slice(0, -1)) === JSON.stringify(withPhotos.images) &&
+    reconciled.at(-1).original_url === `${UPLOADED}.jpg`,
+  `${withPhotos.images.length} → ${reconciled.length}`
+);
 
 console.log(
   failures === 0

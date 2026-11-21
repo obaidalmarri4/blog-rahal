@@ -1,9 +1,10 @@
 /**
- * محرّر نص التدوينة (‎/studio/edit/<slug>‎).
+ * محرّر نص التدوينة، بوضعين:
+ *   - ‎edit‎ (‎/studio/edit/<slug>‎): يحمّل النص طازجاً من ‎/api/studio/posts/<slug>‎ ويحفظه بطلب PUT.
+ *   - ‎new‎ (‎/studio/new‎): محرّر فارغ مع نموذج الحقول، وينشر بطلب ‎POST /api/studio/posts‎.
  *
- * يحمّل النص طازجاً من ‎/api/studio/posts/<slug>‎، يفتحه في TipTap بمخطط اللوحة، ويحفظه بطلب
- * PUT. التحميل والتسلسل بدوال src/lib/studio/document.js نفسها التي تختبرها البوابات — لا
- * بدوال TipTap النصّية.
+ * التحميل والتسلسل بدوال src/lib/studio/document.js نفسها التي تختبرها البوابات — لا بدوال
+ * TipTap النصّية. الصور تُصغَّر في المتصفح (images.ts) وتُرفع إلى ‎/api/studio/media‎.
  */
 
 import { Editor } from '@tiptap/core';
@@ -13,11 +14,12 @@ import { expandRawBlocks, splitRawBlocks } from '../../lib/studio/raw-blocks.js'
 import { RawBlock, studioExtensions } from '../../lib/studio/schema.js';
 import { watchDeploy } from './deploy-status.ts';
 import { clearDraft, readDraft, writeDraft } from './drafts.ts';
-
-const root = document.querySelector<HTMLElement>('[data-studio-editor]');
-if (root) void start(root);
+import type { Draft } from './drafts.ts';
+import { prepareImage } from './images.ts';
 
 const SETTLE_MS = 1500;
+/** مفتاح مسودة «تدوينة جديدة» على هذا الجهاز (التدوينات القائمة مفتاحها الـslug) */
+const NEW_DRAFT = 'new';
 
 /** وصف مختصر لكتلة محفوظة: يظهر مكانها في المحرّر (محتواها لا يُعرض ولا يُنفَّذ هنا) */
 function describeRaw(html: string): { label: string; detail: string; thumb: string | null } {
@@ -67,9 +69,18 @@ const RawBlockView = RawBlock.extend({
 
 const clock = (time: number) => new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn', { hour: 'numeric', minute: '2-digit' }).format(time);
 
+/** معرّف «تدوينة جديدة»: ستّة أحرف، يدخل في الـslug ويمنع نشرها مرتين */
+function newPostId(): string {
+  const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  return [...crypto.getRandomValues(new Uint8Array(6))].map((byte) => alphabet[byte % alphabet.length]).join('');
+}
+
+type MetaSnapshot = Record<string, string | string[]>;
+
 async function start(root: HTMLElement) {
-  const slug = root.dataset.slug!;
-  const api = `/api/studio/posts/${encodeURIComponent(slug)}`;
+  const mode = root.dataset.mode === 'new' ? 'new' : 'edit';
+  const slug = root.dataset.slug ?? '';
+  const draftKey = mode === 'new' ? NEW_DRAFT : slug;
   const query = <T extends HTMLElement>(selector: string) => root.querySelector<T>(selector)!;
 
   const mount = query('[data-editor-mount]');
@@ -80,9 +91,14 @@ async function start(root: HTMLElement) {
   const linkBar = query('[data-editor-linkbar]');
   const linkInput = query<HTMLInputElement>('[data-editor-linkbar] input');
   const selectedBar = query('[data-editor-selected]');
+  const altButton = query<HTMLButtonElement>('[data-cmd="alt"]');
+  const altBar = query('[data-editor-altbar]');
+  const altInput = query<HTMLInputElement>('[data-editor-altbar] input');
+  const fileInput = query<HTMLInputElement>('[data-editor-file]');
   const sizeSelect = query<HTMLSelectElement>('[data-select="size"]');
   const blockSelect = query<HTMLSelectElement>('[data-select="block"]');
   const preview = document.querySelector<HTMLDialogElement>('[data-editor-preview]')!;
+  const metaForm = root.querySelector<HTMLFormElement>('[data-new-meta]');
 
   /** رسالة فوق المحرّر، مع أزرار اختيارية */
   function announce(text: string, kind: 'info' | 'error' | 'saved', actions: [string, () => void][] = []) {
@@ -102,31 +118,88 @@ async function start(root: HTMLElement) {
       button.addEventListener('click', action);
       notice.append(button);
     }
+    if (kind === 'error') notice.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  // ── حقول «تدوينة جديدة» ────────────────────────────────────────────────────
+
+  /** الحقول كما في النموذج الآن — للمسودة وللنشر */
+  function readMetaForm(): MetaSnapshot {
+    if (!metaForm) return {};
+    const form = new FormData(metaForm);
+    const value = (name: string) => String(form.get(name) ?? '');
+    return {
+      title: value('title'),
+      date: value('date'),
+      labels: value('labels'),
+      type: value('type'),
+      country: value('country'),
+      countries: form.getAll('countries').map(String),
+      category: value('category'),
+    };
+  }
+
+  function fillMetaForm(meta: MetaSnapshot) {
+    if (!metaForm) return;
+    for (const element of metaForm.elements) {
+      const field = element as HTMLInputElement;
+      if (!field.name || !(field.name in meta)) continue;
+      const value = meta[field.name];
+      if (field.type === 'radio') field.checked = field.value === value;
+      else if (field.type === 'checkbox') field.checked = Array.isArray(value) && value.includes(field.value);
+      else field.value = Array.isArray(value) ? value.join('\n') : value;
+    }
+  }
+
+  function clearFieldErrors() {
+    for (const error of root.querySelectorAll('[data-js-error]')) error.remove();
+  }
+
+  function showFieldErrors(errors: Record<string, string>) {
+    clearFieldErrors();
+    let first: HTMLElement | null = null;
+    for (const [field, message] of Object.entries(errors)) {
+      const holder = root.querySelector<HTMLElement>(`[data-field="${field}"]`);
+      if (!holder) continue;
+      const error = document.createElement('span');
+      error.className = 'studio-error';
+      error.setAttribute('role', 'alert');
+      error.dataset.jsError = '';
+      error.textContent = message;
+      holder.append(error);
+      first ??= holder;
+    }
+    first?.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
 
   // ── التحميل ────────────────────────────────────────────────────────────────
 
-  let body: { title: string; html: string; base: string; locked: boolean; error?: string };
-  try {
-    const response = await fetch(api, { headers: { Accept: 'application/json' } });
-    body = await response.json();
-    if (!response.ok) throw new Error(body.error);
-  } catch (err) {
-    mount.replaceChildren();
-    return announce(err instanceof Error && err.message ? err.message : 'تعذّر فتح التدوينة. حدّث الصفحة.', 'error');
-  }
-  if (body.locked) {
-    mount.replaceChildren();
-    return announce('هذه التدوينة أكبر من أن تُحرَّر من اللوحة. عدّل بياناتها من صفحتها، ولتعديل نصها أخبر عبيد.', 'error');
+  let initialHtml = '';
+  let base = '';
+  if (mode === 'edit') {
+    let body: { title: string; html: string; base: string; locked: boolean; error?: string };
+    try {
+      const response = await fetch(`/api/studio/posts/${encodeURIComponent(slug)}`, { headers: { Accept: 'application/json' } });
+      body = await response.json();
+      if (!response.ok) throw new Error(body.error);
+    } catch (err) {
+      mount.replaceChildren();
+      return announce(err instanceof Error && err.message ? err.message : 'تعذّر فتح التدوينة. حدّث الصفحة.', 'error');
+    }
+    if (body.locked) {
+      mount.replaceChildren();
+      return announce('هذه التدوينة أكبر من أن تُحرَّر من اللوحة. عدّل بياناتها من صفحتها، ولتعديل نصها أخبر عبيد.', 'error');
+    }
+    initialHtml = body.html;
+    base = body.base;
   }
 
-  let base = body.base;
   mount.replaceChildren();
 
   const editor = new Editor({
     element: mount,
     extensions: studioExtensions.map((extension) => (extension.name === 'rawBlock' ? RawBlockView : extension)),
-    content: loadBody(body.html, document).doc.toJSON(),
+    content: loadBody(initialHtml, document).doc.toJSON(),
     editorProps: {
       attributes: { class: 'post-content studio-page', dir: 'rtl', 'aria-label': 'نص التدوينة' },
       transformPastedHTML: (html) => cleanPastedHTML(html, document),
@@ -136,67 +209,85 @@ async function start(root: HTMLElement) {
   const current = () => bodyForSave(editor.state.doc, document);
   /** ما في المستودع الآن، بتسلسل هذا المحرّر — «تغيّر شيء؟» تُقاس عليه */
   let saved = current();
+  let postId = newPostId();
+  let savedMeta = JSON.stringify(readMetaForm());
   let dirty = false;
   let saving = false;
+  let uploading = 0;
   let timer = 0;
+
+  const changed = () => current() !== saved || (mode === 'new' && JSON.stringify(readMetaForm()) !== savedMeta);
 
   function showState(text: string) {
     stateLabel.textContent = text;
-    saveButton.disabled = !dirty || saving;
+    saveButton.disabled = !dirty || saving || uploading > 0;
   }
 
   /** بعد أن يهدأ الكاتب: هل بقي فرق عن المحفوظ؟ إن بقي تُكتب النسخة الاحتياطية */
   async function settle() {
-    const html = current();
-    dirty = html !== saved;
+    dirty = changed();
     if (!dirty) {
-      await clearDraft(slug);
+      await clearDraft(draftKey);
       return showState('لا تغييرات');
     }
     const at = Date.now();
-    const stored = await writeDraft({ slug, html, base, at });
-    showState(stored === undefined ? 'تغييرات غير محفوظة' : `تغييرات غير محفوظة · نسخة احتياطية على هذا الجهاز ${clock(at)}`);
+    const draft: Draft = { slug: draftKey, html: current(), base, at };
+    if (mode === 'new') Object.assign(draft, { id: postId, meta: readMetaForm() });
+    const stored = await writeDraft(draft);
+    const pending = mode === 'new' ? 'لم تُنشر بعد' : 'تغييرات غير محفوظة';
+    showState(stored === undefined ? pending : `${pending} · نسخة احتياطية على هذا الجهاز ${clock(at)}`);
   }
 
-  editor.on('update', () => {
+  function touched() {
     dirty = true;
-    showState('تغييرات غير محفوظة');
+    showState(mode === 'new' ? 'لم تُنشر بعد' : 'تغييرات غير محفوظة');
     window.clearTimeout(timer);
     timer = window.setTimeout(settle, SETTLE_MS);
-  });
+  }
+
+  editor.on('update', touched);
+  metaForm?.addEventListener('input', touched);
+  metaForm?.addEventListener('change', touched);
+  metaForm?.addEventListener('submit', (event) => event.preventDefault());
 
   window.addEventListener('beforeunload', (event) => {
-    if (dirty) event.preventDefault();
+    if (dirty || uploading > 0) event.preventDefault();
   });
 
-  showState('لا تغييرات');
+  showState(mode === 'new' ? 'ابدأ بالعنوان ثم النص' : 'لا تغييرات');
 
   // نسخة احتياطية من جلسة سابقة انقطعت
-  const draft = await readDraft(slug);
-  if (draft && draft.html !== saved) {
-    const moved = draft.base !== base ? ' تنبيه: نص التدوينة على الموقع تغيّر بعدها، فراجع قبل الحفظ.' : '';
-    announce(`على هذا الجهاز تعديلات لم تُحفظ من ${clock(draft.at)}.${moved}`, 'info', [
+  const draft = await readDraft(draftKey);
+  if (draft && (draft.html !== saved || (mode === 'new' && draft.meta && JSON.stringify(draft.meta) !== savedMeta))) {
+    const moved = mode === 'edit' && draft.base !== base ? ' تنبيه: نص التدوينة على الموقع تغيّر بعدها، فراجع قبل الحفظ.' : '';
+    const what = mode === 'new' ? 'تدوينة جديدة لم تُنشر' : 'تعديلات لم تُحفظ';
+    announce(`على هذا الجهاز ${what} من ${clock(draft.at)}.${moved}`, 'info', [
       [
         'استرجاعها',
         () => {
           editor.commands.setContent(parseBody(expandRawBlocks(draft.html), document).toJSON());
+          if (mode === 'new') {
+            if (draft.meta) fillMetaForm(draft.meta);
+            if (draft.id) postId = draft.id;
+          }
           notice.hidden = true;
+          touched();
         },
       ],
       [
         'تجاهلها',
         () => {
-          void clearDraft(slug);
+          void clearDraft(draftKey);
           notice.hidden = true;
         },
       ],
     ]);
   }
 
-  // ── الحفظ ──────────────────────────────────────────────────────────────────
+  // ── الحفظ (تدوينة قائمة) ───────────────────────────────────────────────────
 
   async function save() {
-    if (saving) return;
+    if (saving || uploading > 0) return;
     window.clearTimeout(timer);
     const html = current();
     if (html === saved) {
@@ -206,7 +297,7 @@ async function start(root: HTMLElement) {
     saving = true;
     showState('جارٍ الحفظ…');
     try {
-      const response = await fetch(api, {
+      const response = await fetch(`/api/studio/posts/${encodeURIComponent(slug)}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({ ...splitRawBlocks(html), base }),
@@ -216,7 +307,7 @@ async function start(root: HTMLElement) {
 
       saved = html;
       dirty = current() !== saved;
-      await clearDraft(slug);
+      await clearDraft(draftKey);
       if (result.commit) {
         base = result.base!;
         announce('تم الحفظ ✓', 'saved');
@@ -239,6 +330,106 @@ async function start(root: HTMLElement) {
     }
   }
 
+  // ── النشر (تدوينة جديدة) ───────────────────────────────────────────────────
+
+  async function publish() {
+    if (saving || uploading > 0) return;
+    window.clearTimeout(timer);
+    clearFieldErrors();
+    const meta = readMetaForm();
+    const html = current();
+
+    const local: Record<string, string> = {};
+    if (!String(meta.title).trim()) local.title = 'اكتب عنوان التدوينة.';
+    if (!html) local.body = 'اكتب نص التدوينة.';
+    if (Object.keys(local).length > 0) {
+      showFieldErrors(local);
+      return announce('ينقص التدوينة ما هو معلَّم بالأحمر.', 'error');
+    }
+
+    const type = String(meta.type);
+    const classification =
+      type === 'travel'
+        ? { type, countries: [String(meta.country), ...(meta.countries as string[])].filter(Boolean) }
+        : type === 'other'
+          ? { type, category: String(meta.category) }
+          : { type: 'none' };
+
+    saving = true;
+    showState('جارٍ النشر…');
+    try {
+      await settle();
+      const response = await fetch('/api/studio/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          id: postId,
+          title: meta.title,
+          date: meta.date,
+          labels: String(meta.labels).split(/\r?\n/),
+          classification,
+          ...splitRawBlocks(html),
+        }),
+      });
+      const result = (await response.json()) as { slug?: string; commit?: string; exists?: boolean; errors?: Record<string, string>; error?: string };
+
+      if (result.slug && (response.status === 201 || result.exists)) {
+        dirty = false;
+        await clearDraft(draftKey);
+        const after = result.commit ? `?saved=${result.commit}&new=1` : '';
+        window.location.assign(`/studio/post/${encodeURIComponent(result.slug)}${after}`);
+        return;
+      }
+      if (result.errors) {
+        showFieldErrors(result.errors);
+        throw new Error('ينقص التدوينة ما هو معلَّم بالأحمر.');
+      }
+      throw new Error(result.error);
+    } catch (err) {
+      saving = false;
+      dirty = true;
+      announce(err instanceof Error && err.message ? err.message : 'تعذّر النشر. تحقق من الاتصال وحاول مرة أخرى.', 'error');
+      showState('لم تُنشر — ما كتبته باقٍ هنا وعلى هذا الجهاز');
+    }
+  }
+
+  // ── الصور ──────────────────────────────────────────────────────────────────
+
+  async function uploadImages(files: File[]) {
+    uploading += 1;
+    showState('جارٍ رفع الصور…');
+    const failed: string[] = [];
+    for (const [index, file] of files.entries()) {
+      announce(files.length > 1 ? `جارٍ رفع الصورة ${index + 1} من ${files.length}…` : 'جارٍ رفع الصورة…', 'info');
+      try {
+        const { full, thumb } = await prepareImage(file);
+        const form = new FormData();
+        form.append('full', full, 'full.jpg');
+        form.append('thumb', thumb, 'thumb.jpg');
+        const response = await fetch('/api/studio/media', { method: 'POST', body: form, headers: { Accept: 'application/json' } });
+        const result = (await response.json()) as { src?: string; thumb?: string; error?: string };
+        if (!response.ok || !result.src) throw new Error(result.error);
+        editor
+          .chain()
+          .focus()
+          .insertContent({ type: 'paragraph', content: [{ type: 'image', attrs: { src: result.src, thumb: result.thumb, alt: '', loading: 'lazy' } }] })
+          .run();
+      } catch (err) {
+        failed.push(err instanceof Error && err.message ? err.message : `تعذّر رفع «${file.name}».`);
+      }
+    }
+    uploading -= 1;
+    if (failed.length > 0) announce(failed.join(' '), 'error');
+    else notice.hidden = true;
+    showState(dirty ? (mode === 'new' ? 'لم تُنشر بعد' : 'تغييرات غير محفوظة') : 'لا تغييرات');
+  }
+
+  fileInput.addEventListener('change', () => {
+    const files = [...(fileInput.files ?? [])];
+    fileInput.value = '';
+    if (files.length > 0) void uploadImages(files);
+  });
+
   // ── المعاينة ───────────────────────────────────────────────────────────────
 
   function openPreview() {
@@ -250,6 +441,12 @@ async function start(root: HTMLElement) {
       stand.className = 'studio-preview-video';
       stand.textContent = 'مقطع مضمَّن — يعمل على الموقع ولا يُعرض في المعاينة';
       frame.replaceWith(stand);
+    }
+    if (mode === 'new') {
+      const heading = document.createElement('h1');
+      heading.className = 'studio-preview-title';
+      heading.textContent = String(readMetaForm().title).trim();
+      holder.prepend(heading);
     }
     const styles = [...document.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]')]
       .map((link) => `<link rel="stylesheet" href="${link.href}">`)
@@ -285,6 +482,23 @@ async function start(root: HTMLElement) {
       const align = centered() ? null : 'center';
       chain().updateAttributes('paragraph', { align }).updateAttributes('heading', { align }).run();
     },
+    image: () => {
+      if (root.dataset.media !== 'on') return announce('رفع الصور غير مفعّل بعد. أخبر عبيد.', 'error');
+      fileInput.click();
+    },
+    alt: () => {
+      altInput.value = editor.getAttributes('image').alt ?? '';
+      altBar.hidden = false;
+      altInput.focus();
+    },
+    'alt-apply': () => {
+      chain().updateAttributes('image', { alt: altInput.value.replace(/\s+/g, ' ').trim() }).run();
+      altBar.hidden = true;
+    },
+    'alt-close': () => {
+      altBar.hidden = true;
+      editor.commands.focus();
+    },
     link: () => {
       linkInput.value = editor.getAttributes('link').href ?? '';
       linkBar.hidden = false;
@@ -308,7 +522,7 @@ async function start(root: HTMLElement) {
     'delete-selected': () => chain().deleteSelection().run(),
     preview: openPreview,
     'close-preview': () => preview.close(),
-    save: () => void save(),
+    save: () => void (mode === 'new' ? publish() : save()),
   };
 
   // الأزرار لا تسرق التحديد من النص: الضغط عليها لا ينقل التركيز
@@ -323,12 +537,17 @@ async function start(root: HTMLElement) {
       if (button) commands[button.dataset.cmd!]?.(button.dataset.value ?? '');
     });
   }
-  linkInput.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      commands['link-apply']('');
-    }
-  });
+  for (const [input, command] of [
+    [linkInput, 'link-apply'],
+    [altInput, 'alt-apply'],
+  ] as const) {
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        commands[command]('');
+      }
+    });
+  }
 
   sizeSelect.addEventListener('change', () => {
     if (sizeSelect.value) chain().setMark('fontSize', { size: sizeSelect.value }).run();
@@ -391,8 +610,11 @@ async function start(root: HTMLElement) {
     const node = (editor.state.selection as { node?: { type: { name: string } } }).node;
     const name = node ? SELECTED_NAMES[node.type.name] : undefined;
     // قبل أن يدخل الكاتب المحرّر يقف التحديد على أول عنصر تلقائياً — ليس اختياراً منه
-    selectedBar.hidden = !name || !editor.isFocused;
+    // خانة وصف الصورة تأخذ التركيز من المحرّر، والشريط يبقى ما دامت مفتوحة
+    selectedBar.hidden = !name || (!editor.isFocused && altBar.hidden);
     if (name) selectedBar.querySelector('span')!.textContent = name;
+    altButton.hidden = node?.type.name !== 'image';
+    if (node?.type.name !== 'image') altBar.hidden = true;
   }
 
   editor.on('transaction', refresh);
@@ -401,3 +623,7 @@ async function start(root: HTMLElement) {
   refresh();
   root.dataset.ready = '';
 }
+
+// في آخر الملف: start تعمل فوراً حتى أول await، وتحتاج كل ما فوقها معرَّفاً
+const root = document.querySelector<HTMLElement>('[data-studio-editor]');
+if (root) void start(root);

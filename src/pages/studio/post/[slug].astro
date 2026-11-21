@@ -2,16 +2,17 @@
 /**
  * صفحة التدوينة في اللوحة: تعديل بياناتها (العنوان، التاريخ، الوسوم، التصنيف) وحذفها.
  * نموذجان عاديان بلا JavaScript — الحفظ يحوّل إلى الصفحة نفسها مع شريط حالة النشر.
- * (نص التدوينة نفسه يُحرَّر في المرحلة 3.)
+ * (نص التدوينة يُحرَّر في ‎/studio/edit/<slug>‎؛ والحقول نفسها في src/components/studio/MetaFields.astro.)
  */
 import DeployStatus from '../../../components/studio/DeployStatus.astro';
+import MetaFields from '../../../components/studio/MetaFields.astro';
 import StudioLayout from '../../../layouts/StudioLayout.astro';
 import { publishesToSite, studioRepo } from '../../../lib/studio/config.ts';
 import { describeFailure, displayDate } from '../../../lib/studio/failure.ts';
 import type { Failure } from '../../../lib/studio/failure.ts';
 import { requireStudio } from '../../../lib/studio/guard.ts';
 import { deletePost, getPost, updatePostMeta } from '../../../lib/studio/store.ts';
-import { CATEGORIES, countriesByContinent } from '../../../lib/studio/taxonomy.ts';
+import { countriesByContinent } from '../../../lib/studio/taxonomy.ts';
 import { cleanLine, diffMeta, readBase, readMetaForm } from '../../../lib/studio/validate.ts';
 import type { FieldErrors, MetaValues } from '../../../lib/studio/validate.ts';
 
@@ -85,18 +86,18 @@ const base: MetaValues | null = post
 const shown = submitted ?? base;
 
 const groups = view ? countriesByContinent(view.taxonomy) : [];
-const chosen = shown?.classification.type === 'travel' ? shown.classification.countries : [];
-const category = shown?.classification.type === 'other' ? shown.classification.category : CATEGORIES[0];
 
 const saved = Astro.url.searchParams.get('saved') ?? '';
 const savedCommit = /^[0-9a-f]{40}$/.test(saved) ? saved : null;
+/** وصل من «تدوينة جديدة» بعد النشر */
+const isNew = Astro.url.searchParams.has('new');
 const today = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 ---
 
 <StudioLayout title={post ? `${post.title.trim()} — لوحة التحرير` : 'لوحة التحرير — رحّال الخبر'}>
   <p class="studio-back"><a href="/studio">كل التدوينات</a></p>
 
-  {savedCommit && <DeployStatus commit={savedCommit} message="تم الحفظ ✓" live={publishesToSite(repo)} />}
+  {savedCommit && <DeployStatus commit={savedCommit} message={isNew ? 'نُشرت التدوينة ✓' : 'تم الحفظ ✓'} live={publishesToSite(repo)} />}
   {saved === 'none' && <div class="studio-flash" role="status"><strong>لا يوجد تغيير للحفظ.</strong></div>}
 
   {
@@ -137,82 +138,7 @@ const today = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 
 
           {errors.form && <p class="studio-error" role="alert">{errors.form}</p>}
 
-          <label class="studio-field">
-            <span>العنوان</span>
-            <input class="studio-input" type="text" name="title" value={shown.title} maxlength="300" required />
-            {errors.title && <span class="studio-error" role="alert">{errors.title}</span>}
-          </label>
-
-          <label class="studio-field">
-            <span>التاريخ</span>
-            <input class="studio-input studio-input--date" type="date" name="date" value={shown.date} max={today} required />
-            {errors.date && <span class="studio-error" role="alert">{errors.date}</span>}
-          </label>
-
-          <label class="studio-field">
-            <span>الوسوم</span>
-            <textarea class="studio-input" name="labels" rows={Math.max(3, shown.labels.length + 1)}>{shown.labels.join('\n')}</textarea>
-            <small>وسم في كل سطر. اتركها فارغة إن لم ترد وسوماً.</small>
-            {errors.labels && <span class="studio-error" role="alert">{errors.labels}</span>}
-          </label>
-
-          <fieldset class="studio-cls">
-            <legend>أين تظهر التدوينة</legend>
-
-            <label class="studio-choice">
-              <input type="radio" name="type" value="travel" checked={shown.classification.type === 'travel'} />
-              <span>رحلة — تظهر في صفحة الدولة والقارّة</span>
-            </label>
-            <div class="studio-cls__travel">
-              <label class="studio-field">
-                <span>الدولة</span>
-                <select class="studio-input" name="country">
-                  <option value="">اختر الدولة</option>
-                  {groups.map((group) => (
-                    <optgroup label={group.continent}>
-                      {group.countries.map((country) => (
-                        <option value={country} selected={chosen[0] === country}>{country}</option>
-                      ))}
-                    </optgroup>
-                  ))}
-                </select>
-              </label>
-              <details class="studio-more" open={chosen.length > 1}>
-                <summary>الرحلة شملت دولاً أخرى</summary>
-                {groups.map((group) => (
-                  <div class="studio-checks">
-                    <strong>{group.continent}</strong>
-                    {group.countries.map((country) => (
-                      <label>
-                        <input type="checkbox" name="countries" value={country} checked={chosen.slice(1).includes(country)} />
-                        {country}
-                      </label>
-                    ))}
-                  </div>
-                ))}
-              </details>
-            </div>
-
-            <label class="studio-choice">
-              <input type="radio" name="type" value="other" checked={shown.classification.type === 'other'} />
-              <span>موضوع آخر — تظهر في «مواضيع أخرى»</span>
-            </label>
-            <div class="studio-cls__other">
-              <label class="studio-field">
-                <span>الفئة</span>
-                <select class="studio-input" name="category">
-                  {CATEGORIES.map((name) => <option value={name} selected={category === name}>{name}</option>)}
-                </select>
-              </label>
-            </div>
-
-            <label class="studio-choice">
-              <input type="radio" name="type" value="none" checked={shown.classification.type === 'none'} />
-              <span>بلا تصنيف — تظهر في المدوّنة والرئيسية فقط</span>
-            </label>
-
-            {errors.classification && <span class="studio-error" role="alert">{errors.classification}</span>}
-          </fieldset>
+          <MetaFields shown={shown} groups={groups} errors={errors} today={today} />
 
           <button type="submit" class="studio-button studio-button--primary">حفظ التعديلات</button>
         </form>

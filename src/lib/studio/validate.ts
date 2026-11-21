@@ -24,7 +24,7 @@ export interface MetaValues {
 export type MetaChange = Partial<MetaValues>;
 
 export type MetaField = keyof MetaValues;
-export type FieldErrors = Partial<Record<MetaField | 'form', string>>;
+export type FieldErrors = Partial<Record<MetaField | 'form' | 'body', string>>;
 
 const MAX_TITLE = 300;
 const MAX_LABELS = 30;

@@ -66,7 +66,10 @@ function badge(classification: Classification): string {
   {
     listing && (
       <>
-        <p class="studio-lead">تدويناتك كلها هنا. اضغط تدوينة لتعديل بياناتها أو حذفها.</p>
+        <p class="studio-lead">
+          <a class="studio-button studio-button--primary" href="/studio/new">تدوينة جديدة</a>
+        </p>
+        <p class="studio-lead">تدويناتك كلها هنا. اضغط تدوينة لتعديل بياناتها أو نصها، أو لحذفها.</p>
 
         <div class="studio-tools">
           <input

@@ -684,3 +684,17 @@ a.studio-button {
   width: 100%;
   border: 0;
 }
+
+/* «تدوينة جديدة»: الحقول فوق المحرّر، والمحرّر حقل مثلها */
+.studio-form--new {
+  margin-bottom: 0.5rem;
+}
+
+.studio-field--body {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.5rem;
+}
+
+.studio-preview-title {
+  margin-bottom: 1.5rem;
+}

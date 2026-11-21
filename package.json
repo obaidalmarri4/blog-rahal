@@ -16,6 +16,7 @@
     "@tiptap/extension-link": "^3.35.0",
     "@tiptap/pm": "^3.35.0",
     "@tiptap/starter-kit": "^3.35.0",
+    "@vercel/blob": "^2.9.0",
     "astro": "^5.17.1",
     "globe.gl": "^2.46.0",
     "parse5": "^8.1.1",

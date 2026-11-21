@@ -15,6 +15,9 @@ export interface Draft {
   base: string;
   /** وقت الحفظ (ms) */
   at: number;
+  /** «تدوينة جديدة» فقط: معرّفها وحقولها كما في النموذج */
+  id?: string;
+  meta?: Record<string, string | string[]>;
 }
 
 const DATABASE = 'rahal-studio';

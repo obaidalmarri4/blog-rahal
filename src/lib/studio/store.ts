@@ -8,7 +8,7 @@
 
 import { createHash } from 'node:crypto';
 import buildIndex from 'virtual:studio-index';
-import { htmlToText, reconcileImages, serializePost } from '../../../scripts/lib/post-html.mjs';
+import { extractImages, htmlToText, reconcileImages, serializePost } from '../../../scripts/lib/post-html.mjs';
 import { PATHS } from './config.ts';
 import { GitHubError, StaleHeadError, createCommit, readFile, readSnapshot } from './github.ts';
 import type { FileAddition, RepoConfig, Snapshot } from './github.ts';
@@ -22,8 +22,8 @@ import {
   serializeTaxonomy,
 } from './taxonomy.ts';
 import type { Classification, Taxonomy } from './taxonomy.ts';
-import { validateChange } from './validate.ts';
-import type { FieldErrors, MetaChange } from './validate.ts';
+import { cleanLine, validateChange } from './validate.ts';
+import type { FieldErrors, MetaChange, MetaValues } from './validate.ts';
 
 export interface PostSummary {
   file: string;
@@ -79,6 +79,31 @@ export type BodyResult =
   /** في المرسَل ما لا يكتبه المحرّر — السبب للسجل لا للعرض */
   | { kind: 'rejected'; reason: string }
   | { kind: 'locked' };
+
+export type CreateResult =
+  | { kind: 'created'; slug: string; commit: string }
+  /** طلب نشر مكرّر (ضغطتان، أو إعادة بعد انقطاع): التدوينة نُشرت من قبل بهذا المعرّف */
+  | { kind: 'exists'; slug: string }
+  | { kind: 'invalid'; errors: FieldErrors }
+  | { kind: 'rejected'; reason: string };
+
+export interface NewPostInput {
+  /** يولّده المتصفح مرة لكل تدوينة جديدة ويحفظه مع مسودتها — به يُعرف الطلب المكرّر */
+  id: string;
+  meta: MetaValues;
+  html: string;
+  raw: string[];
+}
+
+export const NEW_POST_ID = /^[a-z0-9]{6}$/;
+
+/**
+ * ‎YYYY-MM-rk-<المعرّف>‎: شهر التدوينة ثم «rk» — لا يتصادم مع روابط Blogger (‎YYYY-MM-<اسم>‎ من
+ * مسار ‎/YYYY/MM/<اسم>.html‎) لأن Blogger لا يسمّي تدوينة «rk-xxxxxx».
+ */
+export function newPostSlug(date: string, id: string): string {
+  return `${date.slice(0, 7)}-rk-${id}`;
+}
 
 /** جسم أكبر من هذا لا يُفتح في المحرّر (حد جسم الطلب في دوال Vercel 4.5MB، والمحرّر يثقل قبله) */
 export const MAX_BODY_CHARS = 1_000_000;
@@ -281,6 +306,72 @@ export async function updatePostBody(
       additions: [{ path, contents: serializePost(post, raw) }],
     });
     return { kind: 'saved', commit, base: bodyBase(checked.html) };
+  });
+}
+
+/** وقت التدوينة بتوقيت الرياض: الساعة الآن إن كان يومها اليوم، وإلا منتصف النهار */
+function postDate(day: string, nowMs: number): string {
+  const riyadh = new Date(nowMs + 3 * HOUR_MS).toISOString();
+  const time = riyadh.slice(0, 10) === day ? riyadh.slice(11, 19) : '12:00:00';
+  return `${day}T${time}+03:00`;
+}
+
+/**
+ * تدوينة جديدة في commit واحد: ملفها ‎NNNN_<slug>.json‎ (أعلى ترقيم في الفرع + 1) ومفتاحها في
+ * التصنيف إن صُنّفت. الجسم يمرّ بفاحص الخادم نفسه (sanitize.ts) — ولا كتل محفوظة فيه، فلا شيء
+ * قديم يُقارن به. حقول الملف بترتيب ملفات المزامنة نفسه، و‎url‎ فارغ، و‎source: "studio"‎.
+ */
+export async function createPost(repo: RepoConfig, input: NewPostInput, nowMs: number = Date.now()): Promise<CreateResult> {
+  const title = cleanLine(input.meta.title);
+  const errors: FieldErrors = validateChange({ title, date: input.meta.date, labels: input.meta.labels }, nowMs);
+
+  const checked = checkBody(input.html, input.raw, '');
+  if (!checked.ok) return { kind: 'rejected', reason: checked.reason };
+  if (checked.html.length > MAX_BODY_CHARS) return { kind: 'rejected', reason: 'size' };
+  const images = extractImages(checked.html);
+  const text = htmlToText(checked.html);
+  if (!text.trim() && images.length === 0) errors.body = 'اكتب نص التدوينة.';
+  if (Object.keys(errors).length > 0) return { kind: 'invalid', errors };
+
+  const slug = newPostSlug(input.meta.date, input.id);
+  const sameId = new RegExp(`^\\d+_\\d{4}-\\d{2}-rk-${input.id}\\.json$`);
+
+  return retryOnMove<CreateResult>(async () => {
+    const snapshot = await readSnapshot(repo, PATHS);
+
+    const earlier = snapshot.posts.find((entry) => sameId.test(entry.name));
+    if (earlier) return { kind: 'exists', slug: earlier.name.replace(/^\d+_/, '').replace(/\.json$/, '') };
+
+    const taxonomy = parseTaxonomy(snapshot.taxonomyRaw);
+    const problem = classificationProblem(taxonomy, input.meta.classification);
+    if (problem) return { kind: 'invalid', errors: { classification: problem } };
+
+    const top = Math.max(0, ...snapshot.posts.map((entry) => Number(/^(\d+)_/.exec(entry.name)?.[1] ?? 0)));
+    const path = `${PATHS.posts}/${String(top + 1).padStart(4, '0')}_${slug}.json`;
+    const post = {
+      title,
+      date: postDate(input.meta.date, nowMs),
+      url: '',
+      slug,
+      content_html: checked.html,
+      content_text: text,
+      labels: input.meta.labels,
+      images,
+      image_count: images.length,
+      source: 'studio',
+    };
+    const additions: FileAddition[] = [{ path, contents: serializePost(post) }];
+    if (applyClassification(taxonomy, slug, input.meta.classification)) {
+      additions.push({ path: PATHS.taxonomy, contents: serializeTaxonomy(taxonomy, snapshot.taxonomyRaw) });
+    }
+
+    const commit = await createCommit(repo, {
+      expectedHead: snapshot.head,
+      headline: `لوحة التحرير: تدوينة جديدة «${inHeadline(title)}»`,
+      body: path,
+      additions,
+    });
+    return { kind: 'created', slug, commit };
   });
 }
 

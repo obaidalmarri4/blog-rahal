@@ -131,7 +131,7 @@ section('١. بلا اقتران: كل شيء «غير موجود»');
 const anyMissingPage = await request('/no-such-page');
 check('عنوان خاطئ عادي يعيد صفحة 404 الساكنة', looksNotFound(anyMissingPage), describe(anyMissingPage));
 
-for (const pathname of ['/studio', '/studio/', '/studio/not-found', '/studio/post/2025-12-blog-post', '/studio/edit/2025-12-blog-post', '/api/studio/posts/2025-12-blog-post', `/api/studio/status?sha=${'a'.repeat(40)}`, '/api/studio/whatever']) {
+for (const pathname of ['/studio', '/studio/', '/studio/new', '/studio/not-found', '/studio/post/2025-12-blog-post', '/studio/edit/2025-12-blog-post', '/api/studio/posts/2025-12-blog-post', `/api/studio/status?sha=${'a'.repeat(40)}`, '/api/studio/whatever']) {
   const res = await request(pathname);
   check(`${pathname} يطابق صفحة 404 حرفياً`, looksNotFound(res), describe(res));
 }
@@ -148,7 +148,7 @@ for (const [label, candidate] of [
   check(`رابط اقتران ${label} مرفوض`, looksNotFound(res), describe(res));
 }
 
-for (const pathname of ['/api/studio/unpair', '/studio/post/2025-12-blog-post']) {
+for (const pathname of ['/api/studio/unpair', '/studio/post/2025-12-blog-post', '/api/studio/posts', '/api/studio/media']) {
   const res = await formPost(pathname);
   check(`POST ${pathname} بلا كوكي يطابق صفحة 404 حرفياً`, looksNotFound(res), describe(res));
 }
@@ -167,6 +167,8 @@ for (const [method, pathname, headers] of [
   ['POST', '/studio/post/2025-12-blog-post', { origin: 'https://evil.example', 'sec-fetch-site': 'cross-site', 'content-type': 'multipart/form-data; boundary=x', 'content-length': '0' }],
   ['PUT', '/api/studio/posts/2025-12-blog-post', { 'content-type': 'text/plain', 'content-length': '0' }],
   ['DELETE', '/studio', {}],
+  ['POST', '/api/studio/posts', { 'content-type': 'application/json', 'content-length': '0' }],
+  ['POST', '/api/studio/media', { 'content-type': 'multipart/form-data; boundary=x', 'content-length': '0' }],
 ]) {
   const res = await request(pathname, { method, headers });
   check(`${method} ${pathname} بلا Origin مطابق ولا كوكي يطابق صفحة 404 حرفياً`, looksNotFound(res), describe(res));
@@ -351,12 +353,15 @@ const onDemand = output.routes.filter((route) => !route.dest.startsWith('/')).ma
 const EXPECTED_ON_DEMAND = [
   '^/_image/?$',
   '^/_server-islands/([^/]+?)/?$',
+  '^/api/studio/media/?$',
   '^/api/studio/posts/([^/]+?)/?$',
+  '^/api/studio/posts/?$',
   '^/api/studio/status/?$',
   '^/api/studio/unpair/?$',
   '^/studio/?$',
   '^/studio/edit/([^/]+?)/?$',
   '^/studio/enter/([^/]+?)/?$',
+  '^/studio/new/?$',
   '^/studio/not-found/?$',
   '^/studio/post/([^/]+?)/?$',
 ];

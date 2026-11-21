@@ -1,0 +1,91 @@
+---
+/**
+ * تدوينة جديدة: الحقول نفسها التي في صفحة كل تدوينة، والمحرّر نفسه. السكربت
+ * (src/scripts/studio/editor.ts، وضع ‎new‎) يجمع الاثنين ويرسلهما إلى ‎POST /api/studio/posts‎،
+ * ثم ينتقل إلى صفحة التدوينة المنشورة. ما يُكتب هنا يُحفظ على الجهاز أولاً بأول.
+ */
+import EditorPreview from '../../components/studio/EditorPreview.astro';
+import EditorToolbar from '../../components/studio/EditorToolbar.astro';
+import MetaFields from '../../components/studio/MetaFields.astro';
+import StudioLayout from '../../layouts/StudioLayout.astro';
+import { studioRepo } from '../../lib/studio/config.ts';
+import { describeFailure } from '../../lib/studio/failure.ts';
+import type { Failure } from '../../lib/studio/failure.ts';
+import { requireStudio } from '../../lib/studio/guard.ts';
+import { studioMedia } from '../../lib/studio/media.ts';
+import { listPosts } from '../../lib/studio/store.ts';
+import { countriesByContinent } from '../../lib/studio/taxonomy.ts';
+import type { MetaValues } from '../../lib/studio/validate.ts';
+
+export const prerender = false;
+
+const denied = requireStudio(Astro.locals);
+if (denied) return denied;
+
+const repo = studioRepo();
+if (!repo) return Astro.redirect('/studio', 303);
+
+let groups: { continent: string; countries: string[] }[] = [];
+let failure: Failure | null = null;
+try {
+  groups = countriesByContinent((await listPosts(repo)).taxonomy);
+} catch (err) {
+  failure = describeFailure(err);
+  Astro.response.status = 502;
+}
+
+/** اليوم بتوقيت الرياض */
+const today = new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString().slice(0, 10);
+const maxDate = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+const shown: MetaValues = { title: '', date: today, labels: [], classification: { type: 'travel', countries: [] } };
+---
+
+<StudioLayout title="تدوينة جديدة — لوحة التحرير">
+  <p class="studio-back"><a href="/studio">كل التدوينات</a></p>
+
+  <h1 class="studio-h1">تدوينة جديدة</h1>
+
+  {
+    failure && (
+      <section class="studio-card studio-card--error" role="alert">
+        <h2>تعذّر فتح الصفحة</h2>
+        <p>{failure.message}</p>
+        <p class="studio-detail">{failure.detail}</p>
+      </section>
+    )
+  }
+
+  {
+    !failure && (
+      <>
+        <div class="studio-editor" data-studio-editor data-mode="new" data-media={studioMedia(repo) ? 'on' : 'off'}>
+          <div class="studio-flash" data-editor-notice role="status" hidden />
+
+          <form class="studio-form studio-form--new" data-new-meta novalidate>
+            <MetaFields shown={shown} groups={groups} today={maxDate} />
+          </form>
+
+          <div class="studio-field studio-field--body" data-field="body">
+            <span>نص التدوينة</span>
+            <EditorToolbar />
+            <div class="studio-surface" data-editor-mount>
+              <p class="studio-count">جارٍ تجهيز المحرّر…</p>
+            </div>
+          </div>
+
+          <div class="studio-savebar">
+            <span data-editor-state role="status" />
+            <button type="button" class="studio-button" data-cmd="preview">معاينة</button>
+            <button type="button" class="studio-button studio-button--primary" data-cmd="save" disabled>نشر التدوينة</button>
+          </div>
+        </div>
+
+        <EditorPreview />
+      </>
+    )
+  }
+</StudioLayout>
+
+<script>
+  import '../../scripts/studio/editor.ts';
+</script>

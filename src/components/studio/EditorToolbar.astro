@@ -1,0 +1,92 @@
+---
+/**
+ * شريط أدوات المحرّر، مشترك بين «تحرير النص» (‎/studio/edit/<slug>‎) و«تدوينة جديدة» (‎/studio/new‎).
+ * الأوامر يربطها src/scripts/studio/editor.ts بسمة ‎data-cmd‎.
+ */
+import { FONT_SIZES, TEXT_COLORS } from '../../lib/studio/formatting.js';
+---
+
+<div class="studio-toolbar" data-editor-toolbar role="toolbar" aria-label="تنسيق النص">
+  <div class="studio-toolbar__scroll">
+    <div class="studio-toolbar__group">
+      <button type="button" data-cmd="undo">تراجع</button>
+      <button type="button" data-cmd="redo">إعادة</button>
+    </div>
+
+    <div class="studio-toolbar__group">
+      <button type="button" data-cmd="image">صورة</button>
+    </div>
+
+    <div class="studio-toolbar__group">
+      <button type="button" data-cmd="bold" aria-pressed="false"><b>عريض</b></button>
+      <button type="button" data-cmd="italic" aria-pressed="false"><i>مائل</i></button>
+      <button type="button" data-cmd="underline" aria-pressed="false"><u>تسطير</u></button>
+      <button type="button" data-cmd="strike" aria-pressed="false"><s>شطب</s></button>
+      <button type="button" data-cmd="clear">مسح التنسيق</button>
+    </div>
+
+    <div class="studio-toolbar__group">
+      <label>
+        الحجم
+        <select data-select="size">
+          {FONT_SIZES.map((size) => <option value={size.value ?? ''} selected={size.value === null}>{size.label}</option>)}
+          <option data-legacy value="__legacy" hidden>حجم قديم</option>
+        </select>
+      </label>
+      <span class="studio-swatches" role="group" aria-label="لون النص">
+        {
+          TEXT_COLORS.map((color) => (
+            <button
+              type="button"
+              class="studio-swatch"
+              data-cmd="color"
+              data-value={color.value ?? ''}
+              aria-pressed="false"
+              aria-label={`لون النص: ${color.label}`}
+              title={color.label}
+              style={`--swatch:${color.swatch}`}
+            />
+          ))
+        }
+      </span>
+    </div>
+
+    <div class="studio-toolbar__group">
+      <label>
+        النوع
+        <select data-select="block">
+          <option value="p">فقرة</option>
+          <option value="h2">عنوان رئيسي</option>
+          <option value="h3">عنوان فرعي</option>
+        </select>
+      </label>
+      <button type="button" data-cmd="center" aria-pressed="false">توسيط</button>
+      <button type="button" data-cmd="quote" aria-pressed="false">اقتباس</button>
+      <button type="button" data-cmd="bullets" aria-pressed="false">قائمة نقطية</button>
+      <button type="button" data-cmd="numbers" aria-pressed="false">قائمة مرقّمة</button>
+      <button type="button" data-cmd="rule">فاصل</button>
+      <button type="button" data-cmd="link" aria-pressed="false">رابط</button>
+    </div>
+  </div>
+
+  <div class="studio-toolbar__row" data-editor-linkbar hidden>
+    <input class="studio-input" type="url" dir="ltr" placeholder="https://" aria-label="عنوان الرابط" />
+    <button type="button" data-cmd="link-apply">تطبيق</button>
+    <button type="button" data-cmd="link-remove">إزالة الرابط</button>
+    <button type="button" data-cmd="link-close">إغلاق</button>
+  </div>
+
+  <div class="studio-toolbar__row" data-editor-selected hidden>
+    <span></span>
+    <button type="button" data-cmd="alt" hidden>وصف الصورة</button>
+    <button type="button" data-cmd="delete-selected">حذف</button>
+  </div>
+
+  <div class="studio-toolbar__row" data-editor-altbar hidden>
+    <input class="studio-input" type="text" maxlength="200" placeholder="وصف قصير لما في الصورة (اختياري)" aria-label="وصف الصورة" />
+    <button type="button" data-cmd="alt-apply">تطبيق</button>
+    <button type="button" data-cmd="alt-close">إغلاق</button>
+  </div>
+
+  <input type="file" accept="image/*" multiple hidden data-editor-file />
+</div>
