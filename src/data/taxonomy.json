@@ -3160,6 +3160,13 @@
       "countries": [],
       "type": "other",
       "category": "طعام ومشروبات"
+    },
+    "2026-11-rk-td8wra": {
+      "continent": "آسيا",
+      "countries": [
+        "اليابان"
+      ],
+      "type": "travel"
     }
   },
   "continents": {
