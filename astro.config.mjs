@@ -20,6 +20,11 @@ export default defineConfig({
       { hostname: 'localhost', protocol: 'http' },
       { hostname: '127.0.0.1', protocol: 'http' },
     ],
+    // فحص Origin المدمج في Astro يعمل قبل src/middleware.ts ويردّ «Cross-site POST form submissions
+    // are forbidden» (403) على أي طلب كتابة بلا Origin مطابق — حتى من زائر غير مقترن، بينما أي عنوان
+    // غير موجود يردّ 404. هذا الفرق يكشف أن مسارات /studio موجودة (ظهر على الموقع الحيّ 2026-11-21).
+    // الوسيط يفحص بنفسه، وأشدّ: كل طلب كتابة من جهاز مقترن يحتاج Sec-Fetch-Site و Origin مطابقين.
+    checkOrigin: false,
   },
 
   vite: {

@@ -159,6 +159,19 @@ const putUnpaired = await request('/api/studio/posts/2025-12-blog-post', {
 });
 check('PUT ‎/api/studio/posts/…‎ بلا كوكي يطابق صفحة 404 حرفياً', looksNotFound(putUnpaired), describe(putUnpaired));
 
+// ما يرسله أي أداة فحص (curl مثلاً): طلب كتابة بلا Origin أو من موقع آخر. فحص Astro المدمج كان يردّ
+// عليه 403 قبل الوسيط، وعنوان غير موجود يردّ 404 — فيظهر أن ‎/studio‎ موجودة.
+for (const [method, pathname, headers] of [
+  ['POST', '/studio', {}],
+  ['POST', '/api/studio/unpair', { 'content-type': 'application/x-www-form-urlencoded', 'content-length': '0' }],
+  ['POST', '/studio/post/2025-12-blog-post', { origin: 'https://evil.example', 'sec-fetch-site': 'cross-site', 'content-type': 'multipart/form-data; boundary=x', 'content-length': '0' }],
+  ['PUT', '/api/studio/posts/2025-12-blog-post', { 'content-type': 'text/plain', 'content-length': '0' }],
+  ['DELETE', '/studio', {}],
+]) {
+  const res = await request(pathname, { method, headers });
+  check(`${method} ${pathname} بلا Origin مطابق ولا كوكي يطابق صفحة 404 حرفياً`, looksNotFound(res), describe(res));
+}
+
 check(
   'ردّ اللوحة المغلقة يحمل Cache-Control الملفات الساكنة نفسه',
   (await request('/studio')).headers['cache-control'] === anyMissingPage.headers['cache-control'],
@@ -291,6 +304,13 @@ for (const [label, value, candidate] of [
   const viaCookie = await request('/studio', { cookie: cookieValue(reEnter) });
   check(`STUDIO_KEY ${label}: اللوحة مغلقة تماماً`, stayedClosed(viaLink) && viaLink.status === 404 && looksNotFound(viaCookie), `الرابط: ${describe(viaLink)} — الكوكي: ${describe(viaCookie)}`);
 }
+
+// قيمة لُصقت في لوحة Vercel ومعها سطر جديد أو مسافة: المفتاح هو ما بينهما
+process.env.STUDIO_KEY = ` ${KEY}\n`;
+const pasted = await request(`/studio/enter/${KEY}`);
+check('STUDIO_KEY ملصوق بمسافة وسطر جديد حوله: الرابط يقرن', pasted.status === 303 && Boolean(cookieValue(pasted)), describe(pasted));
+check('…والكوكي التي أصدرها تفتح اللوحة', (await request('/studio', { cookie: cookieValue(pasted) })).status === 200);
+check('…والرابط بالمسافة نفسها لا يقرن', looksNotFound(await request(`/studio/enter/${encodeURIComponent(` ${KEY}`)}`)));
 process.env.STUDIO_KEY = KEY;
 
 // ── 6. عناوين ملتوية تصل إلى الدالة مباشرة ──────────────────────────────────

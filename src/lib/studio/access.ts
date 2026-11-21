@@ -13,11 +13,29 @@ import { COOKIE_NAME, SESSION_SECONDS, isUsableKey, issueSession } from './sessi
  */
 const ALLOWED_VERCEL_ENVS = [undefined, '', 'production', 'development'];
 
-/** المفتاح السرّي إن كانت اللوحة مفعّلة هنا، وإلا null (فتردّ اللوحة 404 على كل شيء) */
+let warned = false;
+
+/**
+ * المفتاح السرّي إن كانت اللوحة مفعّلة هنا، وإلا null (فتردّ اللوحة 404 على كل شيء).
+ *
+ * المسافات حول القيمة تُحذف: لصق المفتاح في لوحة Vercel قد يحمل معه سطراً جديداً، وبدونه يُرفض
+ * المفتاح بصمت. وإن بقي المفتاح غير صالح يُكتب سطر واحد في سجلّ الخادم (Vercel ← Logs) — لا يراه
+ * الزائر، فالردّ يبقى 404 كأي عنوان خاطئ.
+ */
 export function studioKey(): string | null {
-  if (!ALLOWED_VERCEL_ENVS.includes(getSecret('VERCEL_ENV'))) return null;
-  const key = getSecret('STUDIO_KEY');
-  return isUsableKey(key) ? key : null;
+  const environment = getSecret('VERCEL_ENV');
+  if (!ALLOWED_VERCEL_ENVS.includes(environment)) return null;
+  const key = getSecret('STUDIO_KEY')?.trim();
+  if (isUsableKey(key)) return key;
+  if (!warned && (key || environment === 'production')) {
+    warned = true;
+    console.warn(
+      key
+        ? '[studio] STUDIO_KEY غير صالح (يلزم 32 حرفاً على الأقل من A-Z a-z 0-9 - _ فقط): اللوحة مغلقة.'
+        : '[studio] STUDIO_KEY غير مضبوط في هذا النشر: اللوحة مغلقة.'
+    );
+  }
+  return null;
 }
 
 /** يكتب كوكي الاقتران (أو يجدّدها) */
