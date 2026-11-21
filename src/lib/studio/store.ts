@@ -6,11 +6,13 @@
  * القراءة. فلا يضيع تعديل تزامن مع بوت المزامنة أو مع جهاز آخر.
  */
 
+import { createHash } from 'node:crypto';
 import buildIndex from 'virtual:studio-index';
-import { serializePost } from '../../../scripts/lib/post-html.mjs';
+import { htmlToText, reconcileImages, serializePost } from '../../../scripts/lib/post-html.mjs';
 import { PATHS } from './config.ts';
 import { GitHubError, StaleHeadError, createCommit, readFile, readSnapshot } from './github.ts';
 import type { FileAddition, RepoConfig, Snapshot } from './github.ts';
+import { checkBody } from './sanitize.ts';
 import { summarizePost } from './summary.js';
 import {
   applyClassification,
@@ -67,6 +69,24 @@ export type DeleteResult =
   | { kind: 'deleted'; commit: string; title: string }
   | { kind: 'missing' }
   | { kind: 'brake'; minutes: number };
+
+export type BodyResult =
+  | { kind: 'saved'; commit: string; base: string }
+  | { kind: 'unchanged' }
+  | { kind: 'missing' }
+  /** نص التدوينة تغيّر في المستودع بعد أن فُتحت للتحرير */
+  | { kind: 'conflict' }
+  /** في المرسَل ما لا يكتبه المحرّر — السبب للسجل لا للعرض */
+  | { kind: 'rejected'; reason: string }
+  | { kind: 'locked' };
+
+/** جسم أكبر من هذا لا يُفتح في المحرّر (حد جسم الطلب في دوال Vercel 4.5MB، والمحرّر يثقل قبله) */
+export const MAX_BODY_CHARS = 1_000_000;
+
+/** بصمة نص التدوينة: يأخذها المحرّر عند الفتح ويعيدها عند الحفظ، فيُكشف تعديل جرى بينهما */
+function bodyBase(html: string): string {
+  return createHash('sha256').update(html).digest('hex');
+}
 
 /** أكثر من هذا العدد من الحذوفات في ساعة يُرفض: رابط متسرّب لا يمسح الأرشيف دفعة واحدة */
 export const MAX_DELETES_PER_HOUR = 5;
@@ -157,6 +177,21 @@ export async function getPost(repo: RepoConfig, slug: string): Promise<{ post: L
   return { post: { ...summary, classification: classificationOf(taxonomy, slug) }, taxonomy };
 }
 
+/** نص التدوينة للتحرير — يُقرأ طازجاً من الفرع لا من البناء */
+export async function getPostBody(
+  repo: RepoConfig,
+  slug: string
+): Promise<{ title: string; html: string; base: string; locked: boolean } | null> {
+  const snapshot = await readSnapshot(repo, PATHS);
+  const summary = findBySlug(await summarize(repo, snapshot), slug);
+  if (!summary) return null;
+
+  const post = JSON.parse(await readFile(repo, `${PATHS.posts}/${summary.file}`, snapshot.head)) as Record<string, unknown>;
+  const html = String(post.content_html ?? '');
+  const locked = html.length > MAX_BODY_CHARS;
+  return { title: summary.title, html: locked ? '' : html, base: bodyBase(html), locked };
+}
+
 // ── الكتابة ─────────────────────────────────────────────────────────────────
 
 /** يطبّق الحقول المتغيّرة فقط على العنوان والتاريخ والوسوم (في ملف التدوينة) والتصنيف (في taxonomy.json) */
@@ -204,6 +239,48 @@ export async function updatePostMeta(repo: RepoConfig, slug: string, change: Met
       additions,
     });
     return { kind: 'saved', commit };
+  });
+}
+
+/**
+ * حفظ نص التدوينة من المحرّر: يُفحص المرسَل (sanitize.ts)، ثم يُكتب ‎content_html‎ ومعه ما
+ * يُشتق منه (‎content_text‎، ‎images[]‎، ‎image_count‎) في commit واحد. باقي حقول الملف لا يُمسّ.
+ */
+export async function updatePostBody(
+  repo: RepoConfig,
+  slug: string,
+  input: { html: string; raw: string[]; base: string }
+): Promise<BodyResult> {
+  return retryOnMove<BodyResult>(async () => {
+    const snapshot = await readSnapshot(repo, PATHS);
+    const summary = findBySlug(await summarize(repo, snapshot), slug);
+    if (!summary) return { kind: 'missing' };
+
+    const path = `${PATHS.posts}/${summary.file}`;
+    const raw = await readFile(repo, path, snapshot.head);
+    const post = JSON.parse(raw) as Record<string, unknown>;
+    const stored = String(post.content_html ?? '');
+    if (stored.length > MAX_BODY_CHARS) return { kind: 'locked' };
+    if (bodyBase(stored) !== input.base) return { kind: 'conflict' };
+
+    const checked = checkBody(input.html, input.raw, stored);
+    if (!checked.ok) return { kind: 'rejected', reason: checked.reason };
+    if (checked.html.length > MAX_BODY_CHARS) return { kind: 'rejected', reason: 'size' };
+    if (checked.html === stored) return { kind: 'unchanged' };
+
+    const images = reconcileImages(post.images as Record<string, string>[], stored, checked.html);
+    post.content_html = checked.html;
+    post.content_text = htmlToText(checked.html);
+    post.images = images;
+    post.image_count = images.length;
+
+    const commit = await createCommit(repo, {
+      expectedHead: snapshot.head,
+      headline: `لوحة التحرير: تعديل نص «${inHeadline(summary.title)}»`,
+      body: path,
+      additions: [{ path, contents: serializePost(post, raw) }],
+    });
+    return { kind: 'saved', commit, base: bodyBase(checked.html) };
   });
 }
 

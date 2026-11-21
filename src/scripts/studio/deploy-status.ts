@@ -5,11 +5,11 @@
 const POLL_MS = 8_000;
 const GIVE_UP_MS = 6 * 60 * 1000;
 
-const banner = document.querySelector<HTMLElement>('[data-deploy-sha]');
-const label = banner?.querySelector<HTMLElement>('[data-deploy-text]');
-
-if (banner && label) {
-  const sha = banner.dataset.deploySha!;
+/** @param banner عنصر يحمل ‎data-deploy-sha‎ وبداخله ‎[data-deploy-text]‎ */
+export function watchDeploy(banner: HTMLElement): void {
+  const label = banner.querySelector<HTMLElement>('[data-deploy-text]');
+  const sha = banner.dataset.deploySha;
+  if (!label || !sha) return;
   const startedAt = Date.now();
 
   const finish = (text: string, state: 'success' | 'failure' | 'late') => {
@@ -18,6 +18,8 @@ if (banner && label) {
   };
 
   const poll = async () => {
+    // الشريط استُبدل بآخر (حفظ جديد): تتوقف متابعة القديم
+    if (!banner.isConnected || banner.dataset.deploySha !== sha) return;
     try {
       const response = await fetch(`/api/studio/status?sha=${sha}`, { headers: { Accept: 'application/json' } });
       if (response.ok) {
@@ -38,3 +40,5 @@ if (banner && label) {
 
   setTimeout(poll, POLL_MS);
 }
+
+for (const banner of document.querySelectorAll<HTMLElement>('[data-deploy-sha]')) watchDeploy(banner);

@@ -16,42 +16,11 @@
 import { Extension, Mark, Node } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import { Image } from '@tiptap/extension-image';
+import { Link } from '@tiptap/extension-link';
+import { RAW_BLOCK_TAGS, SAFE_CSS_VALUE, decodeRaw, encodeRaw, expandRawBlocks } from './raw-blocks.js';
 
-/**
- * وسوم تُحفظ كما هي: المحرّر لا يعرف بنيتها الداخلية، ولو فكّها لضاعت (الجدول يصير فقرات،
- * والفيديو يختفي). تظهر في المحرّر صندوقاً يُحذف أو يُنقل ولا يُعدَّل داخله.
- */
-export const RAW_BLOCK_TAGS = [
-  'table',
-  'iframe',
-  'video',
-  'audio',
-  'object',
-  'embed',
-  'form',
-  'fieldset',
-  'marquee',
-  'svg',
-  'dl',
-  'pre',
-  'figure',
-  'details',
-];
-
-const RAW_PLACEHOLDER = /<div data-raw-block="([^"]*)"><\/div>/g;
-
-function encodeRaw(html) {
-  // toWellFormed: نص منسوخ قد يحمل نصف رمز (surrogate) يتيم يُسقط encodeURIComponent
-  return encodeURIComponent(typeof html.toWellFormed === 'function' ? html.toWellFormed() : html);
-}
-
-function decodeRaw(encoded) {
-  try {
-    return decodeURIComponent(encoded);
-  } catch {
-    return '';
-  }
-}
+export { RAW_BLOCK_TAGS, expandRawBlocks };
+export { FONT_SIZES, TEXT_COLORS } from './formatting.js';
 
 /**
  * الكتلة المحفوظة. المحرّر يكتبها مؤقتاً كعنصر نائب ‎<div data-raw-block="…">‎ يحمل الـHTML
@@ -85,11 +54,6 @@ export const RawBlock = Node.create({
     return ['div', { 'data-raw-block': encodeRaw(node.attrs.html) }];
   },
 });
-
-/** يعيد الـHTML الأصلي مكان العناصر النائبة — آخر خطوة قبل حفظ content_html */
-export function expandRawBlocks(html) {
-  return html.replace(RAW_PLACEHOLDER, (_, encoded) => decodeRaw(encoded));
-}
 
 /**
  * الصورة: عنصر سطري (inline) لا كتلة. في تدوينات Blogger الصورة تجلس داخل رابط نسختها
@@ -127,8 +91,6 @@ export const PostImage = Image.extend({
  * مضمّنةً — <span> أو <div> أو غيرهما — والتداخل يعمل كما في CSS: لون داخلي يغيّر اللون
  * فقط ويبقى الحجم الخارجي.
  */
-const SAFE_CSS_VALUE = /^[#a-z0-9(),.%\s-]+$/i;
-
 function styleMark({ name, property, attribute, fontAttribute }) {
   return Mark.create({
     name,
@@ -166,6 +128,23 @@ function styleMark({ name, property, attribute, fontAttribute }) {
 export const FontSize = styleMark({ name: 'fontSize', property: 'font-size', attribute: 'size' });
 export const TextColor = styleMark({ name: 'textColor', property: 'color', attribute: 'color', fontAttribute: 'color' });
 export const Highlight = styleMark({ name: 'highlight', property: 'background-color', attribute: 'color' });
+
+/**
+ * الرابط كما في TipTap، بلا سمة class. روابط الأرشيف تحمل أصنافاً من مواقع أخرى
+ * (notranslate، mw-redirect…) لا معنى لها هنا، وقبول class من المحرّر يعني أن من وصله رابط
+ * اللوحة يستطيع أن يلبس رابطاً أصنافَ تنسيق الموقع نفسه. فاحص الخادم يرفضها كذلك.
+ */
+export const PostLink = Link.extend({
+  addAttributes() {
+    const { class: _dropped, ...attributes } = this.parent?.() ?? {};
+    return attributes;
+  },
+}).configure({
+  openOnClick: false,
+  autolink: false,
+  // لا تُفرض سمات على روابط التدوينات القديمة — يبقى ما كان مكتوباً فيها
+  HTMLAttributes: { target: null, rel: null, class: null },
+});
 
 export const Superscript = Mark.create({
   name: 'superscript',
@@ -210,22 +189,6 @@ export const BlockAttributes = Extension.create({
   },
 });
 
-/** أحجام الخط في شريط الأدوات — نسبية (em) لتتبع قياس الصفحة على الجوال والكمبيوتر */
-export const FONT_SIZES = [
-  { id: 'small', label: 'صغير', value: '0.85em' },
-  { id: 'normal', label: 'عادي', value: null },
-  { id: 'large', label: 'كبير', value: '1.25em' },
-  { id: 'huge', label: 'كبير جداً', value: '1.6em' },
-];
-
-/** ألوان النص في شريط الأدوات — من هوية الموقع */
-export const TEXT_COLORS = [
-  { id: 'ink', label: 'حبر', value: null },
-  { id: 'clay', label: 'طيني', value: '#c8612e' },
-  { id: 'gold', label: 'ذهبي', value: '#c9a04a' },
-  { id: 'olive', label: 'زيتوني', value: '#6b7d5a' },
-];
-
 export const studioExtensions = [
   StarterKit.configure({
     // لا يوجد كود في المدوّنة؛ و<pre> القديمة تُحفظ ككتلة محفوظة
@@ -233,13 +196,10 @@ export const studioExtensions = [
     codeBlock: false,
     // كل المستويات تُقرأ حفاظاً على القديم؛ شريط الأدوات يعرض H2 و H3 فقط
     heading: { levels: [1, 2, 3, 4, 5, 6] },
-    link: {
-      openOnClick: false,
-      autolink: false,
-      // لا تُفرض سمات على روابط التدوينات القديمة — يبقى ما كان مكتوباً فيها
-      HTMLAttributes: { target: null, rel: null, class: null },
-    },
+    // الرابط يُضاف أدناه بنسخته الخاصة (PostLink)
+    link: false,
   }),
+  PostLink,
   FontSize,
   TextColor,
   Highlight,

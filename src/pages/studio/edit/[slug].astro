@@ -1,0 +1,164 @@
+---
+/**
+ * محرّر نص التدوينة. الصفحة ترسم الهيكل (الشريط، مكان المحرّر، المعاينة)؛ والنص نفسه يجلبه
+ * src/scripts/studio/editor.ts طازجاً من ‎/api/studio/posts/<slug>‎.
+ */
+import StudioLayout from '../../../layouts/StudioLayout.astro';
+import { studioRepo } from '../../../lib/studio/config.ts';
+import { describeFailure } from '../../../lib/studio/failure.ts';
+import type { Failure } from '../../../lib/studio/failure.ts';
+import { FONT_SIZES, TEXT_COLORS } from '../../../lib/studio/formatting.js';
+import { requireStudio } from '../../../lib/studio/guard.ts';
+import { getPost } from '../../../lib/studio/store.ts';
+
+export const prerender = false;
+
+const denied = requireStudio(Astro.locals);
+if (denied) return denied;
+
+const repo = studioRepo();
+if (!repo) return Astro.redirect('/studio', 303);
+
+const slug = Astro.params.slug ?? '';
+let view: Awaited<ReturnType<typeof getPost>> = null;
+let failure: Failure | null = null;
+try {
+  view = await getPost(repo, slug);
+} catch (err) {
+  failure = describeFailure(err);
+}
+
+if (failure) Astro.response.status = 502;
+else if (!view) Astro.response.status = 404;
+
+const title = view?.post.title.trim() || '(بلا عنوان)';
+---
+
+<StudioLayout title={view ? `تحرير: ${title}` : 'لوحة التحرير — رحّال الخبر'}>
+  <p class="studio-back">
+    <a href={view ? `/studio/post/${encodeURIComponent(slug)}` : '/studio'}>{view ? 'بيانات التدوينة' : 'كل التدوينات'}</a>
+  </p>
+
+  {
+    failure && (
+      <section class="studio-card studio-card--error" role="alert">
+        <h2>تعذّر فتح التدوينة</h2>
+        <p>{failure.message}</p>
+        <p class="studio-detail">{failure.detail}</p>
+      </section>
+    )
+  }
+
+  {
+    !failure && !view && (
+      <section class="studio-card">
+        <h2>هذه التدوينة غير موجودة</h2>
+        <p>ربما حُذفت. ارجع إلى قائمة التدوينات.</p>
+      </section>
+    )
+  }
+
+  {
+    view && (
+      <>
+        <h1 class="studio-h1 studio-h1--small">{title}</h1>
+
+        <div class="studio-editor" data-studio-editor data-slug={slug}>
+          <div class="studio-flash" data-editor-notice role="status" hidden />
+
+          <div class="studio-toolbar" data-editor-toolbar role="toolbar" aria-label="تنسيق النص">
+            <div class="studio-toolbar__scroll">
+            <div class="studio-toolbar__group">
+              <button type="button" data-cmd="undo">تراجع</button>
+              <button type="button" data-cmd="redo">إعادة</button>
+            </div>
+
+            <div class="studio-toolbar__group">
+              <button type="button" data-cmd="bold" aria-pressed="false"><b>عريض</b></button>
+              <button type="button" data-cmd="italic" aria-pressed="false"><i>مائل</i></button>
+              <button type="button" data-cmd="underline" aria-pressed="false"><u>تسطير</u></button>
+              <button type="button" data-cmd="strike" aria-pressed="false"><s>شطب</s></button>
+              <button type="button" data-cmd="clear">مسح التنسيق</button>
+            </div>
+
+            <div class="studio-toolbar__group">
+              <label>
+                الحجم
+                <select data-select="size">
+                  {FONT_SIZES.map((size) => <option value={size.value ?? ''} selected={size.value === null}>{size.label}</option>)}
+                  <option data-legacy value="__legacy" hidden>حجم قديم</option>
+                </select>
+              </label>
+              <span class="studio-swatches" role="group" aria-label="لون النص">
+                {TEXT_COLORS.map((color) => (
+                  <button
+                    type="button"
+                    class="studio-swatch"
+                    data-cmd="color"
+                    data-value={color.value ?? ''}
+                    aria-pressed="false"
+                    aria-label={`لون النص: ${color.label}`}
+                    title={color.label}
+                    style={`--swatch:${color.swatch}`}
+                  />
+                ))}
+              </span>
+            </div>
+
+            <div class="studio-toolbar__group">
+              <label>
+                النوع
+                <select data-select="block">
+                  <option value="p">فقرة</option>
+                  <option value="h2">عنوان رئيسي</option>
+                  <option value="h3">عنوان فرعي</option>
+                </select>
+              </label>
+              <button type="button" data-cmd="center" aria-pressed="false">توسيط</button>
+              <button type="button" data-cmd="quote" aria-pressed="false">اقتباس</button>
+              <button type="button" data-cmd="bullets" aria-pressed="false">قائمة نقطية</button>
+              <button type="button" data-cmd="numbers" aria-pressed="false">قائمة مرقّمة</button>
+              <button type="button" data-cmd="rule">فاصل</button>
+              <button type="button" data-cmd="link" aria-pressed="false">رابط</button>
+            </div>
+            </div>
+
+            <div class="studio-toolbar__row" data-editor-linkbar hidden>
+              <input class="studio-input" type="url" dir="ltr" placeholder="https://" aria-label="عنوان الرابط" />
+              <button type="button" data-cmd="link-apply">تطبيق</button>
+              <button type="button" data-cmd="link-remove">إزالة الرابط</button>
+              <button type="button" data-cmd="link-close">إغلاق</button>
+            </div>
+
+            <div class="studio-toolbar__row" data-editor-selected hidden>
+              <span />
+              <button type="button" data-cmd="delete-selected">حذف</button>
+            </div>
+          </div>
+
+          <div class="studio-surface" data-editor-mount>
+            <p class="studio-count">جارٍ فتح التدوينة…</p>
+          </div>
+
+          <div class="studio-savebar">
+            <span data-editor-state role="status" />
+            <button type="button" class="studio-button" data-cmd="preview">معاينة</button>
+            <button type="button" class="studio-button studio-button--primary" data-cmd="save" disabled>حفظ ونشر</button>
+          </div>
+        </div>
+
+        <dialog class="studio-preview" data-editor-preview aria-label="معاينة التدوينة">
+          <div class="studio-preview__bar">
+            <strong>معاينة — كما ستظهر على الموقع</strong>
+            <button type="button" class="studio-button" data-cmd="close-preview">إغلاق</button>
+          </div>
+          <iframe sandbox="allow-same-origin" title="معاينة التدوينة" />
+        </dialog>
+      </>
+    )
+  }
+</StudioLayout>
+
+<script>
+  import '../../../scripts/studio/editor.ts';
+</script>

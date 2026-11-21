@@ -127,6 +127,10 @@ const today = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 
           <a href={`/blog/${encodeURIComponent(post.slug)}`} target="_blank" rel="noopener">عرضها على الموقع</a>
         </p>
 
+        <p class="studio-lead">
+          <a class="studio-button studio-button--primary" href={`/studio/edit/${encodeURIComponent(post.slug)}`}>تعديل نص التدوينة</a>
+        </p>
+
         <form method="post" action={here} class="studio-form">
           <input type="hidden" name="action" value="save" />
           <input type="hidden" name="base" value={JSON.stringify(base)} />

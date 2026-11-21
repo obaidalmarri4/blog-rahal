@@ -186,6 +186,48 @@
   text-align: center !important;
 }
 
+/* What the owner studio's editor writes (src/lib/studio/schema.js).
+   Centering is the one alignment allowed, and only as data-align: Blogger's inline
+   text-align in the old posts stays overridden by the rule above. */
+.post-content [data-align="center"] {
+  text-align: center !important;
+}
+.post-content h3 {
+  font-family: 'Thmanyah Serif Display', serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1f1a14;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+/* Tailwind's reset removes list markers and indentation everywhere */
+.post-content ul,
+.post-content ol {
+  margin-bottom: 0.75rem;
+  padding-inline-start: 1.75rem;
+}
+.post-content ul {
+  list-style: disc;
+}
+.post-content ol {
+  list-style: decimal;
+}
+.post-content li > p {
+  margin-bottom: 0.25rem;
+}
+.post-content hr {
+  height: 1px;
+  margin: 2rem 0;
+  border: 0;
+  background: linear-gradient(to left, transparent, #c9a04a, transparent);
+}
+.studio-preview-video {
+  padding: 2rem 1rem;
+  border: 1px dashed #6b7d5a;
+  background: #e3e6d3;
+  text-align: center !important;
+}
+
 /* Number font */
 .font-num {
   font-family: system-ui, -apple-system, sans-serif;

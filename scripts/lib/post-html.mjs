@@ -33,8 +33,8 @@ export function htmlToText(html) {
       .replace(/<\/(p|div|h[1-6]|li|tr|blockquote)>/gi, '\n')
       .replace(/<[^>]+>/g, '')
   )
-    //   = المسافة غير القابلة للكسر التي يلصقها محرّر Blogger بين الكلمات
-    .replace(/[ \t ]+/g, ' ')
+    // \u00a0 = المسافة غير القابلة للكسر التي يلصقها محرّر Blogger بين الكلمات
+    .replace(/[ \t\u00a0]+/g, ' ')
     .split('\n')
     .map((l) => l.trim())
     .filter((l, i, a) => l !== '' || (i > 0 && a[i - 1] !== ''))
@@ -103,6 +103,39 @@ export function extractImages(bodyHtml) {
   }
 
   return images;
+}
+
+/**
+ * عناوين الصور المعروضة في الجسم (سمة src فقط). رابط يلفّ صورة ليس صورة: لو حُذفت الصورة
+ * وبقي الرابط حول نص بجوارها، فالصورة لم تعد في التدوينة.
+ */
+function imageSourcesIn(html) {
+  const urls = new Set();
+  for (const m of html.matchAll(/<img\b[^>]*?\bsrc=["']([^"']+)["']/gi)) urls.add(decodeEntities(m[1]));
+  return urls;
+}
+
+/**
+ * قائمة ‎images[]‎ بعد تعديل الجسم من لوحة التحرير، بأقل تغيير ممكن:
+ *   - صورة حُذفت من الجسم تُحذف من القائمة.
+ *   - صورة أُضيفت للجسم تُضاف في آخرها.
+ *   - ما عدا ذلك يبقى كما هو حرفاً بحرف (ومنه ‎local_path‎ الذي لا يُشتق من الـHTML).
+ * قوائم الأرشيف جمعها الساحب الأصلي بقواعد لا تطابق extractImages تماماً، فإعادة اشتقاقها
+ * كاملةً تغيّر قائمة تدوينة لم يلمس أحد صورها. مدخل لا تظهر صورته في الجسم القديم أصلاً
+ * (لا ‎<img>‎ بعنوانه) لا يُعرف مصيره، فيبقى.
+ */
+export function reconcileImages(oldImages, oldHtml, newHtml) {
+  const before = imageSourcesIn(oldHtml);
+  const after = imageSourcesIn(newHtml);
+  const inside = (urls, image) => urls.has(image.original_url) || urls.has(image.thumbnail_url);
+
+  const kept = (oldImages ?? []).filter((image) => !inside(before, image) || inside(after, image));
+
+  const known = new Set(extractImages(oldHtml).map((image) => image.original_url));
+  for (const image of kept) known.add(image.original_url).add(image.thumbnail_url);
+  const added = extractImages(newHtml).filter((image) => !known.has(image.original_url) && !known.has(image.thumbnail_url));
+
+  return [...kept, ...added];
 }
 
 /**

@@ -382,6 +382,12 @@ textarea.studio-input {
   justify-self: start;
 }
 
+a.studio-button {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
 .studio-button--primary {
   border-color: #c8612e;
   background: #c8612e;
@@ -421,4 +427,260 @@ textarea.studio-input {
   font-size: 0.85rem;
   direction: ltr;
   text-align: right;
+}
+
+/* ── المحرّر ──────────────────────────────────────────────────────────────── */
+
+.studio-h1--small {
+  margin-bottom: 1rem;
+  font-size: 1.4rem;
+}
+
+/* minmax(0, 1fr): عمود ‎1fr‎ العادي يتّسع لأعرض ما فيه — وشريط الأدوات على الجوال سطر واحد
+   لا يلتفّ، فيمدّ الصفحة كلها إلى عرضه بدل أن يُسحب داخلها */
+.studio-editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+/* الشريط يبقى ظاهراً فوق النص عند النزول في تدوينة طويلة */
+.studio-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding: 0.5rem;
+  border: 1px solid #a8956d;
+  background: #e8dcc4;
+  font-size: 0.95rem;
+}
+
+.studio-toolbar__scroll {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.9rem;
+}
+
+/* على الجوال الشريط سطر واحد يُسحب جانباً: لو التفّ لغطّى نصف الشاشة وهو ثابت فوق النص */
+@media (max-width: 640px) {
+  .studio-toolbar__scroll {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.3rem;
+    scrollbar-width: thin;
+  }
+
+  .studio-toolbar__scroll .studio-toolbar__group,
+  .studio-toolbar__scroll .studio-swatches {
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+  }
+
+  .studio-toolbar__scroll button,
+  .studio-toolbar__scroll label {
+    white-space: nowrap;
+  }
+
+  .studio-savebar {
+    gap: 0.4rem;
+    padding: 0.4rem 0.5rem;
+  }
+
+  .studio-savebar [data-editor-state] {
+    flex-basis: 100%;
+    font-size: 0.85rem;
+  }
+
+  .studio-savebar .studio-button {
+    flex: 1;
+    justify-content: center;
+    padding: 0.4rem 0.75rem;
+  }
+}
+
+.studio-toolbar__group,
+.studio-toolbar__row,
+.studio-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.studio-toolbar__row {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #a8956d;
+}
+
+.studio-toolbar__row[hidden] {
+  display: none;
+}
+
+.studio-toolbar__row .studio-input {
+  flex: 1 1 12rem;
+  width: auto;
+  min-height: 40px;
+  text-align: left;
+}
+
+.studio-toolbar button,
+.studio-toolbar select {
+  min-height: 40px;
+  padding: 0.15rem 0.7rem;
+  border: 1px solid #a8956d;
+  background: #fbf6ea;
+  color: #2a2218;
+  font: inherit;
+  cursor: pointer;
+}
+
+.studio-toolbar button[aria-pressed='true'] {
+  border-color: #2a2218;
+  background: #2a2218;
+  color: #f0e6d2;
+}
+
+.studio-toolbar button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.studio-toolbar label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.studio-toolbar .studio-swatch {
+  width: 40px;
+  padding: 0;
+  background: var(--swatch);
+}
+
+.studio-toolbar .studio-swatch[aria-pressed='true'] {
+  background: var(--swatch);
+  box-shadow: inset 0 0 0 3px #fbf6ea, 0 0 0 2px #2a2218;
+}
+
+/* سطح الكتابة: ‎.post-content‎ من تنسيق الموقع نفسه، فما يُكتب هنا يظهر كما على الموقع */
+.studio-surface .studio-page {
+  min-height: 55vh;
+  padding: 1.25rem 1rem 4rem;
+  border: 1px solid #a8956d;
+  background: #f6efdf;
+  outline: none;
+}
+
+.studio-surface .studio-page:focus-visible {
+  outline: none;
+  border-color: #c8612e;
+}
+
+.studio-page .ProseMirror-selectednode {
+  outline: 3px solid #c8612e;
+  outline-offset: 2px;
+}
+
+.studio-raw {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin: 1.25rem 0;
+  padding: 0.75rem 1rem;
+  border: 1px dashed #6b7d5a;
+  background: #e3e6d3;
+  font-size: 1rem;
+  line-height: 1.7;
+  cursor: default;
+  user-select: none;
+}
+
+.studio-page .studio-raw img {
+  flex: 0 0 auto;
+  width: 96px;
+  height: auto;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.studio-raw span {
+  display: grid;
+  min-width: 0;
+}
+
+.studio-raw small {
+  color: #5a4a36;
+  overflow-wrap: anywhere;
+}
+
+.studio-savebar {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #a8956d;
+  background: #e8dcc4;
+}
+
+.studio-savebar [data-editor-state] {
+  flex: 1 1 12rem;
+  font-size: 0.95rem;
+}
+
+.studio-savebar .studio-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.studio-flash[data-kind='error'] {
+  border-color: #a3270f;
+  background: #f3d9cd;
+}
+
+.studio-flash[hidden] {
+  display: none;
+}
+
+.studio-preview {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  max-height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: #f0e6d2;
+}
+
+.studio-preview[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.studio-preview__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 2px solid #c9a04a;
+  background: #1f1a14;
+  color: #f0e6d2;
+}
+
+.studio-preview__bar .studio-button {
+  border-color: #f0e6d2;
+  color: #f0e6d2;
+}
+
+.studio-preview iframe {
+  flex: 1;
+  width: 100%;
+  border: 0;
 }

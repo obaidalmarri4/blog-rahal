@@ -21,9 +21,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { JSDOM } from 'jsdom';
-import { getSchema } from '@tiptap/core';
-import { DOMParser as PMDOMParser, DOMSerializer } from '@tiptap/pm/model';
-import { expandRawBlocks, RAW_BLOCK_TAGS, studioExtensions } from '../src/lib/studio/schema.js';
+import { parseBody, serializeBody } from '../src/lib/studio/document.js';
+import { RAW_BLOCK_TAGS, expandRawBlocks } from '../src/lib/studio/raw-blocks.js';
 import { cleanSlug } from './lib/post-html.mjs';
 
 const POSTS_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '../src/content/posts');
@@ -34,10 +33,6 @@ const VERBOSE = args.includes('--verbose');
 const valueOf = (flag) => (args.includes(flag) ? args[args.indexOf(flag) + 1] : null);
 const ONLY = valueOf('--only');
 const JSON_OUT = valueOf('--json');
-
-const schema = getSchema(studioExtensions);
-const pmParser = PMDOMParser.fromSchema(schema);
-const pmSerializer = DOMSerializer.fromSchema(schema);
 
 /**
  * نافذة jsdom واحدة لكل التشغيل، والتحليل داخل عنصر ‎<body>‎ منفصل يُترك لجامع القمامة.
@@ -52,12 +47,10 @@ function toBody(html) {
   return body;
 }
 
-/** مرور واحد: HTML → مستند المحرّر → HTML */
+/** مرور واحد: HTML → مستند المحرّر → HTML (بالدوال نفسها التي يستعملها المتصفح) */
 function editorPass(html) {
-  const doc = pmParser.parse(toBody(html));
-  const holder = document.createElement('div');
-  holder.appendChild(pmSerializer.serializeFragment(doc.content, { document }));
-  return { html: expandRawBlocks(holder.innerHTML), doc };
+  const doc = parseBody(html, document);
+  return { html: expandRawBlocks(serializeBody(doc, document)), doc };
 }
 
 /**

@@ -22,10 +22,14 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { JSDOM } from 'jsdom';
+import { Transform } from '@tiptap/pm/transform';
 import { createFakeGitHub } from './lib/fake-github.mjs';
+import { htmlToText } from './lib/post-html.mjs';
 import { readRemovedSlugs } from './lib/removed-posts.mjs';
 import { createOutputServer } from './lib/vercel-output-server.mjs';
+import { bodyForSave, loadBody } from '../src/lib/studio/document.js';
 import { buildStudioIndex } from '../src/lib/studio/index-plugin.mjs';
+import { expandRawBlocks, splitRawBlocks } from '../src/lib/studio/raw-blocks.js';
 import { COOKIE_NAME, issueSession } from '../src/lib/studio/session.ts';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -64,8 +68,8 @@ const cookie = issueSession(KEY);
 /** كل ما ردّت به اللوحة — يُفحص في الآخر أن التوكن لم يظهر في شيء منه */
 const everything = [];
 
-function request(pathname, { method = 'GET', form, paired = true, headers = {} } = {}) {
-  const body = form ? new URLSearchParams(form).toString() : undefined;
+function request(pathname, { method = 'GET', form, json, paired = true, headers = {} } = {}) {
+  const body = json !== undefined ? (typeof json === 'string' ? json : JSON.stringify(json)) : form ? new URLSearchParams(form).toString() : undefined;
   return new Promise((resolve, reject) => {
     const req = http.request(
       {
@@ -77,11 +81,11 @@ function request(pathname, { method = 'GET', form, paired = true, headers = {} }
           host: HOST,
           'x-forwarded-proto': 'https',
           ...(paired ? { cookie: `${COOKIE_NAME}=${cookie}` } : {}),
-          ...(method === 'POST'
+          ...(method !== 'GET'
             ? {
                 origin: ORIGIN,
                 'sec-fetch-site': 'same-origin',
-                'content-type': 'application/x-www-form-urlencoded',
+                'content-type': json !== undefined ? 'application/json' : 'application/x-www-form-urlencoded',
                 'content-length': Buffer.byteLength(body ?? ''),
               }
             : {}),
@@ -336,9 +340,113 @@ github.push({ additions: { [REMOVED]: `${JSON.stringify(aged, null, 2)}\n` }, he
 res = await remove(VICTIMS[5]);
 check('بعد مرور الساعة يعود الحذف', res.status === 303 && github.read(fileOf(VICTIMS[5])) === undefined, `الحالة ${res.status}`);
 
-// ── 7. حالة النشر ───────────────────────────────────────────────────────────
 
-section('٧. حالة النشر');
+// ── نص التدوينة (المحرّر) ───────────────────────────────────────────────────
+
+section('٧. حفظ نص التدوينة من المحرّر');
+
+const { document } = new JSDOM('<!doctype html><html><body></body></html>').window;
+const bodyApi = (slug) => `/api/studio/posts/${encodeURIComponent(slug)}`;
+const getBody = async (slug) => JSON.parse((await request(bodyApi(slug))).text);
+const putBody = async (slug, payload, options = {}) => {
+  const response = await request(bodyApi(slug), { method: 'PUT', json: payload, ...options });
+  let data = {};
+  try {
+    data = JSON.parse(response.text);
+  } catch {
+    // ردّ ليس JSON (404 الصفحة العامة مثلاً)
+  }
+  return { status: response.status, data, text: response.text };
+};
+/** ما يرسله المتصفح عند «حفظ»: المستند مسلسَلاً بدوال المحرّر نفسها */
+const wireOf = (doc) => splitRawBlocks(bodyForSave(doc, document));
+
+// تدوينة فيها صور وجدول، لم تمسّها الفحوص السابقة
+const E = index
+  .map((entry) => entry.slug)
+  .find((slug) => slug !== A && !VICTIMS.includes(slug) && /<table/.test(readPost(slug).content_html) && readPost(slug).images.length >= 3);
+const original = readPost(E);
+const originalRaw = github.read(fileOf(E));
+
+res = await request(`/studio/edit/${encodeURIComponent(E)}`);
+check('صفحة المحرّر تفتح وفيها الشريط', res.status === 200 && res.text.includes('data-editor-toolbar') && res.text.includes('data-cmd="save"'), `الحالة ${res.status}`);
+check('صفحة المحرّر لتدوينة غير موجودة: 404 داخل اللوحة', (await request('/studio/edit/no-such-post')).status === 404);
+
+let opened3 = await getBody(E);
+check('النص يُجلب طازجاً من المستودع مع بصمته', opened3.html === original.content_html && /^[0-9a-f]{64}$/.test(opened3.base) && opened3.locked === false);
+
+let loadedDoc = loadBody(opened3.html, document).doc;
+let firstImage = null;
+loadedDoc.descendants((node, position) => {
+  if (!firstImage && node.type.name === 'image') firstImage = { position, size: node.nodeSize, src: node.attrs.src };
+});
+let editedDoc = new Transform(loadedDoc).delete(firstImage.position, firstImage.position + firstImage.size).doc;
+let wire = wireOf(editedDoc);
+
+count = commits().length;
+let put = await putBody(E, { ...wire, base: opened3.base });
+after = readPost(E);
+check('حفظ النص بعد حذف صورة: 200 مع رقم الـcommit وبصمة جديدة', put.status === 200 && /^[0-9a-f]{40}$/.test(put.data.commit ?? '') && /^[0-9a-f]{64}$/.test(put.data.base ?? '') && put.data.live === false, `${put.status} ${put.text.slice(0, 200)}`);
+check('‎content_html‎ المخزَّن هو ما سلسله المحرّر، والجدول فيه كما كان حرفياً', after.content_html === expandRawBlocks(bodyForSave(editedDoc, document)) && wire.raw.every((block) => after.content_html.includes(block)) && wire.raw.length > 0);
+check('‎content_text‎ أُعيد اشتقاقه من النص الجديد', after.content_text === htmlToText(after.content_html));
+const lostImages = original.images.filter((image) => !after.images.some((kept) => kept.original_url === image.original_url));
+check('‎images[]‎ نقصت الصورة المحذوفة وحدها، و‎image_count‎ يطابق', lostImages.length <= 1 && original.images.length - after.images.length === lostImages.length && after.image_count === after.images.length && !after.images.some((image) => image.thumbnail_url === firstImage.src), `${original.images.length} → ${after.images.length}`);
+check('باقي حقول الملف لم تُمسّ، وتنسيقه محفوظ', same({ ...after, content_html: 0, content_text: 0, images: 0, image_count: 0 }, { ...original, content_html: 0, content_text: 0, images: 0, image_count: 0 }) && github.read(fileOf(E)) === JSON.stringify(after, null, 2) + (originalRaw.endsWith('\n') ? '\n' : ''));
+check('commit واحد يمسّ ملف التدوينة وحده', commits().length === count + 1 && same(lastCommit().added, [fileOf(E)]) && lastCommit().headline.startsWith('لوحة التحرير: تعديل نص'), JSON.stringify(lastCommit()));
+
+count = commits().length;
+let stalePut = await putBody(E, { ...wire, base: opened3.base });
+check('حفظ ببصمة قديمة (النص تغيّر منذ الفتح): 409 بلا كتابة', stalePut.status === 409 && commits().length === count, `${stalePut.status}`);
+let samePut = await putBody(E, { ...wire, base: put.data.base });
+check('حفظ النص نفسه مرة ثانية: لا تغيير ولا commit', samePut.status === 200 && samePut.data.unchanged === true && commits().length === count);
+
+// جهاز آخر غيّر العنوان بعد فتح المحرّر: البصمة بصمة النص وحده، فالحفظ يمرّ والعنوان الجديد يبقى
+opened3 = await getBody(E);
+await save(E, { title: 'عنوان غُيّر والمحرّر مفتوح' });
+loadedDoc = loadBody(opened3.html, document).doc;
+let paragraph = null;
+loadedDoc.forEach((node, offset) => {
+  if (!paragraph && node.type.name === 'paragraph' && node.textContent.trim()) paragraph = { offset, size: node.nodeSize, text: node.textContent };
+});
+editedDoc = new Transform(loadedDoc).delete(paragraph.offset, paragraph.offset + paragraph.size).doc;
+put = await putBody(E, { ...wireOf(editedDoc), base: opened3.base });
+after = readPost(E);
+check('تعديل العنوان من جهاز آخر لا يمنع حفظ النص، ولا يضيع', put.status === 200 && after.title === 'عنوان غُيّر والمحرّر مفتوح' && !after.content_text.includes(paragraph.text.trim().slice(0, 40)), `${put.status} ${after.title}`);
+
+opened3 = await getBody(E);
+stale = github.count('stale');
+github.beforeCommit.push(() => github.push({ additions: { [`${POSTS}/9997_bot-again.json`]: BOT_POST }, headline: 'مزامنة آلية' }));
+editedDoc = loadBody(opened3.html, document).doc;
+editedDoc = new Transform(editedDoc).delete(0, editedDoc.child(0).nodeSize).doc;
+put = await putBody(E, { ...wireOf(editedDoc), base: opened3.base });
+check('دفعة من البوت أثناء حفظ النص: يُعاد ويُحفظ', put.status === 200 && Boolean(put.data.commit) && github.count('stale') - stale === 1, `${put.status}`);
+
+count = commits().length;
+const fresh = (await getBody(E)).base;
+for (const [label, payload, status] of [
+  ['سكربت في النص', { html: '<p>نص</p><script>alert(1)</script>', raw: [], base: fresh }, 422],
+  ['سمة حدث', { html: '<p onclick="alert(1)">نص</p>', raw: [], base: fresh }, 422],
+  ['جدول لم يكن في التدوينة', { html: '<div data-raw-block="0"></div>', raw: ['<table><tbody><tr><td>دخيل</td></tr></tbody></table>'], base: fresh }, 422],
+  ['طلب بلا بصمة', { html: '<p>نص</p>', raw: [] }, 400],
+  ['كتل ليست مصفوفة', { html: '<p>نص</p>', raw: 'x', base: fresh }, 400],
+  ['JSON معطوب', '{"html": ', 400],
+  ['طلب أكبر من الحد', { html: `<p>${'ن'.repeat(4_100_000)}</p>`, raw: [], base: fresh }, 413],
+]) {
+  put = await putBody(E, payload);
+  check(`${label}: رُفض (${status})`, put.status === status && typeof put.data.error === 'string', `الحالة ${put.status} ${put.text.slice(0, 120)}`);
+}
+check('رسالة الكتلة الدخيلة تقول ما العمل', (await putBody(E, { html: '<div data-raw-block="0"></div>', raw: ['<table><tbody><tr><td>دخيل</td></tr></tbody></table>'], base: fresh })).data.error.includes('احذفه ثم احفظ'));
+check('لا شيء مما رُفض وصل المستودع', commits().length === count);
+check('تدوينة غير موجودة: 404', (await putBody('no-such-post', { html: '<p>x</p>', raw: [], base: fresh })).status === 404 && (await request(bodyApi('no-such-post'))).status === 404);
+
+put = await putBody(E, { html: '<p>متسلّل</p>', raw: [], base: fresh }, { paired: false });
+check('حفظ النص بلا اقتران: «غير موجود» ولا يصل المستودع', put.status === 404 && commits().length === count);
+put = await putBody(E, { html: '<p>من موقع آخر</p>', raw: [], base: fresh }, { headers: { origin: 'https://evil.example', 'sec-fetch-site': 'cross-site' } });
+check('حفظ النص من موقع آخر: 403 ولا يصل المستودع', put.status === 403 && commits().length === count);
+
+// ── حالة النشر ──────────────────────────────────────────────────────────────
+
+section('٨. حالة النشر');
 
 const sha = github.head;
 const state = async () => JSON.parse((await request(`/api/studio/status?sha=${sha}`)).text).state;
@@ -353,9 +461,9 @@ check('sha غير صالح: 400', (await request('/api/studio/status?sha=xyz')).
 const flashed = await request(`${postPath(A)}?saved=${sha}`);
 check('شريط «تم الحفظ» يظهر، وعلى فرع التجربة يقول إنه لا يُنشر', flashed.text.includes('تم الحفظ') && flashed.text.includes('فرع تجربة') && !flashed.text.includes('data-deploy-sha="'), flashed.text.slice(flashed.text.indexOf('studio-flash') - 20, flashed.text.indexOf('studio-flash') + 300));
 
-// ── 8. أعطال GitHub ─────────────────────────────────────────────────────────
+// ── أعطال GitHub ─────────────────────────────────────────────────────────
 
-section('٨. أعطال المستودع');
+section('٩. أعطال المستودع');
 
 github.failures.push(500);
 res = await request('/studio');
@@ -378,9 +486,9 @@ res = await request(postPath(A));
 check('بلا توكن: صفحة التدوينة تحوّل إلى الرئيسية', res.status === 303 && res.location === '/studio');
 process.env.STUDIO_GITHUB_TOKEN = TOKEN;
 
-// ── 9. الفرع والحماية ───────────────────────────────────────────────────────
+// ── الفرع والحماية ───────────────────────────────────────────────────────
 
-section('٩. أي فرع يُكتب عليه، ومن يكتب');
+section('١٠. أي فرع يُكتب عليه، ومن يكتب');
 
 const refs = async () => {
   const from = github.log.length;
